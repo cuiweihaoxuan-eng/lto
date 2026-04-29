@@ -107,8 +107,6 @@ export function ReportTemplate({
       Object.fromEntries(config.columns.map((c) => [c.key, c.width ?? 120]))
   );
 
-  // 总表格宽度（用于与外部查询区对齐）
-  const totalTableWidth = visibleColumns.reduce((sum, c) => sum + (columnWidths[c.key] ?? 120), 0);
 
   // 拖拽状态
   const [resizing, setResizing] = useState<string | null>(null);
@@ -248,6 +246,7 @@ export function ReportTemplate({
   const visibleCount = Object.values(columnVisibility).filter(Boolean).length;
   const totalCount = config.columns.length;
   const visibleColumns = config.columns.filter(c => columnVisibility[c.key] !== false);
+  const totalTableWidth = visibleColumns.reduce((sum, c) => sum + (columnWidths[c.key] ?? 120), 0);
 
   // ---- 列可见性弹窗 ----
   const renderColumnModal = () => {
