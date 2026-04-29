@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BrowserRouter, Routes, Route, useSearchParams } from "react-router";
 import { BarChart3 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
@@ -38,6 +39,11 @@ export default function App() {
   const [activeSubFunction, setActiveSubFunction] = useState("matching");
   const [activeSidebarItem, setActiveSidebarItem] = useState("dashboard");
   const [oppDetailId, setOppDetailId] = useState<string | null>(null);
+
+  // 从 URL 获取商机编码参数（用于六到位跳转）
+  const params = new URLSearchParams(window.location.search);
+  const urlOppCode = params.get("code");
+  const isOppDetailFromUrl = !!urlOppCode;
 
   // 判断当前是否在线索管理模块
   const isLeadManagementPage = ["lead-acquisition", "lead-pool", "lead-merge", "lead-distribution"].includes(activeSidebarItem);
@@ -125,9 +131,10 @@ export default function App() {
     }
 
     // 商机管理页面
-    if (["opp-query", "opp-participated", "opp-discovered", "opp-managed"].includes(activeSidebarItem)) {
-      if (oppDetailId) {
-        return <OpportunityDetail onBack={() => setOppDetailId(null)} />;
+    if (["opp-query", "opp-participated", "opp-discovered", "opp-managed"].includes(activeSidebarItem) || isOppDetailFromUrl) {
+      const detailId = isOppDetailFromUrl ? (urlOppCode as string) : oppDetailId;
+      if (detailId) {
+        return <OpportunityDetail onBack={() => { if (isOppDetailFromUrl) { window.close(); } else { setOppDetailId(null); } }} />;
       }
       return <OpportunityQuery onRowClick={(id) => setOppDetailId(id)} />;
     }

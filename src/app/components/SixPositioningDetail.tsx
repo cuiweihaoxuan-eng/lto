@@ -537,9 +537,11 @@ interface SixPositioningDetailProps {
   isOpen: boolean;
   onClose: () => void;
   opportunityName?: string;
+  opportunityCode?: string;
+  onNavigateForwardBid?: (opportunityCode: string) => void;
 }
 
-export function SixPositioningDetail({ isOpen, onClose, opportunityName }: SixPositioningDetailProps) {
+export function SixPositioningDetail({ isOpen, onClose, opportunityName, opportunityCode, onNavigateForwardBid }: SixPositioningDetailProps) {
   const [activePositionTab, setActivePositionTab] = useState<string>("overview");
   const [expandedSeconds, setExpandedSeconds] = useState<Set<string>>(
     new Set(sixPositionDetails.flatMap(p => p.secondLevel.map(s => s.id)))
@@ -821,7 +823,7 @@ function DetailContent({ position }: { position: PositionDetail }) {
               )}
               {/* 录入前向投标按钮 */}
               {(second.id === 'biddingRecord' || second.id === 'biddingResult' || second.id === 'businessNegotiation') && (
-                <Button variant="outline" size="sm" className="gap-1 h-7 text-xs" onClick={(e) => { e.stopPropagation(); }}>
+                <Button variant="outline" size="sm" className="gap-1 h-7 text-xs" onClick={(e) => { e.stopPropagation(); onNavigateForwardBid?.(opportunityCode || mockData.opportunity.opportunityCode); }}>
                   <Plus className="w-3 h-3" /> 录入前向投标
                 </Button>
               )}

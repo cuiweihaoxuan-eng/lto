@@ -169,6 +169,9 @@ export function SixPositioning() {
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<{name: string; code: string} | null>(null);
+  const handleNavigateForwardBid = (oppCode: string) => {
+    window.open(`/opp-forward-bid?code=${oppCode}`, "_blank");
+  };
   const [queryParams, setQueryParams] = useState<QueryParams>({
     city: "",
     createTimeStart: "",
@@ -692,6 +695,8 @@ export function SixPositioning() {
         isOpen={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         opportunityName={selectedOpportunity?.name}
+        opportunityCode={selectedOpportunity?.code}
+        onNavigateForwardBid={handleNavigateForwardBid}
       />
     </div>
   );
