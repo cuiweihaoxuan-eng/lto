@@ -733,6 +733,7 @@ function DetailContent({ position }: { position: PositionDetail }) {
   const [biddingUploadOpen, setBiddingUploadOpen] = useState(false);
   const [afterSalesUploadOpen, setAfterSalesUploadOpen] = useState(false);
   const [businessInfoModalOpen, setBusinessInfoModalOpen] = useState(false);
+  const [showAddBid, setShowAddBid] = useState(false);
   const [uploadField, setUploadField] = useState<string>('');
   const [mockData, setMockData] = useState(initialMockData);
   const [biddingFiles, setBiddingFiles] = useState<Record<string, { name: string; size: string; uploadTime: string; synced: boolean }[]>>({
@@ -3113,6 +3114,9 @@ function DetailContent({ position }: { position: PositionDetail }) {
           }}
         />
       )}
+
+      {/* 新增投标弹窗 */}
+      <AddBidDialog open={showAddBid} onClose={() => setShowAddBid(false)} />
     </div>
   );
 }
