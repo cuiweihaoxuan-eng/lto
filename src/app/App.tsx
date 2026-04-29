@@ -8,7 +8,7 @@ import { ProcessFlowBar } from "./components/ProcessFlowBar";
 import { FunctionMenu } from "./components/FunctionMenu";
 
 // 懒加载组件 - 使用命名导入
-const Dashboard = lazy(() => import("./components/Dashboard").then(m => ({ default: m.Dashboard })));
+const Dashboard = lazy(() => import("./components/Dashboard").then(m => ({ default: m.default })));
 const ProcessNodeConfig = lazy(() => import("./components/ProcessNodeConfig").then(m => ({ default: m.ProcessNodeConfig })));
 const SixPositioning = lazy(() => import("./components/SixPositioning").then(m => ({ default: m.SixPositioning })));
 const ExpertReportPage = lazy(() => import("./components/ExpertReportPage").then(m => ({ default: m.ExpertReportPage })));
