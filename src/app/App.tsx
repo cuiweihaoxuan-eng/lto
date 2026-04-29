@@ -1,37 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Loader2 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
 import { ProjectInfoBar } from "./components/ProjectInfoBar";
 import { ProcessFlowBar } from "./components/ProcessFlowBar";
 import { FunctionMenu } from "./components/FunctionMenu";
-import { ForwardBackwardMatching } from "./components/ForwardBackwardMatching";
-import { ProgressManagement } from "./components/ProgressManagement";
-import { ContractPaymentConfirmation } from "./components/ContractPaymentConfirmation";
-import { ContractDemolition } from "./components/ContractDemolition";
-import { ImplementationMonitoring } from "./components/ImplementationMonitoring";
-import { QualityControl } from "./components/QualityControl";
-import { InvoiceApplication } from "./components/InvoiceApplication";
-import { LeadAcquisition } from "./components/LeadAcquisition";
-import { LeadPoolManagement } from "./components/LeadPoolManagement";
-import { LeadMerge } from "./components/LeadMerge";
-import { LeadDistribution } from "./components/LeadDistribution";
-import { Dashboard } from "./components/Dashboard";
-import { ProcessNodeConfig } from "./components/ProcessNodeConfig";
-import { SixPositioning } from "./components/SixPositioning";
-import { ExpertReportPage } from "./components/ExpertReportPage";
-import { OpportunityQuery } from "./components/OpportunityQuery";
-import { OpportunityDetail } from "./components/OpportunityDetail";
-import { FullFlowTable } from "./components/FullFlowTable";
-import { LowMarginReport } from "./components/LowMarginReport";
-import { RevenuePlanActualDiff } from "./components/RevenuePlanActualDiff";
-import { RevenueCostDiff } from "./components/RevenueCostDiff";
-import { FirstPaymentDiff } from "./components/FirstPaymentDiff";
-import { IctShareAbnormalReport } from "./components/IctShareAbnormalReport";
-import { IctBudgetDetail } from "./components/IctBudgetDetail";
-import { ConstructNotFixedNoExpense } from "./components/ConstructNotFixedNoExpense";
-import { BusinessInfoManagement } from "./components/BusinessInfoManagement";
+
+// 懒加载组件
+const Dashboard = lazy(() => import("./components/Dashboard"));
+const ProcessNodeConfig = lazy(() => import("./components/ProcessNodeConfig"));
+const SixPositioning = lazy(() => import("./components/SixPositioning"));
+const ExpertReportPage = lazy(() => import("./components/ExpertReportPage"));
+const FullFlowTable = lazy(() => import("./components/FullFlowTable"));
+const LowMarginReport = lazy(() => import("./components/LowMarginReport"));
+const RevenuePlanActualDiff = lazy(() => import("./components/RevenuePlanActualDiff"));
+const RevenueCostDiff = lazy(() => import("./components/RevenueCostDiff"));
+const FirstPaymentDiff = lazy(() => import("./components/FirstPaymentDiff"));
+const IctShareAbnormalReport = lazy(() => import("./components/IctShareAbnormalReport"));
+const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail"));
+const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense"));
+const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement"));
+const LeadAcquisition = lazy(() => import("./components/LeadAcquisition"));
+const LeadPoolManagement = lazy(() => import("./components/LeadPoolManagement"));
+const LeadMerge = lazy(() => import("./components/LeadMerge"));
+const LeadDistribution = lazy(() => import("./components/LeadDistribution"));
+const OpportunityQuery = lazy(() => import("./components/OpportunityQuery"));
+const OpportunityDetail = lazy(() => import("./components/OpportunityDetail"));
+const ForwardBackwardMatching = lazy(() => import("./components/ForwardBackwardMatching"));
+const ProgressManagement = lazy(() => import("./components/ProgressManagement"));
+const ContractPaymentConfirmation = lazy(() => import("./components/ContractPaymentConfirmation"));
+const ContractDemolition = lazy(() => import("./components/ContractDemolition"));
+const ImplementationMonitoring = lazy(() => import("./components/ImplementationMonitoring"));
+const QualityControl = lazy(() => import("./components/QualityControl"));
+const InvoiceApplication = lazy(() => import("./components/InvoiceApplication"));
+
+// 加载中组件
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+    </div>
+  );
+}
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -71,34 +82,34 @@ export default function App() {
   const renderContent = () => {
     // 首页
     if (activeSidebarItem === "dashboard") {
-      return <Dashboard />;
+      return <Suspense fallback={<LoadingSpinner />}><Dashboard /></Suspense>;
     }
 
     // 流程节点配置
     if (activeSidebarItem === "process-config") {
-      return <ProcessNodeConfig />;
+      return <Suspense fallback={<LoadingSpinner />}><ProcessNodeConfig /></Suspense>;
     }
 
     // 六到位
     if (activeSidebarItem === "six-positioning") {
-      return <SixPositioning />;
+      return <Suspense fallback={<LoadingSpinner />}><SixPositioning /></Suspense>;
     }
 
     // 专家任务报表
     if (activeSidebarItem === "report" || activeSidebarItem === "expert-report") {
-      return <ExpertReportPage />;
+      return <Suspense fallback={<LoadingSpinner />}><ExpertReportPage /></Suspense>;
     }
 
     // 业财融合报表
-    if (activeSidebarItem === "full-flow-table") return <FullFlowTable />;
-    if (activeSidebarItem === "low-margin-report") return <LowMarginReport />;
-    if (activeSidebarItem === "revenue-plan-actual-diff") return <RevenuePlanActualDiff />;
-    if (activeSidebarItem === "revenue-cost-diff") return <RevenueCostDiff />;
-    if (activeSidebarItem === "first-payment-diff") return <FirstPaymentDiff />;
-    if (activeSidebarItem === "ict-share-abnormal") return <IctShareAbnormalReport />;
-    if (activeSidebarItem === "ict-budget-detail") return <IctBudgetDetail />;
-    if (activeSidebarItem === "construct-not-fixed-no-expense") return <ConstructNotFixedNoExpense />;
-    if (activeSidebarItem === "business-info") return <BusinessInfoManagement />;
+    if (activeSidebarItem === "full-flow-table") return <Suspense fallback={<LoadingSpinner />}><FullFlowTable /></Suspense>;
+    if (activeSidebarItem === "low-margin-report") return <Suspense fallback={<LoadingSpinner />}><LowMarginReport /></Suspense>;
+    if (activeSidebarItem === "revenue-plan-actual-diff") return <Suspense fallback={<LoadingSpinner />}><RevenuePlanActualDiff /></Suspense>;
+    if (activeSidebarItem === "revenue-cost-diff") return <Suspense fallback={<LoadingSpinner />}><RevenueCostDiff /></Suspense>;
+    if (activeSidebarItem === "first-payment-diff") return <Suspense fallback={<LoadingSpinner />}><FirstPaymentDiff /></Suspense>;
+    if (activeSidebarItem === "ict-share-abnormal") return <Suspense fallback={<LoadingSpinner />}><IctShareAbnormalReport /></Suspense>;
+    if (activeSidebarItem === "ict-budget-detail") return <Suspense fallback={<LoadingSpinner />}><IctBudgetDetail /></Suspense>;
+    if (activeSidebarItem === "construct-not-fixed-no-expense") return <Suspense fallback={<LoadingSpinner />}><ConstructNotFixedNoExpense /></Suspense>;
+    if (activeSidebarItem === "business-info") return <Suspense fallback={<LoadingSpinner />}><BusinessInfoManagement /></Suspense>;
     if (["invest-fixed-unbilled", "cooperation-share-report", "cost-provision-report", "project-budget-detail", "ict-gross-profit-report", "monthly-revenue-detail"].includes(activeSidebarItem)) {
       return (
         <div className="h-full flex flex-col">
@@ -120,53 +131,53 @@ export default function App() {
 
     // 线索管理页面
     if (activeSidebarItem === "lead-acquisition") {
-      return <LeadAcquisition />;
+      return <Suspense fallback={<LoadingSpinner />}><LeadAcquisition /></Suspense>;
     }
     if (activeSidebarItem === "lead-pool") {
-      return <LeadPoolManagement />;
+      return <Suspense fallback={<LoadingSpinner />}><LeadPoolManagement /></Suspense>;
     }
     if (activeSidebarItem === "lead-merge") {
-      return <LeadMerge />;
+      return <Suspense fallback={<LoadingSpinner />}><LeadMerge /></Suspense>;
     }
     if (activeSidebarItem === "lead-distribution") {
-      return <LeadDistribution />;
+      return <Suspense fallback={<LoadingSpinner />}><LeadDistribution /></Suspense>;
     }
 
     // 商机管理页面
     if (["opp-query", "opp-participated", "opp-discovered", "opp-managed"].includes(activeSidebarItem) || isOppDetailFromUrl) {
       const detailId = isOppDetailFromUrl ? (urlOppCode as string) : oppDetailId;
       if (detailId) {
-        return <OpportunityDetail onBack={() => { if (isOppDetailFromUrl) { window.close(); } else { setOppDetailId(null); } }} />;
+        return <Suspense fallback={<LoadingSpinner />}><OpportunityDetail onBack={() => { if (isOppDetailFromUrl) { window.close(); } else { setOppDetailId(null); } }} /></Suspense>;
       }
-      return <OpportunityQuery onRowClick={(id) => setOppDetailId(id)} />;
+      return <Suspense fallback={<LoadingSpinner />}><OpportunityQuery onRowClick={(id) => setOppDetailId(id)} /></Suspense>;
     }
 
     // 验收节点子功能
     if (isAcceptanceNode) {
       switch (activeSubFunction) {
         case "matching":
-          return <ForwardBackwardMatching />;
+          return <Suspense fallback={<LoadingSpinner />}><ForwardBackwardMatching /></Suspense>;
         case "progress":
-          return <ProgressManagement />;
+          return <Suspense fallback={<LoadingSpinner />}><ProgressManagement /></Suspense>;
         case "payment":
-          return <ContractPaymentConfirmation />;
+          return <Suspense fallback={<LoadingSpinner />}><ContractPaymentConfirmation /></Suspense>;
         case "six-positioning":
-          return <SixPositioning />;
+          return <Suspense fallback={<LoadingSpinner />}><SixPositioning /></Suspense>;
         default:
-          return <ForwardBackwardMatching />;
+          return <Suspense fallback={<LoadingSpinner />}><ForwardBackwardMatching /></Suspense>;
       }
     }
 
     // 其他节点：直接显示对应页面
     switch (activeNode) {
       case "contract-demolition":
-        return <ContractDemolition />;
+        return <Suspense fallback={<LoadingSpinner />}><ContractDemolition /></Suspense>;
       case "implementation-monitoring":
-        return <ImplementationMonitoring />;
+        return <Suspense fallback={<LoadingSpinner />}><ImplementationMonitoring /></Suspense>;
       case "quality-control":
-        return <QualityControl />;
+        return <Suspense fallback={<LoadingSpinner />}><QualityControl /></Suspense>;
       case "invoice-application":
-        return <InvoiceApplication />;
+        return <Suspense fallback={<LoadingSpinner />}><InvoiceApplication /></Suspense>;
       default:
         return (
           <div className="p-6">
