@@ -71,11 +71,16 @@ export function IctGrossProfitReport() {
       </div>
       <div className="flex-1 overflow-hidden">
         <ReportTemplate
-          config={config}
+          config={{ ...config, headerGroups: [
+            { label: "基础维度", startCol: 0, span: 3, color: "bg-gray-100" },
+            { label: "本年累计", startCol: 3, span: 6, color: "bg-blue-100" },
+            { label: "上年同期", startCol: 9, span: 6, color: "bg-purple-100" },
+          ]}}
           queryFields={queryFields}
           data={mockData}
           onQuery={(params) => console.log("查询", params)}
           onReset={() => setQueryParams({})}
+          hideTitle={true}
         />
       </div>
     </div>
