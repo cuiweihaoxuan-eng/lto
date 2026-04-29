@@ -7,33 +7,33 @@ import { ProjectInfoBar } from "./components/ProjectInfoBar";
 import { ProcessFlowBar } from "./components/ProcessFlowBar";
 import { FunctionMenu } from "./components/FunctionMenu";
 
-// 懒加载组件
-const Dashboard = lazy(() => import("./components/Dashboard"));
-const ProcessNodeConfig = lazy(() => import("./components/ProcessNodeConfig"));
-const SixPositioning = lazy(() => import("./components/SixPositioning"));
-const ExpertReportPage = lazy(() => import("./components/ExpertReportPage"));
-const FullFlowTable = lazy(() => import("./components/FullFlowTable"));
-const LowMarginReport = lazy(() => import("./components/LowMarginReport"));
-const RevenuePlanActualDiff = lazy(() => import("./components/RevenuePlanActualDiff"));
-const RevenueCostDiff = lazy(() => import("./components/RevenueCostDiff"));
-const FirstPaymentDiff = lazy(() => import("./components/FirstPaymentDiff"));
-const IctShareAbnormalReport = lazy(() => import("./components/IctShareAbnormalReport"));
-const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail"));
-const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense"));
-const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement"));
-const LeadAcquisition = lazy(() => import("./components/LeadAcquisition"));
-const LeadPoolManagement = lazy(() => import("./components/LeadPoolManagement"));
-const LeadMerge = lazy(() => import("./components/LeadMerge"));
-const LeadDistribution = lazy(() => import("./components/LeadDistribution"));
-const OpportunityQuery = lazy(() => import("./components/OpportunityQuery"));
-const OpportunityDetail = lazy(() => import("./components/OpportunityDetail"));
-const ForwardBackwardMatching = lazy(() => import("./components/ForwardBackwardMatching"));
-const ProgressManagement = lazy(() => import("./components/ProgressManagement"));
-const ContractPaymentConfirmation = lazy(() => import("./components/ContractPaymentConfirmation"));
-const ContractDemolition = lazy(() => import("./components/ContractDemolition"));
-const ImplementationMonitoring = lazy(() => import("./components/ImplementationMonitoring"));
-const QualityControl = lazy(() => import("./components/QualityControl"));
-const InvoiceApplication = lazy(() => import("./components/InvoiceApplication"));
+// 懒加载组件 - 使用命名导入
+const Dashboard = lazy(() => import("./components/Dashboard").then(m => ({ default: m.Dashboard })));
+const ProcessNodeConfig = lazy(() => import("./components/ProcessNodeConfig").then(m => ({ default: m.ProcessNodeConfig })));
+const SixPositioning = lazy(() => import("./components/SixPositioning").then(m => ({ default: m.SixPositioning })));
+const ExpertReportPage = lazy(() => import("./components/ExpertReportPage").then(m => ({ default: m.ExpertReportPage })));
+const FullFlowTable = lazy(() => import("./components/FullFlowTable").then(m => ({ default: m.FullFlowTable })));
+const LowMarginReport = lazy(() => import("./components/LowMarginReport").then(m => ({ default: m.LowMarginReport })));
+const RevenuePlanActualDiff = lazy(() => import("./components/RevenuePlanActualDiff").then(m => ({ default: m.RevenuePlanActualDiff })));
+const RevenueCostDiff = lazy(() => import("./components/RevenueCostDiff").then(m => ({ default: m.RevenueCostDiff })));
+const FirstPaymentDiff = lazy(() => import("./components/FirstPaymentDiff").then(m => ({ default: m.FirstPaymentDiff })));
+const IctShareAbnormalReport = lazy(() => import("./components/IctShareAbnormalReport").then(m => ({ default: m.IctShareAbnormalReport })));
+const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail").then(m => ({ default: m.IctBudgetDetail })));
+const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense").then(m => ({ default: m.ConstructNotFixedNoExpense })));
+const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement").then(m => ({ default: m.BusinessInfoManagement })));
+const LeadAcquisition = lazy(() => import("./components/LeadAcquisition").then(m => ({ default: m.LeadAcquisition })));
+const LeadPoolManagement = lazy(() => import("./components/LeadPoolManagement").then(m => ({ default: m.LeadPoolManagement })));
+const LeadMerge = lazy(() => import("./components/LeadMerge").then(m => ({ default: m.LeadMerge })));
+const LeadDistribution = lazy(() => import("./components/LeadDistribution").then(m => ({ default: m.LeadDistribution })));
+const OpportunityQuery = lazy(() => import("./components/OpportunityQuery").then(m => ({ default: m.OpportunityQuery })));
+const OpportunityDetail = lazy(() => import("./components/OpportunityDetail").then(m => ({ default: m.OpportunityDetail })));
+const ForwardBackwardMatching = lazy(() => import("./components/ForwardBackwardMatching").then(m => ({ default: m.ForwardBackwardMatching })));
+const ProgressManagement = lazy(() => import("./components/ProgressManagement").then(m => ({ default: m.ProgressManagement })));
+const ContractPaymentConfirmation = lazy(() => import("./components/ContractPaymentConfirmation").then(m => ({ default: m.ContractPaymentConfirmation })));
+const ContractDemolition = lazy(() => import("./components/ContractDemolition").then(m => ({ default: m.ContractDemolition })));
+const ImplementationMonitoring = lazy(() => import("./components/ImplementationMonitoring").then(m => ({ default: m.ImplementationMonitoring })));
+const QualityControl = lazy(() => import("./components/QualityControl").then(m => ({ default: m.QualityControl })));
+const InvoiceApplication = lazy(() => import("./components/InvoiceApplication").then(m => ({ default: m.InvoiceApplication })));
 
 // 加载中组件
 function LoadingSpinner() {
