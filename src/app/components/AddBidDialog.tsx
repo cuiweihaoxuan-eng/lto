@@ -198,8 +198,8 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
   if (!open) return null;
 
   const dialogStyle = isFullscreen
-    ? "fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    : "fixed inset-0 z-50 flex items-center justify-center bg-black/50";
+    ? "fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+    : "fixed inset-0 z-[100] flex items-center justify-center bg-black/50";
 
   const cardStyle = isFullscreen
     ? "bg-white w-full h-full flex flex-col rounded-none"
