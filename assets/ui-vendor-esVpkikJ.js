@@ -1,1 +1,0 @@
-function e(e,t,{checkForDefaultPrevented:n=!0}={}){return function(r){if(e?.(r),!1===n||!r.defaultPrevented)return t?.(r)}}function t(e,[t,n]){return Math.min(n,Math.max(t,e))}function n(e,t,{checkForDefaultPrevented:n=!0}={}){return function(r){if(e?.(r),!1===n||!r.defaultPrevented)return t?.(r)}}export{t as a,n as b,e as c};
