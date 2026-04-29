@@ -29,6 +29,7 @@ const yecaiChildren: MenuItem[] = [
   { id: "first-payment-diff", label: "收款与付款进度差异报表" },
   { id: "ict-share-abnormal", label: "ICT项目分成异常报表" },
   { id: "ict-budget-detail", label: "ICT项目预算明细" },
+  { id: "ict-gross-profit-report", label: "ICT毛利额区域统计报表" },
   { id: "construct-not-fixed-no-expense", label: "已列收工程未转固无支出" },
 ];
 
