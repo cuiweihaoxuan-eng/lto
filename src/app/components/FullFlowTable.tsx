@@ -1007,16 +1007,15 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                                 {String(rowData[col.key] ?? "")}
                               </td>
                             ))}
-                            <td
-                              key="projectStage"
-                              rowSpan={4}
-                              style={cellStyle("projectStage")}
-                              className={`px-2 py-2 text-sm text-center border border-gray-200 ${stageColor.bg} ${stageColor.text}`}
-                            >
-                              {s.label}
-                            </td>
                           </>
                         )}
+                        {/* 项目环节：每行显示对应阶段 */}
+                        <td
+                          style={cellStyle("projectStage")}
+                          className={`px-2 py-2 text-sm text-center border border-gray-200 ${stageColor.bg} ${stageColor.text}`}
+                        >
+                          {s.label}
+                        </td>
 
                         {visCols.filter(c => {
                           const idx = colIndexMap[c.key];

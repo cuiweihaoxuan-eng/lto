@@ -18,6 +18,7 @@ const RevenuePlanActualDiff = lazy(() => import("./components/RevenuePlanActualD
 const RevenueCostDiff = lazy(() => import("./components/RevenueCostDiff").then(m => ({ default: m.RevenueCostDiff })));
 const FirstPaymentDiff = lazy(() => import("./components/FirstPaymentDiff").then(m => ({ default: m.FirstPaymentDiff })));
 const IctShareAbnormalReport = lazy(() => import("./components/IctShareAbnormalReport").then(m => ({ default: m.IctShareAbnormalReport })));
+const IctGrossProfitReport = lazy(() => import("./components/IctGrossProfitReport").then(m => ({ default: m.IctGrossProfitReport })));
 const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail").then(m => ({ default: m.IctBudgetDetail })));
 const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense").then(m => ({ default: m.ConstructNotFixedNoExpense })));
 const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement").then(m => ({ default: m.BusinessInfoManagement })));
@@ -70,7 +71,8 @@ export default function App() {
   const yecaiReportIds = [
     "full-flow-table", "low-margin-report", "revenue-plan-actual-diff",
     "revenue-cost-diff", "first-payment-diff",
-    "ict-share-abnormal", "ict-budget-detail", "construct-not-fixed-no-expense"
+    "ict-share-abnormal", "ict-budget-detail", "construct-not-fixed-no-expense",
+    "ict-gross-profit-report"
   ];
   const isReportPage = ["report", "expert-report", "yecai-report-group", ...yecaiReportIds].includes(activeSidebarItem);
   const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info"].includes(activeSidebarItem) || isReportPage;
@@ -107,6 +109,7 @@ export default function App() {
     if (activeSidebarItem === "revenue-cost-diff") return <Suspense fallback={<LoadingSpinner />}><RevenueCostDiff /></Suspense>;
     if (activeSidebarItem === "first-payment-diff") return <Suspense fallback={<LoadingSpinner />}><FirstPaymentDiff /></Suspense>;
     if (activeSidebarItem === "ict-share-abnormal") return <Suspense fallback={<LoadingSpinner />}><IctShareAbnormalReport /></Suspense>;
+    if (activeSidebarItem === "ict-gross-profit-report") return <Suspense fallback={<LoadingSpinner />}><IctGrossProfitReport /></Suspense>;
     if (activeSidebarItem === "ict-budget-detail") return <Suspense fallback={<LoadingSpinner />}><IctBudgetDetail /></Suspense>;
     if (activeSidebarItem === "construct-not-fixed-no-expense") return <Suspense fallback={<LoadingSpinner />}><ConstructNotFixedNoExpense /></Suspense>;
     if (activeSidebarItem === "business-info") return <Suspense fallback={<LoadingSpinner />}><BusinessInfoManagement /></Suspense>;

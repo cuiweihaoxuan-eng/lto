@@ -153,6 +153,9 @@ export function IctShareAbnormalReport() {
   const columns = isYear ? yearColumns : monthColumns;
   const data = isYear ? yearMockData : monthMockData;
 
+  // 计算查询区总宽度（与表格对齐）
+  const queryAreaWidth = columns.reduce((sum, c) => sum + (c.width ?? 120), 0);
+
   const topGroups: ReportHeaderGroup[] = isYear
     ? [
         { label: "项目基本信息", startCol: 0, span: 11, color: "bg-gray-100" },
@@ -262,7 +265,7 @@ export function IctShareAbnormalReport() {
         </div>
 
         {/* 查询条件卡片 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4" style={{ width: queryAreaWidth, minWidth: queryAreaWidth }}>
           {/* 基础信息 */}
           <div>
             <div className="grid grid-cols-5 gap-x-6 gap-y-3">

@@ -107,6 +107,9 @@ export function ReportTemplate({
       Object.fromEntries(config.columns.map((c) => [c.key, c.width ?? 120]))
   );
 
+  // 总表格宽度（用于与外部查询区对齐）
+  const totalTableWidth = visibleColumns.reduce((sum, c) => sum + (columnWidths[c.key] ?? 120), 0);
+
   // 拖拽状态
   const [resizing, setResizing] = useState<string | null>(null);
   const [resizeStartX, setResizeStartX] = useState(0);
@@ -782,7 +785,7 @@ export function ReportTemplate({
             </Button>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse">
+            <table className="border-collapse" style={{ width: totalTableWidth }}>
               <thead>
                 {headerLevel === 1 && renderSingleHeader()}
                 {headerLevel === 2 && renderTwoLevelHeader()}
