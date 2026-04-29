@@ -57,7 +57,8 @@ const menuItems: MenuItem[] = [
       { id: "opp-participated", label: "我参与的商机" },
       { id: "opp-discovered", label: "我挖掘的商机" },
       { id: "opp-managed", label: "我管理的商机" },
-      { id: "opp-query", label: "商机查询" }
+      { id: "opp-query", label: "商机查询" },
+      { id: "business-info", label: "商情管理" }
     ]
   },
   {

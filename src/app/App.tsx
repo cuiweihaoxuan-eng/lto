@@ -31,6 +31,7 @@ import { FirstPaymentDiff } from "./components/FirstPaymentDiff";
 import { IctShareAbnormalReport } from "./components/IctShareAbnormalReport";
 import { IctBudgetDetail } from "./components/IctBudgetDetail";
 import { ConstructNotFixedNoExpense } from "./components/ConstructNotFixedNoExpense";
+import { BusinessInfoManagement } from "./components/BusinessInfoManagement";
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -61,7 +62,7 @@ export default function App() {
     "ict-share-abnormal", "ict-budget-detail", "construct-not-fixed-no-expense"
   ];
   const isReportPage = ["report", "expert-report", "yecai-report-group", ...yecaiReportIds].includes(activeSidebarItem);
-  const isConfigOrSixPositioningPage = ["process-config", "six-positioning"].includes(activeSidebarItem) || isReportPage;
+  const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info"].includes(activeSidebarItem) || isReportPage;
 
   // 判断当前节点是否需要显示左侧子功能菜单和流程导航
   const isAcceptanceNode = activeNode === "acceptance";
@@ -97,6 +98,7 @@ export default function App() {
     if (activeSidebarItem === "ict-share-abnormal") return <IctShareAbnormalReport />;
     if (activeSidebarItem === "ict-budget-detail") return <IctBudgetDetail />;
     if (activeSidebarItem === "construct-not-fixed-no-expense") return <ConstructNotFixedNoExpense />;
+    if (activeSidebarItem === "business-info") return <BusinessInfoManagement />;
     if (["invest-fixed-unbilled", "cooperation-share-report", "cost-provision-report", "project-budget-detail", "ict-gross-profit-report", "monthly-revenue-detail"].includes(activeSidebarItem)) {
       return (
         <div className="h-full flex flex-col">

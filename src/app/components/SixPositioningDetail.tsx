@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { AddBidDialog } from "./AddBidDialog";
 
 // Mock数据常量
 const initialMockData = {
@@ -546,6 +547,7 @@ export function SixPositioningDetail({ isOpen, onClose, opportunityName, opportu
   const [expandedSeconds, setExpandedSeconds] = useState<Set<string>>(
     new Set(sixPositionDetails.flatMap(p => p.secondLevel.map(s => s.id)))
   );
+  const [showAddBid, setShowAddBid] = useState(false);
 
   const toggleSecondLevel = (id: string) => {
     setExpandedSeconds(prev => {
@@ -823,7 +825,7 @@ function DetailContent({ position }: { position: PositionDetail }) {
               )}
               {/* 录入前向投标按钮 */}
               {(second.id === 'biddingRecord' || second.id === 'biddingResult' || second.id === 'businessNegotiation') && (
-                <Button variant="outline" size="sm" className="gap-1 h-7 text-xs" onClick={(e) => { e.stopPropagation(); onNavigateForwardBid?.(opportunityCode || mockData.opportunity.opportunityCode); }}>
+                <Button variant="outline" size="sm" className="gap-1 h-7 text-xs" onClick={(e) => { e.stopPropagation(); setShowAddBid(true); }}>
                   <Plus className="w-3 h-3" /> 录入前向投标
                 </Button>
               )}
@@ -3664,5 +3666,36 @@ function BusinessInfoModal({ open, onOpenChange, businessInfoList, selectedIds, 
         </div>
       </DialogContent>
     </Dialog>
+  );
+
+  return (
+    <>
+      {/* 六到位明细弹窗内容 */}
+      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle>{opportunityName ? `${opportunityName}商机六到位明细` : '六到位明细'}</DialogTitle>
+          </DialogHeader>
+          {/* 弹窗内容 */}
+          <div className="flex-1 overflow-auto">
+            <div className="p-6">
+              {/* Tab切换 */}
+              <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit mb-4">
+                <button onClick={() => setActivePositionTab("overview")} className={`px-4 py-1.5 text-sm rounded-md transition-colors ${activePositionTab === "overview" ? "bg-white shadow-sm" : "text-gray-600"}`}>
+                  总览
+                </button>
+                <button onClick={() => setActivePositionTab("detail")} className={`px-4 py-1.5 text-sm rounded-md transition-colors ${activePositionTab === "detail" ? "bg-white shadow-sm" : "text-gray-600"}`}>
+                  明细
+                </button>
+              </div>
+              {activePositionTab === "overview" ? <OverviewContent /> : <DetailContent />}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 新增投标弹窗 */}
+      <AddBidDialog open={showAddBid} onClose={() => setShowAddBid(false)} />
+    </>
   );
 }
