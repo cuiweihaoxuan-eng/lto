@@ -21,6 +21,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/lto/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
