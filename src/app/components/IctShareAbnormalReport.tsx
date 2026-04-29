@@ -265,7 +265,8 @@ export function IctShareAbnormalReport() {
         </div>
 
         {/* 查询条件卡片 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4" style={{ width: queryAreaWidth, minWidth: queryAreaWidth }}>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 overflow-x-auto">
+          <div style={{ width: queryAreaWidth }}>
           {/* 基础信息 */}
           <div>
             <div className="grid grid-cols-5 gap-x-6 gap-y-3">
@@ -367,6 +368,7 @@ export function IctShareAbnormalReport() {
               <Button variant="default" size="sm">查询</Button>
               <Button variant="outline" size="sm"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
             </div>
+          </div>
           </div>
         </div>
 

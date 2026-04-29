@@ -784,7 +784,7 @@ export function ReportTemplate({
             </Button>
           </div>
           <div className="overflow-x-auto">
-            <table className="border-collapse" style={{ width: totalTableWidth }}>
+            <table className="border-collapse" style={{ minWidth: totalTableWidth }}>
               <thead>
                 {headerLevel === 1 && renderSingleHeader()}
                 {headerLevel === 2 && renderTwoLevelHeader()}
