@@ -152,10 +152,29 @@ export function BusinessInfoModal({ isOpen, onClose, data, initialTab = "detail"
                 <Field label="招标截至时间" value={data.biddingDeadline as string || '-'} />
                 <Field label="中标时间" value={data.winningTime as string || '-'} />
                 <Field label="招标单位" value={data.biddingUnit as string} fullWidth />
-                <Field label="企业派发名称" value={(data.enterpriseName as string) || (data.companyDispatchName as string) || '-'} />
+                <Field label="招标联系人" value={(data.biddingContact as string) || '-'} />
+                <Field label="联系方式" value={(data.contactPhone as string) || '-'} />
                 <Field label="中标单位" value={data.winningUnit as string || '-'} />
                 <Field label="运营商标签" value={data.operatorLabel as string} />
                 <Field label="招标单位所属区域" value={data.biddingUnitArea as string || '-'} fullWidth />
+              </Section>
+
+              {/* 行业信息 */}
+              <Section title="行业信息">
+                <Field label="一级行业" value={(data.firstLevelIndustry as string) || '-'} />
+                <Field label="二级行业" value={(data.secondLevelIndustry as string) || '-'} />
+              </Section>
+
+              {/* 其他信息 */}
+              <Section title="其他信息">
+                <Field label="原文链接" value={
+                  data.originalUrl ? (
+                    <a href={data.originalUrl as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                      {data.originalUrl as string}
+                    </a>
+                  ) : '-'
+                } fullWidth />
+                <Field label="回退原因" value={(data.returnReason as string) || '-'} fullWidth />
               </Section>
 
               {/* 附件 */}
