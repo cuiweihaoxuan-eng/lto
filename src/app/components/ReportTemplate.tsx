@@ -97,7 +97,7 @@ export function ReportTemplate({
   showDetail = false,
 }: ReportTemplateProps) {
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
-  const [detailModal, setDetailModal] = useState<{ open: boolean; row: Record<string, unknown> | null }>({ open: false, row: null });
+  const [detailPanel, setDetailPanel] = useState<{ row: Record<string, unknown> | null; pinned: boolean }>({ row: null, pinned: false });
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -804,96 +804,153 @@ export function ReportTemplate({
               自定义表头
             </Button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="border-collapse" style={{ minWidth: totalTableWidth }}>
-              <thead>
-                {headerLevel === 1 && renderSingleHeader()}
-                {headerLevel === 2 && renderTwoLevelHeader()}
-                {headerLevel === 3 && renderThreeLevelHeader()}
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {data.map((row, ri) => {
-                  const dataRowSpan = config.dataRowSpan ?? 1;
-                  const isFirstRowOfGroup = ri % dataRowSpan === 0;
-                  const rowType = row["rowType"] as string | undefined;
+          <div className="flex">
+            <div className="flex-1 overflow-x-auto">
+              <table className="border-collapse" style={{ minWidth: totalTableWidth }}>
+                <thead>
+                  {headerLevel === 1 && renderSingleHeader()}
+                  {headerLevel === 2 && renderTwoLevelHeader()}
+                  {headerLevel === 3 && renderThreeLevelHeader()}
+                </thead>
+                <tbody className="divide-y divide-gray-100 bg-white">
+                  {data.map((row, ri) => {
+                    const dataRowSpan = config.dataRowSpan ?? 1;
+                    const isFirstRowOfGroup = ri % dataRowSpan === 0;
+                    const rowType = row["rowType"] as string | undefined;
 
-                  return (
-                    <tr key={ri} className="hover:bg-gray-50">
-                      {visibleColumns.map((col, ci) => {
-                        const origIdx = config.columns.indexOf(col);
-                        // 基本信息列 rowSpan 合并
-                        if (origIdx < 10 && dataRowSpan > 1) {
-                          if (!isFirstRowOfGroup) return null;
+                    return (
+                      <tr key={ri}
+                        className={`hover:bg-blue-50 cursor-pointer ${detailPanel.row === row ? "bg-blue-50" : ""}`}
+                        onMouseEnter={() => showDetail && setDetailPanel({ row, pinned: detailPanel.pinned })}
+                        onMouseLeave={() => showDetail && !detailPanel.pinned && setDetailPanel({ row: null, pinned: false })}
+                      >
+                        {visibleColumns.map((col, ci) => {
+                          const origIdx = config.columns.indexOf(col);
+                          // 基本信息列 rowSpan 合并
+                          if (origIdx < 10 && dataRowSpan > 1) {
+                            if (!isFirstRowOfGroup) return null;
+                            const val = row[col.key];
+                            return (
+                              <td key={col.key} rowSpan={dataRowSpan}
+                                style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
+                                className={`px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 ${
+                                  col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
+                                }`}>
+                                {col.render ? col.render(val, row) : String(val ?? "")}
+                              </td>
+                            );
+                          }
+                          // rowType 列
+                          if (origIdx === 9) {
+                            return (
+                              <td key={col.key}
+                                style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
+                                className="px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 text-center font-medium bg-gray-50">
+                                {rowType ?? ""}
+                              </td>
+                            );
+                          }
                           const val = row[col.key];
+                          const isEmpty = val === 0 || val === "" || val === undefined || val === null;
                           return (
-                            <td key={col.key} rowSpan={dataRowSpan}
+                            <td key={col.key}
                               style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
-                              className={`px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 ${
-                                col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
+                              className={`px-2 py-2.5 text-sm border-b border-gray-100 ${
+                                isEmpty ? "text-gray-300"
+                                  : col.align === "right" ? "text-right text-gray-800"
+                                  : col.align === "center" ? "text-center text-gray-800"
+                                  : "text-left text-gray-800"
                               }`}>
                               {col.render ? col.render(val, row) : String(val ?? "")}
                             </td>
                           );
-                        }
-                        // rowType 列
-                        if (origIdx === 9) {
-                          return (
-                            <td key={col.key}
-                              style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
-                              className="px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 text-center font-medium bg-gray-50">
-                              {rowType ?? ""}
-                            </td>
-                          );
-                        }
-                        const val = row[col.key];
-                        const isEmpty = val === 0 || val === "" || val === undefined || val === null;
-                        return (
-                          <td key={col.key}
-                            style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
-                            className={`px-2 py-2.5 text-sm border-b border-gray-100 ${
-                              isEmpty ? "text-gray-300"
-                                : col.align === "right" ? "text-right text-gray-800"
-                                : col.align === "center" ? "text-center text-gray-800"
-                                : "text-left text-gray-800"
-                            }`}>
-                            {col.render ? col.render(val, row) : String(val ?? "")}
+                        })}
+                        {showDetail && (
+                          <td className="px-2 py-2.5 text-center border-b border-gray-100 bg-white sticky right-0 z-10">
+                            <button
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDetailPanel({ row, pinned: !detailPanel.pinned || detailPanel.row !== row });
+                              }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              {detailPanel.row === row && detailPanel.pinned ? "关闭" : "查看"}
+                            </button>
                           </td>
-                        );
-                      })}
-                      {showDetail && (
-                        <td className="px-2 py-2.5 text-center border-b border-gray-100 bg-white sticky right-0">
-                          <button
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                            onClick={() => setDetailModal({ open: true, row })}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            查看
-                          </button>
-                        </td>
-                      )}
-                    </tr>
+                        )}
+                      </tr>
                   );
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
+
+            {/* 详情侧边栏 */}
+            {showDetail && detailPanel.row && (
+              <div className="w-96 flex-shrink-0 border-l border-gray-200 bg-white overflow-y-auto">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-900">详情</h3>
+                    <button
+                      className="text-gray-400 hover:text-gray-600"
+                      onClick={() => setDetailPanel({ row: null, pinned: false })}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {/* 按一级/二级表头分组展示 */}
+                    {(() => {
+                      const groups = config.headerGroups || [];
+                      const getGroupForColumn = (colIndex: number): string | null => {
+                        for (const group of groups) {
+                          if (colIndex >= group.startCol && colIndex < group.startCol + group.span) {
+                            return group.label;
+                          }
+                        }
+                        return null;
+                      };
+                      const groupedColumns: Record<string, typeof config.columns> = {};
+                      config.columns.forEach((col, index) => {
+                        const groupLabel = getGroupForColumn(index) || "基础信息";
+                        if (!groupedColumns[groupLabel]) {
+                          groupedColumns[groupLabel] = [];
+                        }
+                        groupedColumns[groupLabel].push(col);
+                      });
+                      return Object.entries(groupedColumns).map(([groupLabel, cols]) => (
+                        <div key={groupLabel}>
+                          <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">
+                            {groupLabel}
+                          </h4>
+                          <div className="grid grid-cols-1 gap-1">
+                            {cols.map(col => (
+                              <div key={col.key} className="flex items-start py-1">
+                                <span className="text-xs text-gray-500 w-28 flex-shrink-0 truncate">
+                                  {col.label}：
+                                </span>
+                                <span className={`text-xs text-gray-900 flex-1 ${col.align === "right" ? "text-right" : ""}`}>
+                                  {detailPanel.row[col.key] !== undefined && detailPanel.row[col.key] !== null && detailPanel.row[col.key] !== ""
+                                    ? String(detailPanel.row[col.key])
+                                    : "-"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* 列可见性弹窗 */}
       {renderColumnModal()}
-
-      {/* 详情弹窗 */}
-      {showDetail && detailModal.open && detailModal.row && (
-        <ReportDetailModal
-          isOpen={detailModal.open}
-          onClose={() => setDetailModal({ open: false, row: null })}
-          title={config.title + " - 详情"}
-          columns={config.columns}
-          headerGroups={config.headerGroups}
-          rowData={detailModal.row}
-        />
-      )}
     </div>
   );
 }

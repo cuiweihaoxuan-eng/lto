@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Button } from "./ui/button";
-import { Settings2 } from "lucide-react";
+import { Settings2, Eye } from "lucide-react";
 import { ColumnVisibilityModal } from "./ui/ColumnVisibilityModal";
 import { useColumnVisibility } from "./hooks/useColumnVisibility";
 
@@ -172,6 +172,7 @@ export function LowMarginReport() {
   const [showFilters, setShowFilters] = useState(true);
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [showColumnModal, setShowColumnModal] = useState(false);
+  const [detailPanel, setDetailPanel] = useState<{ project: typeof projectData[0] | null; pinned: boolean }>({ project: null, pinned: false });
   const tableRef = useRef<HTMLDivElement>(null);
 
   // 列可见性
@@ -443,90 +444,159 @@ export function LowMarginReport() {
           {/* 工具栏 */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gray-50">
             <span className="text-xs text-gray-500">已选 {colVis.visibleCount}/{colVis.totalCount} 列</span>
-            <button
-              className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
-              onClick={() => setShowColumnModal(true)}
-            >
-              <Settings2 className="w-4 h-4" />
-              自定义表头
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+                onClick={() => setShowColumnModal(true)}
+              >
+                <Settings2 className="w-4 h-4" />
+                自定义表头
+              </button>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                onClick={() => setDetailPanel({ project: projectData[0] || null, pinned: true })}
+              >
+                <Eye className="w-4 h-4" />
+                查看详情
+              </button>
+            </div>
           </div>
-          {/* 表头 */}
-          <table className="border-collapse w-full" style={{ width: tableWidth }}>
-            <thead>
-              {/* 第一行：一级分组（按可见列重新计算span） */}
-              <tr>
-                {visGroups.map((g, i) => (
-                  <th
-                    key={i}
-                    colSpan={g.span}
-                    className={`${g.color} border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center`}
-                  >
-                    {g.label}
-                  </th>
-                ))}
-              </tr>
-              {/* 第二行：列名（按可见列过滤） */}
-              <tr>
-                {visCols.map((col, i) => {
-                  const origIdx = columns.findIndex(c => c.key === col.key);
-                  let cellColor = "bg-gray-100";
-                  if (origIdx >= 19 && origIdx <= 22) cellColor = "bg-blue-50";
-                  else if (origIdx >= 23 && origIdx <= 25) cellColor = "bg-red-50";
-                  else if (origIdx >= 26 && origIdx <= 28) cellColor = "bg-purple-50";
-                  else if (origIdx >= 29 && origIdx <= 31) cellColor = "bg-orange-50";
-                  return (
-                    <th
-                      key={col.key}
-                      className={`border border-gray-300 px-2 py-2 text-xs font-medium text-center ${cellColor}`}
-                      style={{ width: col.width, minWidth: col.width }}
+          <div className="flex">
+            <div className="flex-1 overflow-x-auto">
+              {/* 表头 */}
+              <table className="border-collapse w-full" style={{ width: tableWidth }}>
+                <thead>
+                  {/* 第一行：一级分组（按可见列重新计算span） */}
+                  <tr>
+                    {visGroups.map((g, i) => (
+                      <th
+                        key={i}
+                        colSpan={g.span}
+                        className={`${g.color} border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center`}
+                      >
+                        {g.label}
+                      </th>
+                    ))}
+                  </tr>
+                  {/* 第二行：列名（按可见列过滤） */}
+                  <tr>
+                    {visCols.map((col, i) => {
+                      const origIdx = columns.findIndex(c => c.key === col.key);
+                      let cellColor = "bg-gray-100";
+                      if (origIdx >= 19 && origIdx <= 22) cellColor = "bg-blue-50";
+                      else if (origIdx >= 23 && origIdx <= 25) cellColor = "bg-red-50";
+                      else if (origIdx >= 26 && origIdx <= 28) cellColor = "bg-purple-50";
+                      else if (origIdx >= 29 && origIdx <= 31) cellColor = "bg-orange-50";
+                      return (
+                        <th
+                          key={col.key}
+                          className={`border border-gray-300 px-2 py-2 text-xs font-medium text-center ${cellColor}`}
+                          style={{ width: col.width, minWidth: col.width }}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <span className="text-gray-700">{col.label}</span>
+                          </div>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {projectData.map((project, pIdx) => {
+                      const projBg = pIdx % 2 === 0 ? "" : "bg-gray-50/40";
+                      return (
+                        <>
+                          {project.rows.map((row, rIdx) => {
+                            return (
+                              <tr key={`${pIdx}-${rIdx}`}
+                                className={`${projBg} hover:bg-blue-50 cursor-pointer ${detailPanel.project === project ? "bg-blue-50" : ""}`}
+                                onMouseEnter={() => setDetailPanel({ project, pinned: detailPanel.pinned })}
+                                onMouseLeave={() => !detailPanel.pinned && setDetailPanel({ project: null, pinned: false })}
+                              >
+                                {/* 基本信息列 rowSpan: 只在第一行可见的基本列渲染rowSpan */}
+                                {rIdx === 0 && visCols.map((col, ci) => {
+                                  const origIdx = columns.findIndex(c => c.key === col.key);
+                                  // 仅在origIdx < 19时rowSpan
+                                  if (origIdx < 19) {
+                                    return (
+                                      <td key={col.key} rowSpan={4}
+                                        className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
+                                        style={{ width: col.width }}>
+                                        {String((project.basic as any)[col.key] ?? "")}
+                                      </td>
+                                    );
+                                  }
+                                  // origIdx >= 19: 无rowSpan
+                                  return (
+                                    <td key={col.key}
+                                      className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
+                                      style={{ width: col.width }}>
+                                      {origIdx === 19 ? row.stage : ""}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                        </>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 详情侧边栏 */}
+            {detailPanel.project && (
+              <div className="w-96 flex-shrink-0 border-l border-gray-200 bg-white overflow-y-auto">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-900">详情</h3>
+                    <button
+                      className="text-gray-400 hover:text-gray-600"
+                      onClick={() => setDetailPanel({ project: null, pinned: false })}
                     >
-                      <div className="flex items-center justify-center gap-1">
-                        <span className="text-gray-700">{col.label}</span>
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {projectData.map((project, pIdx) => {
-                  const projBg = pIdx % 2 === 0 ? "" : "bg-gray-50/40";
-                  return (
-                    <>
-                      {project.rows.map((row, rIdx) => {
-                        return (
-                          <tr key={`${pIdx}-${rIdx}`} className={projBg}>
-                            {/* 基本信息列 rowSpan: 只在第一行可见的基本列渲染rowSpan */}
-                            {rIdx === 0 && visCols.map((col, ci) => {
-                              const origIdx = columns.findIndex(c => c.key === col.key);
-                              // 仅在origIdx < 19时rowSpan
-                              if (origIdx < 19) {
-                                return (
-                                  <td key={col.key} rowSpan={4}
-                                    className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
-                                    style={{ width: col.width }}>
-                                    {String((project.basic as any)[col.key] ?? "")}
-                                  </td>
-                                );
-                              }
-                              // origIdx >= 19: 无rowSpan
-                              return (
-                                <td key={col.key}
-                                  className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
-                                  style={{ width: col.width }}>
-                                  {origIdx === 19 ? row.stage : ""}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </>
-                  );
-                })}
-            </tbody>
-          </table>
+                      ✕
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {(() => {
+                      const p = detailPanel.project!;
+                      const groups = headerGroups;
+                      const getGroupForColumn = (colIdx: number): string | null => {
+                        for (const g of groups) {
+                          if (colIdx >= g.startCol && colIdx < g.startCol + g.span) return g.label;
+                        }
+                        return null;
+                      };
+                      const groupedCols: Record<string, typeof columns> = {};
+                      columns.forEach((col, i) => {
+                        const gl = getGroupForColumn(i) || "基础信息";
+                        if (!groupedCols[gl]) groupedCols[gl] = [];
+                        groupedCols[gl].push(col);
+                      });
+                      return Object.entries(groupedCols).map(([gl, cols]) => (
+                        <div key={gl}>
+                          <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">{gl}</h4>
+                          <div className="grid grid-cols-1 gap-1">
+                            {cols.map(col => (
+                              <div key={col.key} className="flex items-start py-1">
+                                <span className="text-xs text-gray-500 w-28 flex-shrink-0 truncate">{col.label}：</span>
+                                <span className="text-xs text-gray-900 flex-1">
+                                  {p.basic[col.key as keyof typeof p.basic] !== undefined
+                                    ? String(p.basic[col.key as keyof typeof p.basic] ?? "-")
+                                    : "-"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
