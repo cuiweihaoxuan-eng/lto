@@ -784,7 +784,10 @@ export function ReportTemplate({
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
           {isGroupedQuery ? renderGroupedQuery() : renderFlatQuery()}
 
-          <div className="flex items-center justify-end mt-4">
+          <div className="flex items-center justify-between mt-4">
+            <Button variant="link" size="sm" onClick={() => setShowAllConditions(!showAllConditions)} className="text-blue-600 p-0">
+              {showAllConditions ? "收起更多条件" : "展开更多条件"}
+            </Button>
             <div className="flex gap-2">
               <Button variant="default" size="sm" onClick={handleQuery}>查询</Button>
               <Button variant="outline" size="sm" onClick={handleReset}>
@@ -805,10 +808,6 @@ export function ReportTemplate({
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
               onClick={() => setShowQueryArea(!showQueryArea)}>
               {showQueryArea ? "隐藏查询" : "显示查询"}
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
-              onClick={() => setShowAllConditions(!showAllConditions)}>
-              {showAllConditions ? "收起更多条件" : "展开更多条件"}
             </Button>
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
               onClick={() => setShowColumnModal(true)}>

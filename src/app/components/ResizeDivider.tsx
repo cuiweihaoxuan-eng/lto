@@ -71,8 +71,8 @@ export function ResizeDivider({
       <div
         className={`absolute inset-y-0 left-1/2 w-1 -translate-x-1/2 transition-all duration-200 rounded-full ${
           isDragging
-            ? "bg-[#1890ff]"
-            : "bg-[#bae7ff] group-hover:bg-[#1890ff]"
+            ? "bg-gray-400"
+            : "bg-gray-200 group-hover:bg-gray-400"
         }`}
       />
 
@@ -84,10 +84,10 @@ export function ResizeDivider({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="w-5 h-14 bg-white border-2 border-[#1890ff] rounded-lg shadow-lg flex flex-col items-center justify-center gap-1.5 p-1.5">
-          <div className="w-1 h-1.5 bg-[#1890ff] rounded-full" />
-          <div className="w-1 h-1.5 bg-[#1890ff] rounded-full" />
-          <div className="w-1 h-1.5 bg-[#1890ff] rounded-full" />
+        <div className="w-5 h-14 bg-white border-2 border-gray-300 rounded-lg shadow-lg flex flex-col items-center justify-center gap-1.5 p-1.5">
+          <div className="w-1 h-1.5 bg-gray-400 rounded-full" />
+          <div className="w-1 h-1.5 bg-gray-400 rounded-full" />
+          <div className="w-1 h-1.5 bg-gray-400 rounded-full" />
         </div>
       </div>
     </div>

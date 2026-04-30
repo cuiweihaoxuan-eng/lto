@@ -161,7 +161,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
 
   return (
     <div
-      className={`h-full flex flex-col transition-all duration-300 ease-in-out z-[9998] border-l border-[#bae7ff] bg-[#E6F4FF]`}
+      className={`h-full flex flex-col transition-all duration-300 ease-in-out z-[9998] bg-white`}
       style={{ width }}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -178,9 +178,9 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       )}
 
       {/* 头部 */}
-      <div className="flex-shrink-0 h-14 bg-[#E6F4FF] border-b border-[#bae7ff] flex items-center justify-between px-4 shadow-sm">
+      <div className="flex-shrink-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#1890ff] rounded-lg flex items-center justify-center shadow-md">
+          <div className="w-8 h-8 bg-[#1890ff] rounded-lg flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <span className="font-semibold text-gray-700">AI 助手</span>
@@ -203,7 +203,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       </div>
 
       {/* 对话历史折叠区 */}
-      <div className="border-b">
+      <div className="border-b border-gray-100">
         <button
           onClick={() => setHistoryCollapsed(!historyCollapsed)}
           className="w-full px-4 py-2 flex items-center justify-between text-sm text-gray-500 hover:bg-gray-50 transition-colors"
@@ -238,8 +238,8 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
             <div
               className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
                 message.role === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gradient-to-br from-violet-500 to-indigo-500 text-white"
+                  ? "bg-[#1890ff] text-white"
+                  : "bg-gradient-to-br from-[#1890ff] to-[#40a9ff] text-white"
               }`}
             >
               {message.role === "user" ? (
@@ -251,10 +251,10 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
 
             {/* 消息内容 */}
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
+              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                 message.role === "user"
                   ? "bg-[#1890ff] text-white"
-                  : "bg-white text-gray-800"
+                  : "bg-gray-100 text-gray-800"
               }`}
             >
               {/* 文件附件 */}
@@ -263,8 +263,8 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                   {message.files.map((file) => (
                     <div
                       key={file.id}
-                      className={`flex items-center gap-2 px-2 py-1 rounded-lg text-xs shadow-sm ${
-                        message.role === "user" ? "bg-[#40a9ff]" : "bg-[#f0f9ff] border border-[#bae7ff]"
+                      className={`flex items-center gap-2 px-2 py-1 rounded-lg text-xs ${
+                        message.role === "user" ? "bg-[#1890ff] text-white" : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {file.type === "image" ? (
@@ -299,10 +299,10 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
         {/* 正在输入指示器 */}
         {isTyping && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1890ff] to-[#40a9ff] flex items-center justify-center shadow-md">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1890ff] to-[#40a9ff] flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
+            <div className="bg-gray-100 rounded-2xl px-4 py-3">
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-[#1890ff] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-2 h-2 bg-[#1890ff] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -316,7 +316,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       </div>
 
       {/* 输入区域 */}
-      <div className="flex-shrink-0 border-t border-[#bae7ff] bg-[#f0f9ff] p-4">
+      <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 p-4">
         {/* 已上传文件预览 */}
         {attachedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="输入消息，Shift+Enter 换行，Enter 发送..."
-            className="w-full px-4 py-3 pr-24 bg-white border border-[#bae7ff] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#1890ff] focus:border-transparent text-sm shadow-sm"
+            className="w-full px-4 py-3 pr-24 bg-white border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#1890ff] focus:border-transparent text-sm"
             rows={1}
             style={{ minHeight: 48, maxHeight: 120 }}
           />
@@ -395,11 +395,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
           onChange={(e) => handleFileSelect(e.target.files)}
         />
 
-        {/* 提示文字 */}
-        <p className="mt-2 text-xs text-gray-400 text-center">
-          支持粘贴或拖拽文件、图片
-        </p>
-      </div>
+              </div>
     </div>
   );
 }
