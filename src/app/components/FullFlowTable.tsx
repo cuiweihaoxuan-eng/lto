@@ -917,6 +917,8 @@ export function FullFlowTable(_props: FullFlowTableProps) {
           </div>
           {/* 表格+侧边栏容器 */}
           <div className="flex">
+            {/* 表格+侧边栏容器 */}
+          <div className="flex">
             <div className="overflow-x-auto flex-1">
               <table className="min-w-full border-collapse" style={{ width: tableWidth }}>
               {/* 表头Row2: 一级分组（按可见列重新计算span） */}
@@ -1057,47 +1059,48 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               </tbody>
             </table>
             </div>
-            {/* 详情侧边栏 */}
-            {detailPanel.row && (
-              <div className="w-96 border-l border-gray-200 bg-white flex flex-col overflow-hidden flex-shrink-0">
-                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-800">详情</span>
-                    {detailPanel.pinned && <span className="text-xs text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">已固定</span>}
-                  </div>
-                  <button onClick={() => setDetailPanel({ row: null, pinned: false })} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+          </div>
+          {/* 详情侧边栏 - 左侧 */}
+          {detailPanel.row && (
+            <div className="w-[480px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-800">详情</span>
+                  {detailPanel.pinned && <span className="text-xs text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">已固定</span>}
                 </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  {Object.entries({
-                    "项目基本信息": ["currentPeriod","city","district","projectCode","projectName","projectType","projectStartTime","projectStatus","industry","projectManager","projectCategory","oppCode","contractCode","contractName","contractStartDate","contractEndDate","contractType","contractStatus","customerCode","customerName","customerIndustry","customerDept","signAmount","signDate","projectStage"],
-                    "收入": ["incomeTotalTax","incomeTotal","incomeBasic","incomeService","incomeProduct","incomeEquip","incomeOther","incomePlanTotal","incomePlanBasic","incomePlanService","incomePlanProduct","incomePlanEquip","incomePlanOther","incomeYearTotal","incomeYearBasic","incomeYearService","incomeYearProduct","incomeYearEquip","incomeYearOther","incomeMonthTotal","incomeMonthBasic","incomeMonthService","incomeMonthProduct","incomeMonthEquip","incomeMonthOther"],
-                    "收款": ["receivedAmount","receivedYearAmt","receivedMonthAmt","receivableAmt","supplierContractCode","supplierContractName","supplierName"],
-                    "支出": ["costTotalTax","costTotal","costService","costRecorded","costReduction","costIctService","costInvest","costCapability","costEquip","costEquipReduction","costEquipConfirm","costOther","costYearTotal","costYearService","costYearRecorded","costYearReduction","costYearIctService","costYearInvest","costYearCapability","costYearEquip","costYearEquipRed","costYearEquipConfirm","costYearOther","costMonthTotal","costMonthService","costMonthRecorded","costMonthReduction","costMonthIctService","costMonthInvest","costMonthCapability","costMonthEquip","costMonthEquipRed","costMonthEquipConfirm","costMonthOther"],
-                    "付款": ["paymentAmount","paymentYearAmount","paymentMonthAmount","unpaidAmount"],
-                  }).map(([group, keys]) => {
-                    const items = keys.filter(k => detailPanel.row![k] !== undefined && detailPanel.row![k] !== "" && detailPanel.row![k] !== null);
-                    if (items.length === 0) return null;
-                    return (
-                      <div key={group} className="mb-5">
-                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-100">{group}</div>
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                          {items.map(k => {
-                            const col = allColumns[colIndexMap[k]];
-                            return col ? (
-                              <div key={k} className="col-span-1">
-                                <div className="text-xs text-gray-400">{col.label}</div>
-                                <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <button onClick={() => setDetailPanel({ row: null, pinned: false })} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
               </div>
-            )}
+              <div className="flex-1 overflow-y-auto p-4">
+                {Object.entries({
+                  "项目基本信息": ["currentPeriod","city","district","projectCode","projectName","projectType","projectStartTime","projectStatus","industry","projectManager","projectCategory","oppCode","contractCode","contractName","contractStartDate","contractEndDate","contractType","contractStatus","customerCode","customerName","customerIndustry","customerDept","signAmount","signDate","projectStage"],
+                  "收入": ["incomeTotalTax","incomeTotal","incomeBasic","incomeService","incomeProduct","incomeEquip","incomeOther","incomePlanTotal","incomePlanBasic","incomePlanService","incomePlanProduct","incomePlanEquip","incomePlanOther","incomeYearTotal","incomeYearBasic","incomeYearService","incomeYearProduct","incomeYearEquip","incomeYearOther","incomeMonthTotal","incomeMonthBasic","incomeMonthService","incomeMonthProduct","incomeMonthEquip","incomeMonthOther"],
+                  "收款": ["receivedAmount","receivedYearAmt","receivedMonthAmt","receivableAmt","supplierContractCode","supplierContractName","supplierName"],
+                  "支出": ["costTotalTax","costTotal","costService","costRecorded","costReduction","costIctService","costInvest","costCapability","costEquip","costEquipReduction","costEquipConfirm","costOther","costYearTotal","costYearService","costYearRecorded","costYearReduction","costYearIctService","costYearInvest","costYearCapability","costYearEquip","costYearEquipRed","costYearEquipConfirm","costYearOther","costMonthTotal","costMonthService","costMonthRecorded","costMonthReduction","costMonthIctService","costMonthInvest","costMonthCapability","costMonthEquip","costMonthEquipRed","costMonthEquipConfirm","costMonthOther"],
+                  "付款": ["paymentAmount","paymentYearAmount","paymentMonthAmount","unpaidAmount"],
+                }).map(([group, keys]) => {
+                  const items = keys.filter(k => detailPanel.row![k] !== undefined && detailPanel.row![k] !== "" && detailPanel.row![k] !== null);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={group} className="mb-4">
+                      <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-100">{group}</div>
+                      <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
+                        {items.map(k => {
+                          const col = allColumns[colIndexMap[k]];
+                          return col ? (
+                            <div key={k} className="col-span-1">
+                              <div className="text-xs text-gray-400">{col.label}</div>
+                              <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           </div>
         </div>
       </div>
