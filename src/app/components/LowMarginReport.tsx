@@ -604,6 +604,7 @@ export function LowMarginReport() {
                                     </td>
                                   </React.Fragment>
                                 )}
+                              </tr>
                             );
                           })}
                         </>

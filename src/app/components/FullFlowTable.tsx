@@ -907,7 +907,50 @@ export function FullFlowTable(_props: FullFlowTableProps) {
           </div>
           {/* 表格+侧边栏容器 */}
           <div className="flex flex-1 min-h-0">
-            <div className="overflow-x-auto flex-1">
+            {/* 详情侧边栏 - 左侧，宽度40% */}
+            {detailPanel.row && (
+              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden min-h-0">
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-800">详情</span>
+                    {detailPanel.pinned && <span className="text-xs text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">已固定</span>}
+                  </div>
+                  <button onClick={() => setDetailPanel({ row: null, pinned: false })} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  {Object.entries({
+                    "项目基本信息": ["currentPeriod","city","district","projectCode","projectName","projectType","projectStartTime","projectStatus","industry","projectManager","projectCategory","oppCode","contractCode","contractName","contractStartDate","contractEndDate","contractType","contractStatus","customerCode","customerName","customerIndustry","customerDept","signAmount","signDate","projectStage"],
+                    "收入": ["incomeTotalTax","incomeTotal","incomeBasic","incomeService","incomeProduct","incomeEquip","incomeOther","incomePlanTotal","incomePlanBasic","incomePlanService","incomePlanProduct","incomePlanEquip","incomePlanOther","incomeYearTotal","incomeYearBasic","incomeYearService","incomeYearProduct","incomeYearEquip","incomeYearOther","incomeMonthTotal","incomeMonthBasic","incomeMonthService","incomeMonthProduct","incomeMonthEquip","incomeMonthOther"],
+                    "收款": ["receivedAmount","receivedYearAmt","receivedMonthAmt","receivableAmt","supplierContractCode","supplierContractName","supplierName"],
+                    "支出": ["costTotalTax","costTotal","costService","costRecorded","costReduction","costIctService","costInvest","costCapability","costEquip","costEquipReduction","costEquipConfirm","costOther","costYearTotal","costYearService","costYearRecorded","costYearReduction","costYearIctService","costYearInvest","costYearCapability","costYearEquip","costYearEquipRed","costYearEquipConfirm","costYearOther","costMonthTotal","costMonthService","costMonthRecorded","costMonthReduction","costMonthIctService","costMonthInvest","costMonthCapability","costMonthEquip","costMonthEquipRed","costMonthEquipConfirm","costMonthOther"],
+                    "付款": ["paymentAmount","paymentYearAmount","paymentMonthAmount","unpaidAmount"],
+                  }).map(([group, keys]) => {
+                    const items = keys.filter(k => detailPanel.row![k] !== undefined && detailPanel.row![k] !== "" && detailPanel.row![k] !== null);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={group} className="mb-4">
+                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-100">{group}</div>
+                        <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
+                          {items.map(k => {
+                            const col = allColumns[colIndexMap[k]];
+                            return col ? (
+                              <div key={k} className="col-span-1">
+                                <div className="text-xs text-gray-400">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 表格区域 */}
+            <div className="flex-1 min-w-0 overflow-auto">
               <table className="min-w-full border-collapse" style={{ width: tableWidth }}>
               {/* 表头Row2: 一级分组（按可见列重新计算span） */}
               <thead>
@@ -921,6 +964,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                       {g.label}
                     </th>
                   ))}
+                  <th className="px-2 py-2.5 text-center text-sm font-semibold border border-gray-200 bg-gray-100 sticky right-0 z-10">操作</th>
                 </tr>
                 {/* 表头Row3: 二级子分组 */}
                 <tr>
@@ -955,6 +999,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     <th colSpan={visCols.filter(c => { const i = colIndexMap[c.key]; return i >= 98; }).length || 4}
                       className="px-2 py-2 text-center text-xs font-medium bg-green-100 text-green-700 border border-green-200">付款</th>
                   )}
+                  <th className="px-2 py-2 text-center text-xs font-medium bg-gray-200 border border-gray-300 sticky right-0 z-10">操作</th>
                 </tr>
                 {/* 表头Row4: 实际列名（按可见列过滤） */}
                 <tr>
@@ -998,13 +1043,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     return (
                       <tr
                         key={`${pIdx}-${sIdx}`}
-                        className="hover:bg-blue-50 cursor-pointer"
-                        onMouseEnter={() => setDetailPanel(prev => prev.pinned ? prev : { row: rowData, pinned: false })}
-                        onMouseLeave={() => setDetailPanel(prev => prev.pinned ? prev : { row: null, pinned: false })}
-                        onClick={(e) => {
-                          const isPinned = detailPanel.pinned && detailPanel.row === rowData;
-                          setDetailPanel({ row: rowData, pinned: !isPinned });
-                        }}
+                        className="hover:bg-blue-50"
                       >
                         {isFirst && (
                           <>
@@ -1060,49 +1099,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 })}
               </tbody>
             </table>
-            </div>
           </div>
-          {/* 详情侧边栏 - 左侧，宽度40% */}
-          {detailPanel.row && (
-            <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden min-h-0">
-              <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-800">详情</span>
-                  {detailPanel.pinned && <span className="text-xs text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">已固定</span>}
-                </div>
-                <button onClick={() => setDetailPanel({ row: null, pinned: false })} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                {Object.entries({
-                  "项目基本信息": ["currentPeriod","city","district","projectCode","projectName","projectType","projectStartTime","projectStatus","industry","projectManager","projectCategory","oppCode","contractCode","contractName","contractStartDate","contractEndDate","contractType","contractStatus","customerCode","customerName","customerIndustry","customerDept","signAmount","signDate","projectStage"],
-                  "收入": ["incomeTotalTax","incomeTotal","incomeBasic","incomeService","incomeProduct","incomeEquip","incomeOther","incomePlanTotal","incomePlanBasic","incomePlanService","incomePlanProduct","incomePlanEquip","incomePlanOther","incomeYearTotal","incomeYearBasic","incomeYearService","incomeYearProduct","incomeYearEquip","incomeYearOther","incomeMonthTotal","incomeMonthBasic","incomeMonthService","incomeMonthProduct","incomeMonthEquip","incomeMonthOther"],
-                  "收款": ["receivedAmount","receivedYearAmt","receivedMonthAmt","receivableAmt","supplierContractCode","supplierContractName","supplierName"],
-                  "支出": ["costTotalTax","costTotal","costService","costRecorded","costReduction","costIctService","costInvest","costCapability","costEquip","costEquipReduction","costEquipConfirm","costOther","costYearTotal","costYearService","costYearRecorded","costYearReduction","costYearIctService","costYearInvest","costYearCapability","costYearEquip","costYearEquipRed","costYearEquipConfirm","costYearOther","costMonthTotal","costMonthService","costMonthRecorded","costMonthReduction","costMonthIctService","costMonthInvest","costMonthCapability","costMonthEquip","costMonthEquipRed","costMonthEquipConfirm","costMonthOther"],
-                  "付款": ["paymentAmount","paymentYearAmount","paymentMonthAmount","unpaidAmount"],
-                }).map(([group, keys]) => {
-                  const items = keys.filter(k => detailPanel.row![k] !== undefined && detailPanel.row![k] !== "" && detailPanel.row![k] !== null);
-                  if (items.length === 0) return null;
-                  return (
-                    <div key={group} className="mb-4">
-                      <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-100">{group}</div>
-                      <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
-                        {items.map(k => {
-                          const col = allColumns[colIndexMap[k]];
-                          return col ? (
-                            <div key={k} className="col-span-1">
-                              <div className="text-xs text-gray-400">{col.label}</div>
-                              <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
-                            </div>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
