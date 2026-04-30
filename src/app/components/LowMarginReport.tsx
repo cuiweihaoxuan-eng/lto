@@ -225,7 +225,7 @@ export function LowMarginReport() {
   const tableWidth = visCols.reduce((a, c) => a + (c.width ?? 100), 0);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col">
       {/* 标题区 */}
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">项目低负毛利预警</h2>
@@ -440,7 +440,7 @@ export function LowMarginReport() {
 
       {/* 表格区 */}
       <div ref={tableRef} className="flex-1 overflow-auto px-6 pb-6">
-        <div className="border border-gray-200 rounded bg-white" style={{ minWidth: tableWidth + 2 }}>
+        <div className="border border-gray-200 rounded bg-white overflow-hidden" style={{ maxHeight: "calc(100vh - 280px)" }}>
           {/* 工具栏 */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gray-50">
             <span className="text-xs text-gray-500">已选 {colVis.visibleCount}/{colVis.totalCount} 列</span>
@@ -461,10 +461,10 @@ export function LowMarginReport() {
               </button>
             </div>
           </div>
-          <div className="flex flex-1 min-h-0 overflow-hidden">
+          <div className="flex flex-1 min-h-0">
             {/* 详情侧边栏 - 左侧，宽度40% */}
             {detailPanel.project && (
-              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0 overflow-y-auto">
+              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0">
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-600" />
@@ -514,8 +514,8 @@ export function LowMarginReport() {
             )}
 
             {/* 表格区域 */}
-            <div className="relative flex-1 overflow-x-auto min-w-0">
-              <table className="border-collapse w-full" style={{ width: tableWidth }}>
+            <div className="flex-1 overflow-x-auto min-w-0">
+              <table className="border-collapse" style={{ minWidth: tableWidth }}>
                 <thead>
                   {/* 第一行：一级分组（按可见列重新计算span） */}
                   <tr>
