@@ -53,14 +53,12 @@ const menuItems: MenuItem[] = [
   {
     id: "opportunity",
     label: "商机管理",
-    icon: <ShoppingCart className="w-4 h-4" />,
-    children: [
-      { id: "opp-participated", label: "我参与的商机" },
-      { id: "opp-discovered", label: "我挖掘的商机" },
-      { id: "opp-managed", label: "我管理的商机" },
-      { id: "opp-query", label: "商机查询" },
-      { id: "business-info", label: "商情管理" }
-    ]
+    icon: <ShoppingCart className="w-4 h-4" />
+  },
+  {
+    id: "business-info",
+    label: "商情管理",
+    icon: <ShoppingCart className="w-4 h-4" />
   },
   {
     id: "process-config",
@@ -110,8 +108,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem, onItemChange }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["opportunity", "report"]);
-  const [activeItem, setActiveItem] = useState("opp-query");
+  const [expandedItems, setExpandedItems] = useState<string[]>(["report"]);
+  const [activeItem, setActiveItem] = useState("dashboard");
   const [cascadeParent, setCascadeParent] = useState<string | null>(null);
   const [cascadePos, setCascadePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const sidebarRef = useRef<HTMLDivElement>(null);

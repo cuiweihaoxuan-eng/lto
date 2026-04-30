@@ -62,7 +62,7 @@ export default function App() {
   const isLeadManagementPage = ["lead-acquisition", "lead-pool", "lead-merge", "lead-distribution"].includes(activeSidebarItem);
 
   // 判断当前是否在商机查询页面
-  const isOpportunityQueryPage = ["opp-query", "opp-participated", "opp-discovered", "opp-managed"].includes(activeSidebarItem);
+  const isOpportunityQueryPage = ["opportunity", "business-info"].includes(activeSidebarItem);
 
   // 判断是否为首页
   const isDashboardPage = activeSidebarItem === "dashboard";
@@ -147,7 +147,7 @@ export default function App() {
     }
 
     // 商机管理页面
-    if (["opp-query", "opp-participated", "opp-discovered", "opp-managed"].includes(activeSidebarItem) || isOppDetailFromUrl) {
+    if (activeSidebarItem === "opportunity" || isOppDetailFromUrl) {
       const detailId = isOppDetailFromUrl ? (urlOppCode as string) : oppDetailId;
       if (detailId) {
         return <Suspense fallback={<LoadingSpinner />}><OpportunityDetail onBack={() => { if (isOppDetailFromUrl) { window.close(); } else { setOppDetailId(null); } }} /></Suspense>;
