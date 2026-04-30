@@ -904,20 +904,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               <Settings2 className="w-4 h-4" />
               自定义表头
             </button>
-            <button
-              className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-              onClick={() => {
-                if (!detailPanel.row) {
-                  const firstRow = flatRows[0];
-                  if (firstRow) setDetailPanel({ row: firstRow.data, pinned: true });
-                } else {
-                  setDetailPanel({ row: null, pinned: false });
-                }
-              }}
-            >
-              <Eye className="w-4 h-4" />
-              {detailPanel.row ? "关闭详情" : "查看详情"}
-            </button>
           </div>
           {/* 表格+侧边栏容器 */}
           <div className="flex flex-1 min-h-0">
@@ -1054,6 +1040,20 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                             {rowData[col.key] !== undefined && rowData[col.key] !== 0 ? String(rowData[col.key]) : ""}
                           </td>
                         ))}
+                        {/* 查看按钮 */}
+                        <td className="px-2 py-2 text-center border border-gray-200 bg-white">
+                          <button
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const isPinned = detailPanel.pinned && detailPanel.row === rowData;
+                              setDetailPanel({ row: rowData, pinned: !isPinned });
+                            }}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            {detailPanel.row === rowData && detailPanel.pinned ? "关闭" : "查看"}
+                          </button>
+                        </td>
                       </tr>
                     );
                   });
@@ -1062,9 +1062,9 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             </table>
             </div>
           </div>
-          {/* 详情侧边栏 - 左侧 */}
+          {/* 详情侧边栏 - 左侧，宽度40% */}
           {detailPanel.row && (
-            <div className="w-[480px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden">
+            <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden min-h-0">
               <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-blue-600" />
