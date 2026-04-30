@@ -84,6 +84,8 @@ interface ReportTemplateProps {
   hideQueryArea?: boolean;
   /** 是否显示查看按钮 */
   showDetail?: boolean;
+  /** 同项目占几行（用于共用查看按钮），默认1 */
+  projectRowSpan?: number;
 }
 
 export function ReportTemplate({
@@ -95,6 +97,7 @@ export function ReportTemplate({
   hideTitle,
   hideQueryArea,
   showDetail = false,
+  projectRowSpan = 1,
 }: ReportTemplateProps) {
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
   const [detailPanel, setDetailPanel] = useState<{ row: Record<string, unknown> | null; pinned: boolean }>({ row: null, pinned: false });
@@ -838,24 +841,38 @@ export function ReportTemplate({
                       }
                       groupedColumns[groupLabel].push(col);
                     });
+                    // 收集同项目的所有行数据（用于显示收入和支出数据）
+                    const firstRowIndex = data.findIndex(r => r === detailPanel.row);
+                    const projectRows = projectRowSpan > 1 && firstRowIndex >= 0
+                      ? data.slice(firstRowIndex, Math.min(firstRowIndex + projectRowSpan, data.length))
+                      : [detailPanel.row];
+
                     return Object.entries(groupedColumns).map(([groupLabel, cols]) => (
                       <div key={groupLabel} className="mb-4">
                         <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">
                           {groupLabel}
                         </h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                          {cols.map(col => (
-                            <div key={col.key} className="flex items-start py-1">
-                              <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">
-                                {col.label}：
-                              </span>
-                              <span className={`text-xs text-gray-900 flex-1 truncate ${col.align === "right" ? "text-right" : ""}`}>
-                                {detailPanel.row[col.key] !== undefined && detailPanel.row[col.key] !== null && detailPanel.row[col.key] !== ""
-                                  ? String(detailPanel.row[col.key])
-                                  : "-"}
-                              </span>
-                            </div>
-                          ))}
+                          {cols.map(col => {
+                            // 优先从收入行（第一行）获取数据，如果没有则从后续行获取
+                            let val: unknown = undefined;
+                            for (const r of projectRows) {
+                              if (r[col.key] !== undefined && r[col.key] !== null && r[col.key] !== "" && r[col.key] !== 0) {
+                                val = r[col.key];
+                                break;
+                              }
+                            }
+                            return (
+                              <div key={col.key} className="flex items-start py-1">
+                                <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">
+                                  {col.label}：
+                                </span>
+                                <span className={`text-xs text-gray-900 flex-1 truncate ${col.align === "right" ? "text-right" : ""}`}>
+                                  {val !== undefined ? String(val) : "-"}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ));
