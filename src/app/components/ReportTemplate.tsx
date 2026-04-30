@@ -867,11 +867,11 @@ export function ReportTemplate({
 
                     return groupedColumns.map(({ label: groupLabel, color: groupColor, cols }) => (
                       <div key={groupLabel} className="mb-4">
-                        <h4 className={`text-sm font-semibold mb-2 pb-2 border-b-2 ${groupColor.replace("bg-", "text-").replace("-100", "-700")}`}>
-                          <span className="inline-block w-1 h-4 mr-2 rounded-sm ${groupColor}"></span>
+                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">
+                          <span className={`inline-block w-1 h-3 mr-2 rounded-sm ${groupColor} flex-shrink-0 align-middle`}></span>
                           {groupLabel}
-                        </h4>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                        </div>
+                        <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
                           {cols.map(col => {
                             // 优先从收入行（第一行）获取数据，如果没有则从后续行获取
                             let val: unknown = undefined;
@@ -882,13 +882,11 @@ export function ReportTemplate({
                               }
                             }
                             return (
-                              <div key={col.key} className="flex items-start py-1">
-                                <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">
-                                  {col.label}：
-                                </span>
-                                <span className={`text-xs text-gray-900 flex-1 truncate ${col.align === "right" ? "text-right" : ""}`}>
+                              <div key={col.key} className="col-span-1">
+                                <div className="text-xs text-gray-400">{col.label}</div>
+                                <div className={`text-sm text-gray-800 truncate ${col.align === "right" ? "text-right" : ""}`}>
                                   {val !== undefined ? String(val) : "-"}
-                                </span>
+                                </div>
                               </div>
                             );
                           })}

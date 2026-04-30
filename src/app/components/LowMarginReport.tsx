@@ -505,19 +505,19 @@ export function LowMarginReport() {
                       });
                       return groupedCols.map(({ label: gl, color: gColor, cols }) => (
                         <div key={gl} className="mb-4">
-                          <h4 className={`text-sm font-semibold mb-2 pb-2 border-b-2 ${gColor.replace("bg-", "text-").replace("-100", "-700")}`}>
-                            <span className={`inline-block w-1 h-4 mr-2 rounded-sm ${gColor} flex-shrink-0`}></span>
+                          <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">
+                            <span className={`inline-block w-1 h-3 mr-2 rounded-sm ${gColor} flex-shrink-0 align-middle`}></span>
                             {gl}
-                          </h4>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                          </div>
+                          <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
                             {cols.map(col => (
-                              <div key={col.key} className="flex items-start py-1">
-                                <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">{col.label}：</span>
-                                <span className="text-xs text-gray-900 flex-1 truncate">
+                              <div key={col.key} className="col-span-1">
+                                <div className="text-xs text-gray-400">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate">
                                   {p.basic[col.key as keyof typeof p.basic] !== undefined
                                     ? String(p.basic[col.key as keyof typeof p.basic] ?? "-")
                                     : "-"}
-                                </span>
+                                </div>
                               </div>
                             ))}
                           </div>

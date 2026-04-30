@@ -950,7 +950,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     if (items.length === 0) return null;
                     return (
                       <div key={group} className="mb-4">
-                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-100">{group}</div>
+                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">{group}</div>
                         <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
                           {items.map(k => {
                             const col = allColumns[colIndexMap[k]];
