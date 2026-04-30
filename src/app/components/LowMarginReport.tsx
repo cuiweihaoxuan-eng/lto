@@ -566,42 +566,44 @@ export function LowMarginReport() {
                                 onMouseEnter={() => setDetailPanel({ project, pinned: detailPanel.pinned })}
                                 onMouseLeave={() => !detailPanel.pinned && setDetailPanel({ project: null, pinned: false })}
                               >
-                                {/* 基本信息列 rowSpan: 只在第一行可见的基本列渲染rowSpan */}
-                                {rIdx === 0 && visCols.map((col, ci) => {
-                                  const origIdx = columns.findIndex(c => c.key === col.key);
-                                  // 仅在origIdx < 19时rowSpan
-                                  if (origIdx < 19) {
-                                    return (
-                                      <td key={col.key} rowSpan={4}
-                                        className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
-                                        style={{ width: col.width }}>
-                                        {String((project.basic as any)[col.key] ?? "")}
-                                      </td>
-                                    );
-                                  }
-                                  // origIdx >= 19: 无rowSpan
-                                  return (
-                                    <td key={col.key}
-                                      className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
-                                      style={{ width: col.width }}>
-                                      {origIdx === 19 ? row.stage : ""}
+                                {/* 基本信息列 rowSpan: 只在第一行渲染 */}
+                                {rIdx === 0 && (
+                                  <React.Fragment>
+                                    {visCols.map((col, ci) => {
+                                      const origIdx = columns.findIndex(c => c.key === col.key);
+                                      if (origIdx < 19) {
+                                        return (
+                                          <td key={col.key} rowSpan={4}
+                                            className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
+                                            style={{ width: col.width }}>
+                                            {String((project.basic as any)[col.key] ?? "")}
+                                          </td>
+                                        );
+                                      }
+                                      return (
+                                        <td key={col.key}
+                                          className={`border border-gray-300 px-2 py-2 text-xs text-gray-700 text-center align-middle ${projBg}`}
+                                          style={{ width: col.width }}>
+                                          {origIdx === 19 ? row.stage : ""}
+                                        </td>
+                                      );
+                                    })}
+                                    {/* 查看按钮：只在第一行显示，rowSpan=4 */}
+                                    <td className="border border-gray-300 px-2 py-2 text-center align-middle" rowSpan={4}>
+                                      <button
+                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const isPinned = detailPanel.pinned && detailPanel.project === project;
+                                          setDetailPanel({ project, pinned: !isPinned });
+                                        }}
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                        {detailPanel.project === project && detailPanel.pinned ? "关闭" : "查看"}
+                                      </button>
                                     </td>
-                                  );
-                                })}
-                                {/* 查看按钮 */}
-                                <td className="border border-gray-300 px-2 py-2 text-center">
-                                  <button
-                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const isPinned = detailPanel.pinned && detailPanel.project === project;
-                                      setDetailPanel({ project, pinned: !isPinned });
-                                    }}
-                                  >
-                                    <Eye className="w-3.5 h-3.5" />
-                                    {detailPanel.project === project && detailPanel.pinned ? "关闭" : "查看"}
-                                  </button>
-                                </td>
+                                  </React.Fragment>
+                                )}
                             );
                           })}
                         </>
