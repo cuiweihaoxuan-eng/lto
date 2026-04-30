@@ -916,9 +916,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             </button>
           </div>
           {/* 表格+侧边栏容器 */}
-          <div className="flex">
-            {/* 表格+侧边栏容器 */}
-          <div className="flex">
+          <div className="flex h-full">
             <div className="overflow-x-auto flex-1">
               <table className="min-w-full border-collapse" style={{ width: tableWidth }}>
               {/* 表头Row2: 一级分组（按可见列重新计算span） */}
@@ -1101,7 +1099,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               </div>
             </div>
           )}
-          </div>
         </div>
       </div>
 

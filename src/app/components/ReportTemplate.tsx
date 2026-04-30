@@ -804,67 +804,7 @@ export function ReportTemplate({
               自定义表头
             </Button>
           </div>
-          <div className="flex">
-            {/* 详情侧边栏 - 左侧 */}
-            {showDetail && detailPanel.row && (
-              <div className="w-[480px] flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-900">详情</h3>
-                    <button
-                      className="text-gray-400 hover:text-gray-600"
-                      onClick={() => setDetailPanel({ row: null, pinned: false })}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {/* 按一级/二级表头分组展示 */}
-                    {(() => {
-                      const groups = config.headerGroups || [];
-                      const getGroupForColumn = (colIndex: number): string | null => {
-                        for (const group of groups) {
-                          if (colIndex >= group.startCol && colIndex < group.startCol + group.span) {
-                            return group.label;
-                          }
-                        }
-                        return null;
-                      };
-                      const groupedColumns: Record<string, typeof config.columns> = {};
-                      config.columns.forEach((col, index) => {
-                        const groupLabel = getGroupForColumn(index) || "基础信息";
-                        if (!groupedColumns[groupLabel]) {
-                          groupedColumns[groupLabel] = [];
-                        }
-                        groupedColumns[groupLabel].push(col);
-                      });
-                      return Object.entries(groupedColumns).map(([groupLabel, cols]) => (
-                        <div key={groupLabel}>
-                          <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">
-                            {groupLabel}
-                          </h4>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                            {cols.map(col => (
-                              <div key={col.key} className="flex items-start py-1">
-                                <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">
-                                  {col.label}：
-                                </span>
-                                <span className={`text-xs text-gray-900 flex-1 truncate ${col.align === "right" ? "text-right" : ""}`}>
-                                  {detailPanel.row[col.key] !== undefined && detailPanel.row[col.key] !== null && detailPanel.row[col.key] !== ""
-                                    ? String(detailPanel.row[col.key])
-                                    : "-"}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              </div>
-            )}
-
+          <div className="flex h-full">
             <div className="flex-1 overflow-x-auto">
               <table className="border-collapse" style={{ minWidth: totalTableWidth }}>
                 <thead>
@@ -945,9 +885,67 @@ export function ReportTemplate({
               </tbody>
               </table>
             </div>
+
+            {/* 详情侧边栏 */}
+            {showDetail && detailPanel.row && (
+              <div className="w-[480px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900">详情</h3>
+                    <button
+                      className="text-gray-400 hover:text-gray-600"
+                      onClick={() => setDetailPanel({ row: null, pinned: false })}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  {(() => {
+                    const groups = config.headerGroups || [];
+                    const getGroupForColumn = (colIndex: number): string | null => {
+                      for (const group of groups) {
+                        if (colIndex >= group.startCol && colIndex < group.startCol + group.span) {
+                          return group.label;
+                        }
+                      }
+                      return null;
+                    };
+                    const groupedColumns: Record<string, typeof config.columns> = {};
+                    config.columns.forEach((col, index) => {
+                      const groupLabel = getGroupForColumn(index) || "基础信息";
+                      if (!groupedColumns[groupLabel]) {
+                        groupedColumns[groupLabel] = [];
+                      }
+                      groupedColumns[groupLabel].push(col);
+                    });
+                    return Object.entries(groupedColumns).map(([groupLabel, cols]) => (
+                      <div key={groupLabel} className="mb-4">
+                        <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">
+                          {groupLabel}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                          {cols.map(col => (
+                            <div key={col.key} className="flex items-start py-1">
+                              <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">
+                                {col.label}：
+                              </span>
+                              <span className={`text-xs text-gray-900 flex-1 truncate ${col.align === "right" ? "text-right" : ""}`}>
+                                {detailPanel.row[col.key] !== undefined && detailPanel.row[col.key] !== null && detailPanel.row[col.key] !== ""
+                                  ? String(detailPanel.row[col.key])
+                                  : "-"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
       {/* 列可见性弹窗 */}
       {renderColumnModal()}
