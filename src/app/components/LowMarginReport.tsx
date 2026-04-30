@@ -528,7 +528,7 @@ export function LowMarginReport() {
                         {g.label}
                       </th>
                     ))}
-                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center bg-gray-100">操作</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center bg-gray-100 sticky right-0 z-10">操作</th>
                   </tr>
                   {/* 第二行：列名（按可见列过滤） */}
                   <tr>
@@ -551,7 +551,7 @@ export function LowMarginReport() {
                         </th>
                       );
                     })}
-                    <th className="border border-gray-300 px-2 py-2 text-xs font-medium text-center bg-gray-100">操作</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-medium text-center bg-gray-100 sticky right-0 z-10">操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -589,7 +589,7 @@ export function LowMarginReport() {
                                       );
                                     })}
                                     {/* 查看按钮：只在第一行显示，rowSpan=4 */}
-                                    <td className="border border-gray-300 px-2 py-2 text-center align-middle" rowSpan={4}>
+                                    <td className="border border-gray-300 px-2 py-2 text-center align-middle bg-white sticky right-0 z-10" rowSpan={4}>
                                       <button
                                         className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                                         onClick={(e) => {
