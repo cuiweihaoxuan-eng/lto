@@ -945,10 +945,11 @@ export function ReportTemplate({
               </div>
             )}
           </div>
-        </div>
 
-      {/* 列可见性弹窗 */}
-      {renderColumnModal()}
+          {/* 列可见性弹窗 */}
+          {renderColumnModal()}
+        </div>
+      </div>
     </div>
   );
 }

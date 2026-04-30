@@ -904,6 +904,20 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               <Settings2 className="w-4 h-4" />
               自定义表头
             </button>
+            <button
+              className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+              onClick={() => {
+                if (!detailPanel.row) {
+                  const firstRow = flatRows[0];
+                  if (firstRow) setDetailPanel({ row: firstRow.data, pinned: true });
+                } else {
+                  setDetailPanel({ row: null, pinned: false });
+                }
+              }}
+            >
+              <Eye className="w-4 h-4" />
+              {detailPanel.row ? "关闭详情" : "查看详情"}
+            </button>
           </div>
           {/* 表格+侧边栏容器 */}
           <div className="flex h-full">
