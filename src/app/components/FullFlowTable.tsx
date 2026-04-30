@@ -1023,6 +1023,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                       </th>
                     );
                   })}
+                  <th className="px-2 py-2 text-center text-xs font-medium bg-gray-200 border border-gray-300 sticky right-0 z-10">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
