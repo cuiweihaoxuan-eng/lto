@@ -896,17 +896,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
         {/* 表格 */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {/* 工具栏 */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gray-50">
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500">已选 {colVis.visibleCount}/{colVis.totalCount} 列</span>
-              {detailPanel.row && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>已固定详情</span>
-                  <button onClick={() => setDetailPanel({ row: null, pinned: false })} className="ml-1 hover:bg-blue-100 rounded p-0.5"><X className="w-3.5 h-3.5" /></button>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-200 bg-gray-50">
             <button
               className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
               onClick={() => setShowColumnModal(true)}
