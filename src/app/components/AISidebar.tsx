@@ -19,6 +19,7 @@ interface FileItem {
 interface AISidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  width?: number;
 }
 
 // 模拟的 AI 回复
@@ -29,7 +30,7 @@ const mockResponses = [
   "我来帮你生成一份简报。当前项目毛利率为32%，略低于目标值，建议关注成本控制环节。",
 ];
 
-export function AISidebar({ isOpen, onClose }: AISidebarProps) {
+export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -160,10 +161,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
   return (
     <div
-      className={`fixed top-0 right-0 h-screen bg-white shadow-2xl flex flex-col transition-all duration-300 ease-in-out z-[9998] ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      }`}
-      style={{ width: 400 }}
+      className={`h-full flex flex-col transition-all duration-300 ease-in-out z-[9998] border-l border-[#bae7ff] bg-[#E6F4FF]`}
+      style={{ width }}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
@@ -179,26 +178,26 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
       )}
 
       {/* 头部 */}
-      <div className="flex-shrink-0 h-14 bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-between px-4">
+      <div className="flex-shrink-0 h-14 bg-[#E6F4FF] border-b border-[#bae7ff] flex items-center justify-between px-4 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#1890ff] rounded-lg flex items-center justify-center shadow-md">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-white font-semibold">AI 助手</span>
+          <span className="font-semibold text-gray-700">AI 助手</span>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={clearChat}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-[#bae7ff] rounded-lg transition-colors"
             title="清空对话"
           >
-            <Trash2 className="w-4 h-4 text-white/80" />
+            <Trash2 className="w-4 h-4 text-gray-500" />
           </button>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-[#bae7ff] rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
       </div>
@@ -252,10 +251,10 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
             {/* 消息内容 */}
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
                 message.role === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-800"
+                  ? "bg-[#1890ff] text-white"
+                  : "bg-white text-gray-800"
               }`}
             >
               {/* 文件附件 */}
@@ -264,8 +263,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                   {message.files.map((file) => (
                     <div
                       key={file.id}
-                      className={`flex items-center gap-2 px-2 py-1 rounded-lg text-xs ${
-                        message.role === "user" ? "bg-blue-400" : "bg-gray-200"
+                      className={`flex items-center gap-2 px-2 py-1 rounded-lg text-xs shadow-sm ${
+                        message.role === "user" ? "bg-[#40a9ff]" : "bg-[#f0f9ff] border border-[#bae7ff]"
                       }`}
                     >
                       {file.type === "image" ? (
@@ -300,14 +299,14 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         {/* 正在输入指示器 */}
         {isTyping && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1890ff] to-[#40a9ff] flex items-center justify-center shadow-md">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-gray-100 rounded-2xl px-4 py-3">
+            <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
               <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-2 h-2 bg-[#1890ff] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 bg-[#1890ff] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 bg-[#1890ff] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
@@ -317,7 +316,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
       </div>
 
       {/* 输入区域 */}
-      <div className="flex-shrink-0 border-t bg-gray-50 p-4">
+      <div className="flex-shrink-0 border-t border-[#bae7ff] bg-[#f0f9ff] p-4">
         {/* 已上传文件预览 */}
         {attachedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -355,7 +354,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="输入消息，Shift+Enter 换行，Enter 发送..."
-            className="w-full px-4 py-3 pr-24 bg-white border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+            className="w-full px-4 py-3 pr-24 bg-white border border-[#bae7ff] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#1890ff] focus:border-transparent text-sm shadow-sm"
             rows={1}
             style={{ minHeight: 48, maxHeight: 120 }}
           />

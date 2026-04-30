@@ -244,6 +244,7 @@ interface FullFlowTableProps {}
 export function FullFlowTable(_props: FullFlowTableProps) {
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
   const [showAllConditions, setShowAllConditions] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [showColumnModal, setShowColumnModal] = useState(false);
   const [detailPanel, setDetailPanel] = useState<{ row: Record<string, unknown> | null; pinned: boolean }>({ row: null, pinned: false });
   const [columnWidths] = useState<Record<string, number>>(
@@ -682,6 +683,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
 
       <div className="flex-1 overflow-auto px-6 pb-6">
         {/* 查询条件 */}
+        {showFilters && (
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
           {/* 基础信息（不显示分组标题） */}
           <div className="mb-4">
@@ -892,6 +894,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             </div>
           </div>
         </div>
+        )}
 
         {/* 表格 */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 280px)" }}>
@@ -900,13 +903,27 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             <span className="text-xs text-gray-400">
               已选 {colVis.visibleCount}/{colVis.totalCount} 列
             </span>
-            <button
-              className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
-              onClick={() => setShowColumnModal(true)}
-            >
-              <Settings2 className="w-4 h-4" />
-              自定义表头
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                {showFilters ? "隐藏查询" : "显示查询"}
+              </button>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                onClick={() => setShowAllConditions(!showAllConditions)}
+              >
+                {showAllConditions ? "收起更多条件" : "展开更多条件"}
+              </button>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+                onClick={() => setShowColumnModal(true)}
+              >
+                <Settings2 className="w-4 h-4" />
+                自定义表头
+              </button>
+            </div>
           </div>
           {/* 表格+侧边栏容器 */}
           <div className="flex flex-1 min-h-0">

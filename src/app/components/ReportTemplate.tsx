@@ -807,6 +807,10 @@ export function ReportTemplate({
               {showQueryArea ? "隐藏查询" : "显示查询"}
             </Button>
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+              onClick={() => setShowAllConditions(!showAllConditions)}>
+              {showAllConditions ? "收起更多条件" : "展开更多条件"}
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
               onClick={() => setShowColumnModal(true)}>
               <Settings2 className="w-3.5 h-3.5" />
               自定义表头

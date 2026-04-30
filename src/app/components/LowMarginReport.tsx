@@ -414,19 +414,19 @@ export function LowMarginReport() {
             )}
 
             {/* 收起/展开按钮 */}
-            <div className="flex items-center justify-end mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+              <button
+                className="px-4 py-1.5 text-sm text-blue-600 hover:text-blue-700"
+                onClick={() => setShowAllConditions(!showAllConditions)}
+              >
+                {showAllConditions ? "收起更多条件" : "展开更多条件"}
+              </button>
               <div className="flex gap-2">
                 <button
                   className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
                   onClick={() => setShowFilters(!showFilters)}
                 >
                   {showFilters ? "隐藏查询" : "显示查询"}
-                </button>
-                <button
-                  className="px-4 py-1.5 text-sm text-blue-600 hover:text-blue-700"
-                  onClick={() => setShowAllConditions(!showAllConditions)}
-                >
-                  {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </button>
                 <button className="px-4 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">重置</button>
                 <button className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">查询</button>
@@ -443,6 +443,18 @@ export function LowMarginReport() {
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-gray-50">
             <span className="text-xs text-gray-500">已选 {colVis.visibleCount}/{colVis.totalCount} 列</span>
             <div className="flex items-center gap-2">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                {showFilters ? "隐藏查询" : "显示查询"}
+              </button>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                onClick={() => setShowAllConditions(!showAllConditions)}
+              >
+                {showAllConditions ? "收起更多条件" : "展开更多条件"}
+              </button>
               <button
                 className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
                 onClick={() => setShowColumnModal(true)}

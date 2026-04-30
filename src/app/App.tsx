@@ -55,6 +55,8 @@ export default function App() {
   const [activeSubFunction, setActiveSubFunction] = useState("matching");
   const [activeSidebarItem, setActiveSidebarItem] = useState("dashboard");
   const [oppDetailId, setOppDetailId] = useState<string | null>(null);
+  const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [aiSidebarWidth, setAiSidebarWidth] = useState(400);
 
   // 从 URL 获取商机编码参数（用于六到位跳转）
   const params = new URLSearchParams(window.location.search);
@@ -232,16 +234,41 @@ export default function App() {
             />
           )}
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-auto">
-            <div className="p-6">
-              <div className="bg-white rounded shadow-sm h-full">
+          {/* Content Area - 宽度随AI侧边栏变化 */}
+          <div
+            className="overflow-auto transition-all duration-300 bg-[#f0f5ff]"
+            style={{ width: aiSidebarOpen ? `calc(100% - ${aiSidebarWidth}px - 6px)` : "100%" }}
+          >
+            <div className="p-6 h-full flex flex-col">
+              <div className="bg-white rounded shadow-sm flex-1">
                 {renderContent()}
               </div>
             </div>
           </div>
+
+          {/* Resize Divider */}
+          <ResizeDivider
+            onWidthChange={setAiSidebarWidth}
+            minWidth={300}
+            maxWidth={600}
+            defaultWidth={400}
+            visible={aiSidebarOpen}
+          />
+
+          {/* AI Sidebar */}
+          <AISidebar
+            isOpen={aiSidebarOpen}
+            onClose={() => setAiSidebarOpen(false)}
+            width={aiSidebarWidth}
+          />
         </div>
       </div>
+
+      {/* Floating AI Button */}
+      <FloatAIBtn
+        isOpen={aiSidebarOpen}
+        onClick={() => setAiSidebarOpen(!aiSidebarOpen)}
+      />
     </div>
   );
 }
