@@ -635,55 +635,140 @@ export function SixPositioning() {
             </div>
           </>
         ) : (
-          <div className="mt-4 bg-white rounded-lg border border-gray-200 p-6">
-            <div className="grid grid-cols-4 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-blue-600">156</div>
-                <div className="text-sm text-gray-600 mt-2">商机总数</div>
-              </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-green-600">89</div>
-                <div className="text-sm text-gray-600 mt-2">具备客情掌握</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-purple-600">72</div>
-                <div className="text-sm text-gray-600 mt-2">具备方案总控</div>
-              </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-orange-600">65</div>
-                <div className="text-sm text-gray-600 mt-2">具备谈判/应标自主</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 gap-6 mt-4">
-              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-red-600">58</div>
-                <div className="text-sm text-gray-600 mt-2">具备采购自主</div>
-              </div>
-              <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-teal-600">61</div>
-                <div className="text-sm text-gray-600 mt-2">具备项目强管理</div>
-              </div>
-              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-indigo-600">49</div>
-                <div className="text-sm text-gray-600 mt-2">具备运维自主</div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 text-center">
-                <div className="text-3xl font-bold text-gray-600">17</div>
-                <div className="text-sm text-gray-600 mt-2">六到位全具备</div>
-              </div>
-            </div>
-            <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">各区域六到位覆盖率</h3>
-              <div className="space-y-4">
-                {[{ name: "杭州", value: 78, color: "bg-blue-500" }, { name: "宁波", value: 85, color: "bg-green-500" }, { name: "温州", value: 62, color: "bg-purple-500" }, { name: "金华", value: 71, color: "bg-orange-500" }].map((item) => (
-                  <div key={item.name} className="flex items-center gap-4">
-                    <span className="w-12 text-sm">{item.name}</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-4">
-                      <div className={`${item.color} h-4 rounded-full`} style={{ width: `${item.value}%` }}></div>
-                    </div>
-                    <span className="w-12 text-sm text-right">{item.value}%</span>
+          <div className="mt-4 space-y-4">
+            {/* 查询筛选 */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">区域</label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部</SelectItem>
+                      <SelectItem value="hangzhou">浙江分公司</SelectItem>
+                      <SelectItem value="ningbo">杭州分公司</SelectItem>
+                      <SelectItem value="wenzhou">宁波分公司</SelectItem>
+                      <SelectItem value="jinhua">温州分公司</SelectItem>
+                      <SelectItem value="shaoxing">嘉兴分公司</SelectItem>
+                      <SelectItem value="huzhou">湖州分公司</SelectItem>
+                      <SelectItem value="shaoxing">绍兴分公司</SelectItem>
+                      <SelectItem value="jinhua">金华分公司</SelectItem>
+                      <SelectItem value="quzhou">衢州分公司</SelectItem>
+                      <SelectItem value="zhoushan">舟山分公司</SelectItem>
+                      <SelectItem value="taizhou">台州分公司</SelectItem>
+                      <SelectItem value="lishui">丽水分公司</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">商机创建时间</label>
+                  <div className="flex gap-2">
+                    <Input type="date" />
+                    <span className="self-center text-gray-400">-</span>
+                    <Input type="date" />
                   </div>
-                ))}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">合同签约时间</label>
+                  <div className="flex gap-2">
+                    <Input type="date" />
+                    <span className="self-center text-gray-400">-</span>
+                    <Input type="date" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-end mt-4 gap-2">
+                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                  <Search className="w-4 h-4 mr-1" />查询
+                </Button>
+                <Button variant="outline" size="sm">
+                  <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                  <Download className="w-4 h-4 mr-1" />导出
+                </Button>
+                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                  <Download className="w-4 h-4 mr-1" />任务下载列表
+                </Button>
+              </div>
+            </div>
+
+            {/* 统计表格 */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-16">序号</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-32">区域</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20">商机数</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-24">已转化商机数</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-28 bg-blue-50">客情掌握措施数量</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-24 bg-blue-50">占比</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-24 bg-green-50">方案总控数量</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20 bg-green-50">占比</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-28 bg-purple-50">谈判/应标自主数量</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20 bg-purple-50">占比</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-24 bg-orange-50">采购自主数量</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20 bg-orange-50">占比</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-24 bg-red-50">项目强管理数量</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20 bg-red-50">占比</th>
+                      <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 min-w-20 bg-cyan-50">运维</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {[
+                      { idx: 1, region: "浙江分公司", oppCount: 256, convertedCount: 198, customerCount: 189, customerRate: 73.83, planCount: 176, planRate: 68.75, biddingCount: 168, biddingRate: 65.63, procurementCount: 145, procurementRate: 56.64, projectCount: 132, projectRate: 51.56, maintenanceCount: 98 },
+                      { idx: 2, region: "杭州分公司", oppCount: 68, convertedCount: 52, customerCount: 48, customerRate: 70.59, planCount: 45, planRate: 66.18, biddingCount: 42, biddingRate: 61.76, procurementCount: 38, procurementRate: 55.88, projectCount: 35, projectRate: 51.47, maintenanceCount: 28 },
+                      { idx: 3, region: "宁波分公司", oppCount: 52, convertedCount: 41, customerCount: 39, customerRate: 75.00, planCount: 38, planRate: 73.08, biddingCount: 36, biddingRate: 69.23, procurementCount: 32, procurementRate: 61.54, projectCount: 29, projectRate: 55.77, maintenanceCount: 22 },
+                      { idx: 4, region: "温州分公司", oppCount: 38, convertedCount: 28, customerCount: 26, customerRate: 68.42, planCount: 24, planRate: 63.16, biddingCount: 23, biddingRate: 60.53, procurementCount: 20, procurementRate: 52.63, projectCount: 18, projectRate: 47.37, maintenanceCount: 14 },
+                      { idx: 5, region: "嘉兴分公司", oppCount: 29, convertedCount: 22, customerCount: 21, customerRate: 72.41, planCount: 19, planRate: 65.52, biddingCount: 18, biddingRate: 62.07, procurementCount: 16, procurementRate: 55.17, projectCount: 14, projectRate: 48.28, maintenanceCount: 11 },
+                      { idx: 6, region: "湖州分公司", oppCount: 22, convertedCount: 18, customerCount: 16, customerRate: 72.73, planCount: 15, planRate: 68.18, biddingCount: 14, biddingRate: 63.64, procurementCount: 12, procurementRate: 54.55, projectCount: 10, projectRate: 45.45, maintenanceCount: 8 },
+                      { idx: 7, region: "绍兴分公司", oppCount: 18, convertedCount: 15, customerCount: 14, customerRate: 77.78, planCount: 13, planRate: 72.22, biddingCount: 12, biddingRate: 66.67, procurementCount: 10, procurementRate: 55.56, projectCount: 9, projectRate: 50.00, maintenanceCount: 6 },
+                      { idx: 8, region: "金华分公司", oppCount: 14, convertedCount: 11, customerCount: 10, customerRate: 71.43, planCount: 9, planRate: 64.29, biddingCount: 9, biddingRate: 64.29, procurementCount: 8, procurementRate: 57.14, projectCount: 7, projectRate: 50.00, maintenanceCount: 5 },
+                      { idx: 9, region: "衢州分公司", oppCount: 8, convertedCount: 6, customerCount: 5, customerRate: 62.50, planCount: 5, planRate: 62.50, biddingCount: 5, biddingRate: 62.50, procurementCount: 4, procurementRate: 50.00, projectCount: 4, projectRate: 50.00, maintenanceCount: 3 },
+                      { idx: 10, region: "舟山分公司", oppCount: 4, convertedCount: 3, customerCount: 2, customerRate: 50.00, planCount: 2, planRate: 50.00, biddingCount: 2, biddingRate: 50.00, procurementCount: 2, procurementRate: 50.00, projectCount: 2, projectRate: 50.00, maintenanceCount: 1 },
+                      { idx: 11, region: "台州分公司", oppCount: 2, convertedCount: 1, customerCount: 1, customerRate: 50.00, planCount: 1, planRate: 50.00, biddingCount: 1, biddingRate: 50.00, procurementCount: 1, procurementRate: 50.00, projectCount: 1, projectRate: 50.00, maintenanceCount: 0 },
+                      { idx: 12, region: "丽水分公司", oppCount: 1, convertedCount: 1, customerCount: 1, customerRate: 100.00, planCount: 1, planRate: 100.00, biddingCount: 1, biddingRate: 100.00, procurementCount: 1, procurementRate: 100.00, projectCount: 1, projectRate: 100.00, maintenanceCount: 0 },
+                    ].map((row, rowIdx) => (
+                      <tr key={row.idx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-3 py-3 text-center text-sm text-gray-900">{row.idx}</td>
+                        <td className="px-3 py-3 text-left text-sm text-gray-900 font-medium">{row.region}</td>
+                        <td className="px-3 py-3 text-center text-sm text-gray-900">{row.oppCount}</td>
+                        <td className="px-3 py-3 text-center text-sm text-blue-600">{row.convertedCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-blue-50">{row.customerCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-blue-50">{row.customerRate.toFixed(2)}%</td>
+                        <td className="px-3 py-3 text-center text-sm bg-green-50">{row.planCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-green-50">{row.planRate.toFixed(2)}%</td>
+                        <td className="px-3 py-3 text-center text-sm bg-purple-50">{row.biddingCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-purple-50">{row.biddingRate.toFixed(2)}%</td>
+                        <td className="px-3 py-3 text-center text-sm bg-orange-50">{row.procurementCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-orange-50">{row.procurementRate.toFixed(2)}%</td>
+                        <td className="px-3 py-3 text-center text-sm bg-red-50">{row.projectCount}</td>
+                        <td className="px-3 py-3 text-center text-sm bg-red-50">{row.projectRate.toFixed(2)}%</td>
+                        <td className="px-3 py-3 text-center text-sm bg-cyan-50">{row.maintenanceCount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 分页 */}
+            <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
+              <span className="text-sm text-gray-600">共 12 条</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">10条/页</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>&lt;</Button>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]">1</Button>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">&gt;</Button>
+                </div>
+                <div className="flex items-center gap-1 ml-2">
+                  <span className="text-sm text-gray-500">前往</span>
+                  <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
+                  <span className="text-sm text-gray-500">页</span>
+                </div>
               </div>
             </div>
           </div>
