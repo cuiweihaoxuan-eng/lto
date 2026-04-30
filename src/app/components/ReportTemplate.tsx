@@ -639,8 +639,6 @@ export function ReportTemplate({
             </th>
           )}
         </tr>
-          ))}
-        </tr>
       </>
     );
   };

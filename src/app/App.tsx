@@ -6,6 +6,9 @@ import { Header } from "./components/Header";
 import { ProjectInfoBar } from "./components/ProjectInfoBar";
 import { ProcessFlowBar } from "./components/ProcessFlowBar";
 import { FunctionMenu } from "./components/FunctionMenu";
+import { FloatAIBtn } from "./components/FloatAIBtn";
+import { AISidebar } from "./components/AISidebar";
+import { ResizeDivider } from "./components/ResizeDivider";
 
 // 懒加载组件 - 使用命名导入
 const Dashboard = lazy(() => import("./components/Dashboard").then(m => ({ default: m.default })));
