@@ -225,7 +225,7 @@ export function LowMarginReport() {
   const tableWidth = visCols.reduce((a, c) => a + (c.width ?? 100), 0);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* 标题区 */}
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">项目低负毛利预警</h2>
@@ -461,10 +461,10 @@ export function LowMarginReport() {
               </button>
             </div>
           </div>
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* 详情侧边栏 - 左侧，宽度40% */}
             {detailPanel.project && (
-              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0">
+              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0 overflow-y-auto">
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-600" />
@@ -514,7 +514,7 @@ export function LowMarginReport() {
             )}
 
             {/* 表格区域 */}
-            <div className="flex-1 overflow-x-auto min-w-0">
+            <div className="relative flex-1 overflow-x-auto min-w-0">
               <table className="border-collapse w-full" style={{ width: tableWidth }}>
                 <thead>
                   {/* 第一行：一级分组（按可见列重新计算span） */}
@@ -528,7 +528,7 @@ export function LowMarginReport() {
                         {g.label}
                       </th>
                     ))}
-                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center bg-gray-100 sticky right-0 z-10">操作</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800 text-center bg-gray-100 sticky right-0 z-10 w-[70px]">操作</th>
                   </tr>
                   {/* 第二行：列名（按可见列过滤） */}
                   <tr>
@@ -551,7 +551,7 @@ export function LowMarginReport() {
                         </th>
                       );
                     })}
-                    <th className="border border-gray-300 px-2 py-2 text-xs font-medium text-center bg-gray-100 sticky right-0 z-10">操作</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-medium text-center bg-gray-100 sticky right-0 z-10 w-[70px]">操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -587,7 +587,7 @@ export function LowMarginReport() {
                                       );
                                     })}
                                     {/* 查看按钮：只在第一行显示，rowSpan=4 */}
-                                    <td className="border border-gray-300 px-2 py-2 text-center align-middle bg-white sticky right-0 z-10" rowSpan={4}>
+                                    <td className="border border-gray-300 px-2 py-2 text-center align-middle bg-white sticky right-0 z-10 w-[70px]" rowSpan={4}>
                                       <button
                                         className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                                         onClick={(e) => {
