@@ -840,13 +840,23 @@ export function ReportTemplate({
                       }
                       return null;
                     };
-                    const groupedColumns: Record<string, typeof config.columns> = {};
+                    const groupedColumns: { label: string; color: string; cols: typeof config.columns }[] = [];
                     config.columns.forEach((col, index) => {
                       const groupLabel = getGroupForColumn(index) || "基础信息";
-                      if (!groupedColumns[groupLabel]) {
-                        groupedColumns[groupLabel] = [];
+                      const groupColor = (() => {
+                        for (const group of groups) {
+                          if (index >= group.startCol && index < group.startCol + group.span) {
+                            return group.color ?? "bg-gray-100";
+                          }
+                        }
+                        return "bg-gray-100";
+                      })();
+                      const existing = groupedColumns.find(g => g.label === groupLabel);
+                      if (existing) {
+                        existing.cols.push(col);
+                      } else {
+                        groupedColumns.push({ label: groupLabel, color: groupColor, cols: [col] });
                       }
-                      groupedColumns[groupLabel].push(col);
                     });
                     // 收集同项目的所有行数据（用于显示收入和支出数据）
                     const firstRowIndex = data.findIndex(r => r === detailPanel.row);
@@ -854,9 +864,10 @@ export function ReportTemplate({
                       ? data.slice(firstRowIndex, Math.min(firstRowIndex + projectRowSpan, data.length))
                       : [detailPanel.row];
 
-                    return Object.entries(groupedColumns).map(([groupLabel, cols]) => (
+                    return groupedColumns.map(({ label: groupLabel, color: groupColor, cols }) => (
                       <div key={groupLabel} className="mb-4">
-                        <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">
+                        <h4 className={`text-sm font-semibold mb-2 pb-2 border-b-2 ${groupColor.replace("bg-", "text-").replace("-100", "-700")}`}>
+                          <span className="inline-block w-1 h-4 mr-2 rounded-sm ${groupColor}"></span>
                           {groupLabel}
                         </h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1">

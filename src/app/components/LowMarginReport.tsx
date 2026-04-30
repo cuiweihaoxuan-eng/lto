@@ -475,15 +475,28 @@ export function LowMarginReport() {
                         }
                         return null;
                       };
-                      const groupedCols: Record<string, typeof columns> = {};
+                      const groupedCols: { label: string; color: string; cols: typeof columns }[] = [];
                       columns.forEach((col, i) => {
                         const gl = getGroupForColumn(i) || "基础信息";
-                        if (!groupedCols[gl]) groupedCols[gl] = [];
-                        groupedCols[gl].push(col);
+                        const gColor = (() => {
+                          for (const g of headerGroups) {
+                            if (i >= g.startCol && i < g.startCol + g.span) return g.color ?? "bg-gray-100";
+                          }
+                          return "bg-gray-100";
+                        })();
+                        const existing = groupedCols.find(g => g.label === gl);
+                        if (existing) {
+                          existing.cols.push(col);
+                        } else {
+                          groupedCols.push({ label: gl, color: gColor, cols: [col] });
+                        }
                       });
-                      return Object.entries(groupedCols).map(([gl, cols]) => (
+                      return groupedCols.map(({ label: gl, color: gColor, cols }) => (
                         <div key={gl} className="mb-4">
-                          <h4 className="text-xs font-semibold text-gray-700 mb-2 pb-1 border-b border-gray-100">{gl}</h4>
+                          <h4 className={`text-sm font-semibold mb-2 pb-2 border-b-2 ${gColor.replace("bg-", "text-").replace("-100", "-700")}`}>
+                            <span className={`inline-block w-1 h-4 mr-2 rounded-sm ${gColor} flex-shrink-0`}></span>
+                            {gl}
+                          </h4>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                             {cols.map(col => (
                               <div key={col.key} className="flex items-start py-1">
