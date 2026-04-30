@@ -414,14 +414,20 @@ export function LowMarginReport() {
             )}
 
             {/* 收起/展开按钮 */}
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <button
-                className="text-sm text-blue-600 hover:text-blue-700"
-                onClick={() => setShowAllConditions(!showAllConditions)}
-              >
-                {showAllConditions ? "收起更多条件" : "展开更多条件"}
-              </button>
+            <div className="flex items-center justify-end mt-4 pt-4 border-t border-gray-100">
               <div className="flex gap-2">
+                <button
+                  className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  {showFilters ? "隐藏查询" : "显示查询"}
+                </button>
+                <button
+                  className="px-4 py-1.5 text-sm text-blue-600 hover:text-blue-700"
+                  onClick={() => setShowAllConditions(!showAllConditions)}
+                >
+                  {showAllConditions ? "收起更多条件" : "展开更多条件"}
+                </button>
                 <button className="px-4 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">重置</button>
                 <button className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">查询</button>
               </div>
@@ -429,14 +435,6 @@ export function LowMarginReport() {
           </div>
         </div>
       )}
-
-      {/* 标签页 */}
-      <div className="px-6 pb-2 flex-shrink-0 flex items-center gap-1">
-        <button className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-full">数据明细</button>
-        <button className="px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-full" onClick={() => setShowFilters(!showFilters)}>
-          {showFilters ? "隐藏查询" : "显示查询"}
-        </button>
-      </div>
 
       {/* 表格区 */}
       <div ref={tableRef} className="flex-1 overflow-auto px-6 pb-6">
@@ -451,13 +449,6 @@ export function LowMarginReport() {
               >
                 <Settings2 className="w-4 h-4" />
                 自定义表头
-              </button>
-              <button
-                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-                onClick={() => setDetailPanel({ project: projectData[0] || null, pinned: true })}
-              >
-                <Eye className="w-4 h-4" />
-                查看详情
               </button>
             </div>
           </div>

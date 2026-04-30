@@ -101,6 +101,7 @@ export function ReportTemplate({
 }: ReportTemplateProps) {
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
   const [detailPanel, setDetailPanel] = useState<{ row: Record<string, unknown> | null; pinned: boolean }>({ row: null, pinned: false });
+  const [showQueryArea, setShowQueryArea] = useState(true);
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -427,7 +428,7 @@ export function ReportTemplate({
         </th>
       ))}
       {showDetail && (
-        <th className="px-2 py-2.5 text-center text-sm font-medium text-gray-700 bg-gray-50 border-b border-gray-200 w-20">
+        <th className="px-2 py-2.5 text-center text-sm font-medium text-gray-700 bg-gray-50 border-b border-gray-200 sticky right-0 z-10 w-20">
           操作
         </th>
       )}
@@ -482,7 +483,7 @@ export function ReportTemplate({
             );
           })}
           {showDetail && (
-            <th rowSpan={2} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200">
+            <th rowSpan={2} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200 sticky right-0 z-10">
               操作
             </th>
           )}
@@ -603,7 +604,7 @@ export function ReportTemplate({
             </th>
           ))}
           {showDetail && (
-            <th rowSpan={3} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200">
+            <th rowSpan={3} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200 sticky right-0 z-10">
               操作
             </th>
           )}
@@ -631,6 +632,13 @@ export function ReportTemplate({
               <div className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-300 transition-colors"
                 onMouseDown={(e) => handleResizeStart(e, col.key)} />
             </th>
+          ))}
+          {showDetail && (
+            <th className="px-2 py-2 text-center text-xs font-medium bg-gray-50 border-b border-r border-gray-200 sticky right-0 z-10 w-20">
+              操作
+            </th>
+          )}
+        </tr>
           ))}
         </tr>
       </>
@@ -774,16 +782,11 @@ export function ReportTemplate({
       {/* 内容区 */}
       <div className="flex-1 overflow-auto px-6 pb-6">
         {/* 查询条件卡片 */}
-        {!hideQueryArea && (
+        {!hideQueryArea && showQueryArea && (
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
           {isGroupedQuery ? renderGroupedQuery() : renderFlatQuery()}
 
-          <div className="flex items-center justify-between mt-4">
-            {(isGroupedQuery ? (queryFields as QueryFieldGroup[]).length > DEFAULT_VISIBLE_ROWS : flatFields.length > 8) && (
-              <Button variant="link" size="sm" onClick={() => setShowAllConditions(!showAllConditions)} className="text-blue-600 p-0">
-                {showAllConditions ? "收起更多条件" : "展开更多条件"}
-              </Button>
-            )}
+          <div className="flex items-center justify-end mt-4">
             <div className="flex gap-2">
               <Button variant="default" size="sm" onClick={handleQuery}>查询</Button>
               <Button variant="outline" size="sm" onClick={handleReset}>
@@ -801,6 +804,10 @@ export function ReportTemplate({
             <span className="text-xs text-gray-400 mr-auto">
               已选 {visibleCount}/{totalCount} 列
             </span>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+              onClick={() => setShowQueryArea(!showQueryArea)}>
+              {showQueryArea ? "隐藏查询" : "显示查询"}
+            </Button>
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
               onClick={() => setShowColumnModal(true)}>
               <Settings2 className="w-3.5 h-3.5" />
