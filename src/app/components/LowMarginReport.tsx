@@ -461,10 +461,10 @@ export function LowMarginReport() {
               </button>
             </div>
           </div>
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* 详情侧边栏 - 左侧，宽度40% */}
             {detailPanel.project && (
-              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0">
+              <div className="w-[40%] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col min-h-0 overflow-y-auto">
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-600" />
