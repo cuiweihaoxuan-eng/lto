@@ -894,9 +894,9 @@ export function FullFlowTable(_props: FullFlowTableProps) {
         </div>
 
         {/* 表格 */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 280px)" }}>
           {/* 工具栏 */}
-          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end px-4 py-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <button
               className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
               onClick={() => setShowColumnModal(true)}
@@ -920,7 +920,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             </button>
           </div>
           {/* 表格+侧边栏容器 */}
-          <div className="flex h-full">
+          <div className="flex flex-1 min-h-0">
             <div className="overflow-x-auto flex-1">
               <table className="min-w-full border-collapse" style={{ width: tableWidth }}>
               {/* 表头Row2: 一级分组（按可见列重新计算span） */}

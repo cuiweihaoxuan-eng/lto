@@ -792,9 +792,9 @@ export function ReportTemplate({
         )}
 
         {/* 表格 */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 280px)" }}>
           {/* 表格工具栏 */}
-          <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <span className="text-xs text-gray-400 mr-auto">
               已选 {visibleCount}/{totalCount} 列
             </span>
@@ -804,7 +804,7 @@ export function ReportTemplate({
               自定义表头
             </Button>
           </div>
-          <div className="flex h-full">
+          <div className="flex flex-1 min-h-0">
             <div className="flex-1 overflow-x-auto">
               <table className="border-collapse" style={{ minWidth: totalTableWidth }}>
                 <thead>
