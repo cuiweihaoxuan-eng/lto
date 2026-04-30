@@ -631,10 +631,10 @@ export function FullFlowTable(_props: FullFlowTableProps) {
 // 从可见列计算各维度数据
   const visCols = colVis.visibleColumns as ColumnDef[];
   const visKeys = new Set(visCols.map(c => c.key));
-  // 基本信息列：包含 projectStage（col 0-24），共25列
+  // 基本信息列：不含 projectStage（col 0-23），col 24 单独处理
   const basicVisCols = visCols.filter(c => {
     const idx = colIndexMap[c.key];
-    return idx >= 0 && idx <= 24;
+    return idx >= 0 && idx <= 23;
   });
 
   // 计算可见的一级分组（重新统计span）
@@ -923,7 +923,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 {/* 表头Row3: 二级子分组 */}
                 <tr>
                   {basicVisCols.length > 0 && (
-                    <th colSpan={basicVisCols.length} className="px-2 py-2 text-center text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300">项目基本信息</th>
+                    <th colSpan={basicVisCols.length} className="px-2 py-2 text-center text-xs font-medium bg-gray-200 text-gray-700 border border-gray-300">项目基本信息</th>
                   )}
                   {visIncomeSubGroups.filter(sg => sg.span > 0).map((sg, i) => (
                     <th key={`vis-income-${i}`} colSpan={sg.span}
