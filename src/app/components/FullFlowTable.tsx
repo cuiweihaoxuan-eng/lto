@@ -1081,7 +1081,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                           </td>
                         ))}
                         {/* 查看按钮 */}
-                        <td className="px-2 py-2 text-center border border-gray-200 bg-white">
+                        <td className="px-2 py-2 text-center border border-gray-200 bg-white sticky right-0 z-10">
                           <button
                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                             onClick={(e) => {
