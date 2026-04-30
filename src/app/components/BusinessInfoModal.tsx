@@ -6,10 +6,9 @@ interface FlowRecord {
   id: number;
   time: string;
   operator: string;
-  fromRole: string;
-  toRole: string;
   action: string;
-  remark?: string;
+  content: string;
+  receiver?: string;
 }
 
 interface BusinessInfoModalProps {
@@ -49,11 +48,10 @@ export function BusinessInfoModal({ isOpen, onClose, data, initialTab = "detail"
     {
       id: 1,
       time: (data.groupDispatchTime as string) || "2025-02-03 14:30:35",
-      operator: "系统",
-      fromRole: "集团自动派单",
-      toRole: "省级自动派单",
-      action: "自动派单",
-      remark: "",
+      operator: "超级管理员",
+      action: "商情自动派单",
+      content: "超级管理员 商情自动派单",
+      receiver: "赵丹亚,吴琼,曹茅,肖松,叶建民,",
     },
     {
       id: 2,
@@ -61,10 +59,9 @@ export function BusinessInfoModal({ isOpen, onClose, data, initialTab = "detail"
       operator: Array.isArray(data.currentOperators)
         ? (data.currentOperators as string[]).join('、')
         : (data.currentOperator as string) || "系统",
-      fromRole: "省级自动派单",
-      toRole: data.currentOperationRole as string || "地市管理员",
-      action: data.currentOperationStep as string || "派单",
-      remark: data.currentOperationStep ? `当前处理人：${Array.isArray(data.currentOperators) ? (data.currentOperators as string[]).join('、') : data.currentOperator}` : "",
+      action: (data.currentOperationStep as string) || "派单",
+      content: `${Array.isArray(data.currentOperators) ? (data.currentOperators as string[]).join('、') : data.currentOperator} ${data.currentOperationStep || "派单"}`,
+      receiver: "",
     },
     ...((data as Record<string, unknown>).flowHistory as FlowRecord[] | undefined) || [],
   ];
@@ -209,31 +206,27 @@ export function BusinessInfoModal({ isOpen, onClose, data, initialTab = "detail"
                     </div>
                     <div className="flex-1 pb-6">
                       <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="text-sm text-gray-900 mb-2 font-medium">{process.time}</div>
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-                          <div>
-                            <span className="text-gray-500">操作人：</span>
+                        <div className="text-sm text-gray-900 mb-3 font-medium">{process.time}</div>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                          <div className="flex items-start">
+                            <span className="text-gray-500 w-20 flex-shrink-0">操作人：</span>
                             <span className="text-gray-900">{process.operator}</span>
                           </div>
-                          <div>
-                            <span className="text-gray-500">执行操作：</span>
+                          <div className="flex items-start">
+                            <span className="text-gray-500 w-20 flex-shrink-0">执行操作：</span>
                             <span className="text-gray-900">{process.action}</span>
                           </div>
-                          <div>
-                            <span className="text-gray-500">操作前状态：</span>
-                            <span className="text-gray-900">{process.fromRole}</span>
+                          <div className="col-span-2 flex items-start">
+                            <span className="text-gray-500 w-20 flex-shrink-0">操作内容：</span>
+                            <span className="text-gray-900">{process.content}</span>
                           </div>
-                          <div className="col-span-3">
-                            <span className="text-gray-500">操作后状态：</span>
-                            <span className="text-gray-900">{process.toRole}</span>
-                          </div>
+                          {process.receiver && (
+                            <div className="col-span-2 flex items-start">
+                              <span className="text-gray-500 w-20 flex-shrink-0">接收人：</span>
+                              <span className="text-gray-900">{process.receiver}</span>
+                            </div>
+                          )}
                         </div>
-                        {process.remark && (
-                          <div className="mt-3 text-sm">
-                            <span className="text-gray-500">备注：</span>
-                            <p className="text-gray-900 mt-1 leading-relaxed">{process.remark}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
