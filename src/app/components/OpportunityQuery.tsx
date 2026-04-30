@@ -139,8 +139,11 @@ const functionMenuItems = [
 ];
 
 const viewTabs = [
-  { id: "list", label: "列表视图" },
-  { id: "card", label: "卡片视图" }
+  { id: "list", label: "我发起的商机" },
+  { id: "card", label: "我管理的商机" },
+  { id: "card", label: "我支撑的商机" },
+  { id: "card", label: "我管理人员所支撑的商机" },
+  { id: "card", label: "我关注的商机" },
 ];
 
 const statusTabs = ["全部", "跟进中", "推进中", "已转化", "已关闭"];
@@ -302,7 +305,7 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
-        <h2 className="text-lg font-medium text-gray-900">商机查询</h2>
+        <h2 className="text-lg font-medium text-gray-900">商机管理</h2>
         <p className="text-sm text-gray-500 mt-1">商机信息查询与管理</p>
       </div>
 
