@@ -81,6 +81,7 @@ export function IctGrossProfitReport() {
           onQuery={(params) => console.log("查询", params)}
           onReset={() => setQueryParams({})}
           hideTitle={true}
+          showDetail={true}
         />
       </div>
     </div>

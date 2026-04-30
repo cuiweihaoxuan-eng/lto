@@ -193,6 +193,7 @@ export function RevenuePlanActualDiff() {
       config={config}
       queryFields={queryFields}
       data={mockData}
+      showDetail={true}
     />
   );
 }

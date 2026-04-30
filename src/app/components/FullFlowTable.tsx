@@ -631,10 +631,10 @@ export function FullFlowTable(_props: FullFlowTableProps) {
 // 从可见列计算各维度数据
   const visCols = colVis.visibleColumns as ColumnDef[];
   const visKeys = new Set(visCols.map(c => c.key));
-  // 基本信息列：不含 projectStage（col 24），col 24 单独处理
+  // 基本信息列：包含 projectStage（col 0-24），共25列
   const basicVisCols = visCols.filter(c => {
     const idx = colIndexMap[c.key];
-    return idx >= 0 && idx <= 23;
+    return idx >= 0 && idx <= 24;
   });
 
   // 计算可见的一级分组（重新统计span）
@@ -923,7 +923,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 {/* 表头Row3: 二级子分组 */}
                 <tr>
                   {basicVisCols.length > 0 && (
-                    <th colSpan={basicVisCols.length} className="px-2 py-2 text-center text-xs font-medium bg-gray-200 text-gray-700 border border-gray-300">项目基本信息</th>
+                    <th colSpan={basicVisCols.length} className="px-2 py-2 text-center text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300">项目基本信息</th>
                   )}
                   {visIncomeSubGroups.filter(sg => sg.span > 0).map((sg, i) => (
                     <th key={`vis-income-${i}`} colSpan={sg.span}
@@ -958,14 +958,14 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 <tr>
                   {visCols.map((col) => {
                     const idx = colIndexMap[col.key];
-                    let bg = "bg-gray-50";
+                    let bg = "bg-gray-100";
                     let text = "text-gray-700";
-                    if (idx >= 25 && idx <= 49) { bg = "bg-blue-50"; text = "text-blue-700"; }
-                    else if (idx >= 50 && idx <= 53) { bg = "bg-teal-50"; text = "text-teal-700"; }
-                    else if (idx >= 54 && idx <= 56) { bg = "bg-orange-50"; text = "text-orange-700"; }
-                    else if (idx >= 57 && idx <= 90) { bg = "bg-red-50"; text = "text-red-700"; }
-                    else if (idx >= 91 && idx <= 97) { bg = "bg-purple-50"; text = "text-purple-700"; }
-                    else if (idx >= 98) { bg = "bg-green-50"; text = "text-green-700"; }
+                    if (idx >= 25 && idx <= 49) { bg = "bg-blue-100"; text = "text-blue-700"; }
+                    else if (idx >= 50 && idx <= 53) { bg = "bg-teal-100"; text = "text-teal-700"; }
+                    else if (idx >= 54 && idx <= 56) { bg = "bg-orange-100"; text = "text-orange-700"; }
+                    else if (idx >= 57 && idx <= 90) { bg = "bg-red-100"; text = "text-red-700"; }
+                    else if (idx >= 91 && idx <= 97) { bg = "bg-purple-100"; text = "text-purple-700"; }
+                    else if (idx >= 98) { bg = "bg-green-100"; text = "text-green-700"; }
                     return (
                       <th
                         key={col.key}

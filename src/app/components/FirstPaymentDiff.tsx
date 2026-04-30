@@ -157,6 +157,7 @@ export function FirstPaymentDiff() {
       config={config}
       queryFields={queryFields}
       data={mockData}
+      showDetail={true}
     />
   );
 }

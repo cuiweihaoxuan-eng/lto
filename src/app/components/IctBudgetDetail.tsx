@@ -137,6 +137,6 @@ const config: ReportConfig = {
 
 export function IctBudgetDetail() {
   return (
-    <ReportTemplate config={config} queryFields={queryFields} data={mockData} />
+    <ReportTemplate config={config} queryFields={queryFields} data={mockData} showDetail={true} />
   );
 }

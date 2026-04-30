@@ -144,6 +144,6 @@ const config: ReportConfig = {
 
 export function ConstructNotFixedNoExpense() {
   return (
-    <ReportTemplate config={config} queryFields={queryFields} data={mockData} />
+    <ReportTemplate config={config} queryFields={queryFields} data={mockData} showDetail={true} />
   );
 }

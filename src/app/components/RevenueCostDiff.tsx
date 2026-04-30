@@ -367,6 +367,7 @@ export function RevenueCostDiff() {
       config={config}
       queryFields={queryFields}
       data={mockData}
+      showDetail={true}
     />
   );
 }

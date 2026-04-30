@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
-import { RotateCcw, Settings2 } from "lucide-react";
+import { RotateCcw, Settings2, Eye } from "lucide-react";
+import { ReportDetailModal } from "./ReportDetailModal";
 
 /** 单列定义 */
 export interface ReportColumn {
@@ -81,6 +82,8 @@ interface ReportTemplateProps {
   hideTitle?: boolean;
   /** 隐藏查询条件区（外部已提供查询区时使用） */
   hideQueryArea?: boolean;
+  /** 是否显示查看按钮 */
+  showDetail?: boolean;
 }
 
 export function ReportTemplate({
@@ -91,8 +94,10 @@ export function ReportTemplate({
   onReset,
   hideTitle,
   hideQueryArea,
+  showDetail = false,
 }: ReportTemplateProps) {
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
+  const [detailModal, setDetailModal] = useState<{ open: boolean; row: Record<string, unknown> | null }>({ open: false, row: null });
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -418,6 +423,11 @@ export function ReportTemplate({
             onMouseDown={(e) => handleResizeStart(e, col.key)} />
         </th>
       ))}
+      {showDetail && (
+        <th className="px-2 py-2.5 text-center text-sm font-medium text-gray-700 bg-gray-50 border-b border-gray-200 w-20">
+          操作
+        </th>
+      )}
     </tr>
   );
 
@@ -468,6 +478,11 @@ export function ReportTemplate({
               </th>
             );
           })}
+          {showDetail && (
+            <th rowSpan={2} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200">
+              操作
+            </th>
+          )}
         </tr>
         {/* 第二层：列名（只渲染可见列） */}
         <tr>
@@ -486,6 +501,7 @@ export function ReportTemplate({
                 onMouseDown={(e) => handleResizeStart(e, col.key)} />
             </th>
           ))}
+          {!showDetail && null}
         </tr>
       </>
     );
@@ -583,6 +599,11 @@ export function ReportTemplate({
               {cell.label}
             </th>
           ))}
+          {showDetail && (
+            <th rowSpan={3} className="px-2 py-2 text-center text-sm font-semibold text-gray-800 bg-gray-50 border-b border-gray-200">
+              操作
+            </th>
+          )}
         </tr>
         <tr>
           {row2Cells.map((cell, i) => (
@@ -839,6 +860,17 @@ export function ReportTemplate({
                           </td>
                         );
                       })}
+                      {showDetail && (
+                        <td className="px-2 py-2.5 text-center border-b border-gray-100 bg-white sticky right-0">
+                          <button
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                            onClick={() => setDetailModal({ open: true, row })}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            查看
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -850,6 +882,18 @@ export function ReportTemplate({
 
       {/* 列可见性弹窗 */}
       {renderColumnModal()}
+
+      {/* 详情弹窗 */}
+      {showDetail && detailModal.open && detailModal.row && (
+        <ReportDetailModal
+          isOpen={detailModal.open}
+          onClose={() => setDetailModal({ open: false, row: null })}
+          title={config.title + " - 详情"}
+          columns={config.columns}
+          headerGroups={config.headerGroups}
+          rowData={detailModal.row}
+        />
+      )}
     </div>
   );
 }

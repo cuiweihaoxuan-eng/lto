@@ -373,7 +373,7 @@ export function IctShareAbnormalReport() {
         </div>
 
         {/* 表格（只传空queryFields，由外层控制查询条件） */}
-        <ReportTemplate config={config} queryFields={[]} data={data} hideTitle={true} hideQueryArea={true} />
+        <ReportTemplate config={config} queryFields={[]} data={data} hideTitle={true} hideQueryArea={true} showDetail={true} />
       </div>
     </div>
   );
