@@ -511,9 +511,9 @@ export function LowMarginReport() {
                           </div>
                           <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
                             {cols.map(col => (
-                              <div key={col.key} className="col-span-1">
-                                <div className="text-xs text-gray-400">{col.label}</div>
-                                <div className="text-sm text-gray-800 truncate">
+                              <div key={col.key} className="col-span-1 text-left">
+                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate text-left">
                                   {p.basic[col.key as keyof typeof p.basic] !== undefined
                                     ? String(p.basic[col.key as keyof typeof p.basic] ?? "-")
                                     : "-"}

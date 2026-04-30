@@ -882,9 +882,9 @@ export function ReportTemplate({
                               }
                             }
                             return (
-                              <div key={col.key} className="col-span-1">
-                                <div className="text-xs text-gray-400">{col.label}</div>
-                                <div className={`text-sm text-gray-800 truncate ${col.align === "right" ? "text-right" : ""}`}>
+                              <div key={col.key} className="col-span-1 text-left">
+                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
+                                <div className={`text-sm text-gray-800 truncate text-left ${col.align === "right" ? "text-right" : ""}`}>
                                   {val !== undefined ? String(val) : "-"}
                                 </div>
                               </div>

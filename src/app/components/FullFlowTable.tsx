@@ -955,9 +955,9 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                           {items.map(k => {
                             const col = allColumns[colIndexMap[k]];
                             return col ? (
-                              <div key={k} className="col-span-1">
-                                <div className="text-xs text-gray-400">{col.label}</div>
-                                <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
+                              <div key={k} className="col-span-1 text-left">
+                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate text-left">{String(detailPanel.row![k] ?? "-")}</div>
                               </div>
                             ) : null;
                           })}
