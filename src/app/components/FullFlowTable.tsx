@@ -1100,8 +1100,9 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               </tbody>
             </table>
           </div>
-          </div>
         </div>
+        </div>
+      </div>
 
       {/* 列可见性弹窗 */}
       <ColumnVisibilityModal
