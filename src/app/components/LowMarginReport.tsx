@@ -563,8 +563,6 @@ export function LowMarginReport() {
                             return (
                               <tr key={`${pIdx}-${rIdx}`}
                                 className={`${projBg} hover:bg-blue-50 cursor-pointer ${detailPanel.project === project ? "bg-blue-50" : ""}`}
-                                onMouseEnter={() => setDetailPanel({ project, pinned: detailPanel.pinned })}
-                                onMouseLeave={() => !detailPanel.pinned && setDetailPanel({ project: null, pinned: false })}
                               >
                                 {/* 基本信息列 rowSpan: 只在第一行渲染 */}
                                 {rIdx === 0 && (
