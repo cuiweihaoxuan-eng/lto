@@ -969,7 +969,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 {/* 表头Row3: 二级子分组 */}
                 <tr>
                   {basicVisCols.length > 0 && (
-                    <th colSpan={basicVisCols.length} className="px-2 py-2 text-center text-xs font-medium bg-gray-200 text-gray-700 border border-gray-300">项目基本信息</th>
+                    <th colSpan={basicVisCols.length + 1} className="px-2 py-2 text-center text-xs font-medium bg-gray-200 text-gray-700 border border-gray-300">项目基本信息</th>
                   )}
                   {visIncomeSubGroups.filter(sg => sg.span > 0).map((sg, i) => (
                     <th key={`vis-income-${i}`} colSpan={sg.span}
