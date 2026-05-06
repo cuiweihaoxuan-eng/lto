@@ -8,9 +8,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from ".
 
 // 月报列定义
 const monthColumns: ReportColumn[] = [
-  // 项目基本信息 (cols 0-10)
   { key: "period", label: "账期", width: 80, groupColor: "bg-gray-50" },
-  { key: "province", label: "省份", width: 80, groupColor: "bg-gray-50" },
   { key: "city", label: "地市", width: 80, groupColor: "bg-gray-50" },
   { key: "district", label: "区县", width: 80, groupColor: "bg-gray-50" },
   { key: "projectCode", label: "项目编号", width: 130, groupColor: "bg-gray-50" },
@@ -20,35 +18,29 @@ const monthColumns: ReportColumn[] = [
   { key: "projectStatus", label: "项目状态", width: 90, groupColor: "bg-gray-50" },
   { key: "projectManager", label: "项目经理", width: 90, groupColor: "bg-gray-50" },
   { key: "projectCategory", label: "项目分类", width: 90, groupColor: "bg-gray-50" },
-  // 前向合同信息 (cols 11-16)
   { key: "forwardContractCode", label: "前向合同编号", width: 130, groupColor: "bg-blue-50" },
   { key: "forwardContractName", label: "前向合同名称", width: 180, groupColor: "bg-blue-50" },
   { key: "forwardContractType", label: "前向合同类型", width: 100, groupColor: "bg-blue-50" },
   { key: "forwardSignType", label: "前向签约类型", width: 100, groupColor: "bg-blue-50" },
   { key: "planIncomeTotal", label: "计划收入总金额", width: 120, align: "right", groupColor: "bg-blue-50" },
   { key: "signDate", label: "合同签约日期", width: 110, groupColor: "bg-blue-50" },
-  // 分成合同信息 (cols 17-22)
   { key: "shareContractCode", label: "分成合同编号", width: 130, groupColor: "bg-teal-50" },
   { key: "shareContractName", label: "分成合同名称", width: 180, groupColor: "bg-teal-50" },
   { key: "shareContractType", label: "分成合同类型", width: 100, groupColor: "bg-teal-50" },
   { key: "shareSignType", label: "分成签约类型", width: 100, groupColor: "bg-teal-50" },
   { key: "reductionPlanTotal", label: "减收计划总金额", width: 120, align: "right", groupColor: "bg-teal-50" },
   { key: "shareSignDate", label: "分成合同签约日期", width: 110, groupColor: "bg-teal-50" },
-  // 收入/减收数据 (cols 23-27)
   { key: "monthDICTIncome", label: "本月DICT收入金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "monthDICTReduction", label: "本月DICT减收金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "monthReductionPlan", label: "本月减收计划金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "monthIncomeProgress", label: "本月收入进度", width: 100, align: "right", groupColor: "bg-green-50" },
   { key: "monthReductionProgress", label: "本月减收进度", width: 100, align: "right", groupColor: "bg-green-50" },
-  // 稽核结果 (col 28)
   { key: "auditResult", label: "稽核结果", width: 200, groupColor: "bg-red-50" },
 ];
 
-// 年报列定义（包含累计数据）
+// 年报列定义
 const yearColumns: ReportColumn[] = [
-  // 项目基本信息 (cols 0-10)
   { key: "period", label: "账期", width: 80, groupColor: "bg-gray-50" },
-  { key: "province", label: "省份", width: 80, groupColor: "bg-gray-50" },
   { key: "city", label: "地市", width: 80, groupColor: "bg-gray-50" },
   { key: "district", label: "区县", width: 80, groupColor: "bg-gray-50" },
   { key: "projectCode", label: "项目编号", width: 130, groupColor: "bg-gray-50" },
@@ -58,32 +50,27 @@ const yearColumns: ReportColumn[] = [
   { key: "projectStatus", label: "项目状态", width: 90, groupColor: "bg-gray-50" },
   { key: "projectManager", label: "项目经理", width: 90, groupColor: "bg-gray-50" },
   { key: "projectCategory", label: "项目分类", width: 90, groupColor: "bg-gray-50" },
-  // 前向合同信息 (cols 11-16)
   { key: "forwardContractCode", label: "前向合同编号", width: 130, groupColor: "bg-blue-50" },
   { key: "forwardContractName", label: "前向合同名称", width: 180, groupColor: "bg-blue-50" },
   { key: "forwardContractType", label: "前向合同类型", width: 100, groupColor: "bg-blue-50" },
   { key: "forwardSignType", label: "前向签约类型", width: 100, groupColor: "bg-blue-50" },
   { key: "planIncomeTotal", label: "计划收入总金额", width: 120, align: "right", groupColor: "bg-blue-50" },
   { key: "signDate", label: "合同签约日期", width: 110, groupColor: "bg-blue-50" },
-  // 分成合同信息 (cols 17-22)
   { key: "shareContractCode", label: "分成合同编号", width: 130, groupColor: "bg-teal-50" },
   { key: "shareContractName", label: "分成合同名称", width: 180, groupColor: "bg-teal-50" },
   { key: "shareContractType", label: "分成合同类型", width: 100, groupColor: "bg-teal-50" },
   { key: "shareSignType", label: "分成签约类型", width: 100, groupColor: "bg-teal-50" },
   { key: "reductionPlanTotal", label: "减收计划总金额", width: 120, align: "right", groupColor: "bg-teal-50" },
   { key: "shareSignDate", label: "分成合同签约日期", width: 110, groupColor: "bg-teal-50" },
-  // 累计数据 (cols 23-27)
   { key: "totalDICTIncome", label: "累计DICT收入金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "totalDICTReduction", label: "累计DICT减收金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "yearDICTIncome", label: "本年DICT收入金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "yearDICTReduction", label: "本年DICT减收金额", width: 130, align: "right", groupColor: "bg-green-50" },
   { key: "yearReductionPlan", label: "本年减收计划金额", width: 130, align: "right", groupColor: "bg-green-50" },
-  // 进度 (cols 28-31)
   { key: "totalIncomeProgress", label: "累计收入进度", width: 100, align: "right", groupColor: "bg-purple-50" },
   { key: "totalReductionProgress", label: "累计减收进度", width: 100, align: "right", groupColor: "bg-purple-50" },
   { key: "yearIncomeProgress", label: "本年收入进度", width: 100, align: "right", groupColor: "bg-purple-50" },
   { key: "yearReductionProgress", label: "本年减收进度", width: 100, align: "right", groupColor: "bg-purple-50" },
-  // 稽核结果 (cols 32-33)
   { key: "totalAuditResult", label: "累计数据稽核结果", width: 200, groupColor: "bg-red-50" },
   { key: "yearAuditResult", label: "本年数据稽核结果", width: 200, groupColor: "bg-red-50" },
 ];
@@ -91,7 +78,7 @@ const yearColumns: ReportColumn[] = [
 // 月报Mock数据
 const monthMockData: Record<string, string | number>[] = [
   {
-    period: "2026-03", province: "浙江省", city: "杭州", district: "西湖区",
+    period: "2026-03", city: "杭州", district: "西湖区",
     projectCode: "JHTB-2026-001", projectName: "某区政府信息化项目",
     projectTypeName: "分成型", projectStartTime: "2026-01-15", projectStatus: "实施中",
     projectManager: "张明", projectCategory: "自拓",
@@ -125,7 +112,7 @@ const monthMockData: Record<string, string | number>[] = [
 // 年报Mock数据
 const yearMockData: Record<string, string | number>[] = [
   {
-    period: "2026-03", province: "浙江省", city: "杭州", district: "西湖区",
+    period: "2026-03", city: "杭州", district: "西湖区",
     projectCode: "JHTB-2026-001", projectName: "某区政府信息化项目",
     projectTypeName: "分成型", projectStartTime: "2026-01-15", projectStatus: "实施中",
     projectManager: "张明", projectCategory: "自拓",
@@ -153,24 +140,21 @@ export function IctShareAbnormalReport() {
   const columns = isYear ? yearColumns : monthColumns;
   const data = isYear ? yearMockData : monthMockData;
 
-  // 计算查询区总宽度（与表格对齐）
-  const queryAreaWidth = columns.reduce((sum, c) => sum + (c.width ?? 120), 0);
-
   const topGroups: ReportHeaderGroup[] = isYear
     ? [
-        { label: "项目基本信息", startCol: 0, span: 11, color: "bg-gray-100" },
-        { label: "前向合同信息", startCol: 11, span: 6, color: "bg-blue-100" },
-        { label: "分成合同信息", startCol: 17, span: 6, color: "bg-teal-100" },
-        { label: "累计/本年数据", startCol: 23, span: 5, color: "bg-green-100" },
-        { label: "进度", startCol: 28, span: 4, color: "bg-purple-100" },
-        { label: "稽核结果", startCol: 32, span: 2, color: "bg-red-100" },
+        { label: "项目基本信息", startCol: 0, span: 10, color: "bg-gray-100" },
+        { label: "前向合同信息", startCol: 10, span: 6, color: "bg-blue-100" },
+        { label: "分成合同信息", startCol: 16, span: 6, color: "bg-teal-100" },
+        { label: "累计/本年数据", startCol: 22, span: 5, color: "bg-green-100" },
+        { label: "进度", startCol: 27, span: 4, color: "bg-purple-100" },
+        { label: "稽核结果", startCol: 31, span: 2, color: "bg-red-100" },
       ]
     : [
-        { label: "项目基本信息", startCol: 0, span: 11, color: "bg-gray-100" },
-        { label: "前向合同信息", startCol: 11, span: 6, color: "bg-blue-100" },
-        { label: "分成合同信息", startCol: 17, span: 6, color: "bg-teal-100" },
-        { label: "收入/减收数据", startCol: 23, span: 5, color: "bg-green-100" },
-        { label: "稽核结果", startCol: 28, span: 1, color: "bg-red-100" },
+        { label: "项目基本信息", startCol: 0, span: 10, color: "bg-gray-100" },
+        { label: "前向合同信息", startCol: 10, span: 6, color: "bg-blue-100" },
+        { label: "分成合同信息", startCol: 16, span: 6, color: "bg-teal-100" },
+        { label: "收入/减收数据", startCol: 22, span: 5, color: "bg-green-100" },
+        { label: "稽核结果", startCol: 27, span: 1, color: "bg-red-100" },
       ];
 
   const config: ReportConfig = {
@@ -181,7 +165,6 @@ export function IctShareAbnormalReport() {
     hasThreeLevelHeader: false,
   };
 
-  // 基础信息字段
   const basicFields = [
     { key: "city", label: "地市", type: "select" as const, options: [
       { label: "杭州", value: "hangzhou" }, { label: "宁波", value: "ningbo" }, { label: "温州", value: "wenzhou" }
@@ -198,7 +181,6 @@ export function IctShareAbnormalReport() {
     ]},
   ];
 
-  // 项目信息字段
   const projectFields = [
     { key: "projectCode", label: "项目编码", type: "text" as const, placeholder: "请输入" },
     { key: "projectName", label: "项目名称", type: "text" as const, placeholder: "请输入" },
@@ -216,7 +198,6 @@ export function IctShareAbnormalReport() {
     ]},
   ];
 
-  // 更多条件字段（默认收起）
   const extraFields = [
     { key: "forwardContractCode", label: "前向合同编号", type: "text" as const, placeholder: "请输入" },
     { key: "forwardContractName", label: "前向合同名称", type: "text" as const, placeholder: "请输入" },
@@ -233,14 +214,10 @@ export function IctShareAbnormalReport() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* 标题 */}
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">ICT项目分成异常报表</h2>
       </div>
-
-      {/* 内容区 */}
       <div className="flex-1 overflow-auto px-6 pb-6">
-        {/* Tab切换 */}
         <div className="mb-4 flex gap-2">
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -263,11 +240,7 @@ export function IctShareAbnormalReport() {
             年度
           </button>
         </div>
-
-        {/* 查询条件卡片 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 overflow-x-auto">
-          <div style={{ width: queryAreaWidth }}>
-          {/* 基础信息 */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
           <div>
             <div className="grid grid-cols-5 gap-x-6 gap-y-3">
               {basicFields.map((field) => (
@@ -288,8 +261,6 @@ export function IctShareAbnormalReport() {
               ))}
             </div>
           </div>
-
-          {/* 项目信息 */}
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
               <span className="w-1 h-4 bg-green-500 rounded mr-2"></span>
@@ -330,8 +301,6 @@ export function IctShareAbnormalReport() {
               ))}
             </div>
           </div>
-
-          {/* 更多条件（默认收起） */}
           {showAllConditions && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
@@ -358,8 +327,6 @@ export function IctShareAbnormalReport() {
               </div>
             </div>
           )}
-
-          {/* 展开更多条件 */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <button className="text-sm text-blue-600 hover:text-blue-700" onClick={() => setShowAllConditions(!showAllConditions)}>
               {showAllConditions ? "收起更多条件" : "展开更多条件"}
@@ -367,12 +334,10 @@ export function IctShareAbnormalReport() {
             <div className="flex gap-2">
               <Button variant="default" size="sm">查询</Button>
               <Button variant="outline" size="sm"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+              <Button variant="outline" size="sm">导出</Button>
             </div>
           </div>
-          </div>
         </div>
-
-        {/* 表格（只传空queryFields，由外层控制查询条件） */}
         <ReportTemplate config={config} queryFields={[]} data={data} hideTitle={true} hideQueryArea={true} showDetail={true} />
       </div>
     </div>

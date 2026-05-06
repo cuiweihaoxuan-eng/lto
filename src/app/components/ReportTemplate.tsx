@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
-import { RotateCcw, Settings2, Eye } from "lucide-react";
+import { RotateCcw, Settings2, Eye, FileText, Calculator, DollarSign, Percent, Gauge, Tag } from "lucide-react";
 import { ReportDetailModal } from "./ReportDetailModal";
 
 /** 单列定义 */
@@ -779,37 +779,39 @@ export function ReportTemplate({
 
       {/* 内容区 */}
       <div className="flex-1 overflow-auto px-6 pb-6">
-        {/* 查询条件卡片 */}
-        {!hideQueryArea && showQueryArea && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-          {isGroupedQuery ? renderGroupedQuery() : renderFlatQuery()}
+        <div className="min-w-0">
+          {/* 查询条件卡片 */}
+          {!hideQueryArea && showQueryArea && (
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+            {isGroupedQuery ? renderGroupedQuery() : renderFlatQuery()}
 
-          <div className="flex items-center justify-between mt-4">
-            <Button variant="link" size="sm" onClick={() => setShowAllConditions(!showAllConditions)} className="text-blue-600 p-0">
-              {showAllConditions ? "收起更多条件" : "展开更多条件"}
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="default" size="sm" onClick={handleQuery}>查询</Button>
-              <Button variant="outline" size="sm" onClick={handleReset}>
-                <RotateCcw className="w-4 h-4 mr-1" />重置
+            <div className="flex items-center justify-between mt-4">
+              <Button variant="link" size="sm" onClick={() => setShowAllConditions(!showAllConditions)} className="text-blue-600 p-0">
+                {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </Button>
+              <div className="flex gap-2">
+                <Button variant="default" size="sm" onClick={handleQuery}>查询</Button>
+                <Button variant="outline" size="sm" onClick={handleReset}>
+                  <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => {}}>导出</Button>
+              </div>
             </div>
           </div>
-        </div>
-        )}
+          )}
 
-        {/* 表格 */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 280px)" }}>
-          {/* 表格工具栏 */}
-          <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <span className="text-xs text-gray-400 mr-auto">
-              已选 {visibleCount}/{totalCount} 列
-            </span>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
-              onClick={() => setShowQueryArea(!showQueryArea)}>
-              {showQueryArea ? "隐藏查询" : "显示查询"}
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+          {/* 表格 */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col min-w-0" style={{ maxHeight: "calc(100vh - 280px)" }}>
+            {/* 表格工具栏 */}
+            <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+              <span className="text-xs text-gray-400 mr-auto">
+                已选 {visibleCount}/{totalCount} 列
+              </span>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+                onClick={() => setShowQueryArea(!showQueryArea)}>
+                {showQueryArea ? "隐藏查询" : "显示查询"}
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
               onClick={() => setShowColumnModal(true)}>
               <Settings2 className="w-3.5 h-3.5" />
               自定义表头
@@ -865,10 +867,19 @@ export function ReportTemplate({
                       ? data.slice(firstRowIndex, Math.min(firstRowIndex + projectRowSpan, data.length))
                       : [detailPanel.row];
 
+                    const getTitleIcon = (label: string, bgClass: string) => {
+                      const colorClass = bgClass.replace("bg-", "text-");
+                      if (label.includes("基本信息")) return <FileText className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                      if (label.includes("预算")) return <Calculator className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                      if (label.includes("结算")) return <DollarSign className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                      if (label.includes("进度")) return <Gauge className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                      if (label.includes("差异")) return <Percent className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                      return <FileText className={`w-3.5 h-3.5 ${colorClass} flex-shrink-0`} />;
+                    };
                     return groupedColumns.map(({ label: groupLabel, color: groupColor, cols }) => (
                       <div key={groupLabel} className="mb-4">
-                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">
-                          <span className={`inline-block w-1 h-3 mr-2 rounded-sm ${groupColor} flex-shrink-0 align-middle`}></span>
+                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200 flex items-center gap-1.5">
+                          {getTitleIcon(groupLabel, groupColor)}
                           {groupLabel}
                         </div>
                         <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
@@ -882,11 +893,9 @@ export function ReportTemplate({
                               }
                             }
                             return (
-                              <div key={col.key} className="col-span-1 text-left">
-                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
-                                <div className={`text-sm text-gray-800 truncate text-left ${col.align === "right" ? "text-right" : ""}`}>
-                                  {val !== undefined ? String(val) : "-"}
-                                </div>
+                              <div key={col.key} className="col-span-1">
+                                <div className="text-xs text-gray-400">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate">{val !== undefined ? String(val) : "-"}</div>
                               </div>
                             );
                           })}
@@ -927,7 +936,7 @@ export function ReportTemplate({
                             return (
                               <td key={col.key} rowSpan={dataRowSpan}
                                 style={{ width: columnWidths[col.key], minWidth: columnWidths[col.key] }}
-                                className={`px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 ${
+                                className={`px-2 py-2.5 text-sm text-gray-800 border-b border-gray-100 whitespace-nowrap ${
                                   col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
                                 }`}>
                                 {col.render ? col.render(val, row) : String(val ?? "")}
@@ -983,6 +992,7 @@ export function ReportTemplate({
 
           {/* 列可见性弹窗 */}
           {renderColumnModal()}
+        </div>
         </div>
       </div>
     </div>

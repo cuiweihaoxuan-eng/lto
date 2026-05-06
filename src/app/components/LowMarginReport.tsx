@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Button } from "./ui/button";
-import { Settings2, Eye } from "lucide-react";
+import { Settings2, Eye, X, FileText, TrendingUp, TrendingDown, Percent } from "lucide-react";
 import { ColumnVisibilityModal } from "./ui/ColumnVisibilityModal";
 import { useColumnVisibility } from "./hooks/useColumnVisibility";
 
@@ -430,6 +430,7 @@ export function LowMarginReport() {
                 </button>
                 <button className="px-4 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">重置</button>
                 <button className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">查询</button>
+                <button className="px-4 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">导出</button>
               </div>
             </div>
           </div>
@@ -448,12 +449,6 @@ export function LowMarginReport() {
                 onClick={() => setShowFilters(!showFilters)}
               >
                 {showFilters ? "隐藏查询" : "显示查询"}
-              </button>
-              <button
-                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-                onClick={() => setShowAllConditions(!showAllConditions)}
-              >
-                {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </button>
               <button
                 className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
@@ -503,26 +498,36 @@ export function LowMarginReport() {
                           groupedCols.push({ label: gl, color: gColor, cols: [col] });
                         }
                       });
-                      return groupedCols.map(({ label: gl, color: gColor, cols }) => (
-                        <div key={gl} className="mb-4">
-                          <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">
-                            <span className={`inline-block w-1 h-3 mr-2 rounded-sm ${gColor} flex-shrink-0 align-middle`}></span>
-                            {gl}
-                          </div>
-                          <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
-                            {cols.map(col => (
-                              <div key={col.key} className="col-span-1 text-left">
-                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
-                                <div className="text-sm text-gray-800 truncate text-left">
-                                  {p.basic[col.key as keyof typeof p.basic] !== undefined
-                                    ? String(p.basic[col.key as keyof typeof p.basic] ?? "-")
-                                    : "-"}
+                      return groupedCols.map(({ label: gl, color: gColor, cols }) => {
+                        const iconColor = gColor.replace("bg-", "text-");
+                        const iconEl = (() => {
+                          if (gl.includes("基本信息")) return <FileText className={`w-3.5 h-3.5 ${iconColor} flex-shrink-0`} />;
+                          if (gl === "收入") return <TrendingUp className={`w-3.5 h-3.5 ${iconColor} flex-shrink-0`} />;
+                          if (gl === "支出") return <TrendingDown className={`w-3.5 h-3.5 ${iconColor} flex-shrink-0`} />;
+                          if (gl === "毛利" || gl === "毛利差异") return <Percent className={`w-3.5 h-3.5 ${iconColor} flex-shrink-0`} />;
+                          return <FileText className={`w-3.5 h-3.5 ${iconColor} flex-shrink-0`} />;
+                        })();
+                        return (
+                          <div key={gl} className="mb-4">
+                            <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200 flex items-center gap-1.5">
+                              {iconEl}
+                              {gl}
+                            </div>
+                            <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
+                              {cols.map(col => (
+                                <div key={col.key} className="col-span-1">
+                                  <div className="text-xs text-gray-400">{col.label}</div>
+                                  <div className="text-sm text-gray-800 truncate">
+                                    {p.basic[col.key as keyof typeof p.basic] !== undefined
+                                      ? String(p.basic[col.key as keyof typeof p.basic] ?? "-")
+                                      : "-"}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ));
+                        );
+                      });
                     })()}
                   </div>
                 </div>
@@ -574,7 +579,7 @@ export function LowMarginReport() {
                   {projectData.map((project, pIdx) => {
                       const projBg = pIdx % 2 === 0 ? "" : "bg-gray-50/40";
                       return (
-                        <>
+                        <React.Fragment key={pIdx}>
                           {project.rows.map((row, rIdx) => {
                             return (
                               <tr key={`${pIdx}-${rIdx}`}
@@ -621,7 +626,7 @@ export function LowMarginReport() {
                               </tr>
                             );
                           })}
-                        </>
+                        </React.Fragment>
                       );
                     })}
                 </tbody>

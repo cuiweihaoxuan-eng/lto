@@ -36,8 +36,8 @@ const mockData: Record<string, string | number>[] = [
 ];
 
 const config: ReportConfig = {
-  title: "ICT毛利额区域统计报表",
-  description: "ICT项目毛利额按区域统计汇总",
+  title: "政企口径ICT毛利额（区县维度）",
+  description: "政企口径ICT毛利额区域统计",
   columns,
 };
 
@@ -67,7 +67,7 @@ export function IctGrossProfitReport() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
-        <h2 className="text-lg font-medium text-gray-900">ICT毛利额区域统计报表</h2>
+        <h2 className="text-lg font-medium text-gray-900">政企口径ICT毛利额（区县维度）</h2>
       </div>
       <div className="flex-1 overflow-hidden">
         <ReportTemplate

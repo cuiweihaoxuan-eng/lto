@@ -21,6 +21,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api/ai': {
+        target: 'http://localhost:8080', // 后端地址，改成实际端口
+        changeOrigin: true,
+      },
+    },
+  },
   base: '/lto/',
   resolve: {
     alias: {

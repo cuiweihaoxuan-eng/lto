@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
-import { RotateCcw, Settings2, Eye, X } from "lucide-react";
+import { RotateCcw, Settings2, Eye, X, FileText, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { ColumnVisibilityModal } from "./ui/ColumnVisibilityModal";
 import { useColumnVisibility } from "./hooks/useColumnVisibility";
 
@@ -891,6 +891,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
             <div className="flex gap-2">
               <Button variant="default" size="sm">查询</Button>
               <Button variant="outline" size="sm"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+              <Button variant="outline" size="sm">导出</Button>
             </div>
           </div>
         </div>
@@ -909,12 +910,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                 onClick={() => setShowFilters(!showFilters)}
               >
                 {showFilters ? "隐藏查询" : "显示查询"}
-              </button>
-              <button
-                className="flex items-center gap-1.5 px-3 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-                onClick={() => setShowAllConditions(!showAllConditions)}
-              >
-                {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </button>
               <button
                 className="flex items-center gap-1.5 px-3 py-1 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
@@ -948,16 +943,27 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                   }).map(([group, keys]) => {
                     const items = keys.filter(k => detailPanel.row![k] !== undefined && detailPanel.row![k] !== "" && detailPanel.row![k] !== null);
                     if (items.length === 0) return null;
+                    const groupIcon = (() => {
+                      if (group.includes("基本信息")) return <FileText className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                      if (group === "收入") return <TrendingUp className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                      if (group === "收款") return <Wallet className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                      if (group === "支出") return <TrendingDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                      if (group === "付款") return <Wallet className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                      return <FileText className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
+                    })();
                     return (
                       <div key={group} className="mb-4">
-                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200">{group}</div>
+                        <div className="text-xs font-semibold text-gray-500 mb-2 pb-1 border-b border-gray-200 flex items-center gap-1.5">
+                          {groupIcon}
+                          {group}
+                        </div>
                         <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
                           {items.map(k => {
                             const col = allColumns[colIndexMap[k]];
                             return col ? (
-                              <div key={k} className="col-span-1 text-left">
-                                <div className="text-xs text-gray-400 text-left">{col.label}</div>
-                                <div className="text-sm text-gray-800 truncate text-left">{String(detailPanel.row![k] ?? "-")}</div>
+                              <div key={k} className="col-span-1">
+                                <div className="text-xs text-gray-400">{col.label}</div>
+                                <div className="text-sm text-gray-800 truncate">{String(detailPanel.row![k] ?? "-")}</div>
                               </div>
                             ) : null;
                           })}
@@ -984,7 +990,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                       {g.label}
                     </th>
                   ))}
-                  <th className="px-2 py-2.5 text-center text-sm font-semibold border border-gray-200 bg-gray-100 sticky right-0 z-10">操作</th>
+                  <th rowSpan={3} className="px-2 py-2.5 text-center text-sm font-semibold border border-gray-200 bg-gray-100 sticky right-0 z-10">操作</th>
                 </tr>
                 {/* 表头Row3: 二级子分组 */}
                 <tr>
@@ -1019,7 +1025,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     <th colSpan={visCols.filter(c => { const i = colIndexMap[c.key]; return i >= 98; }).length || 4}
                       className="px-2 py-2 text-center text-xs font-medium bg-green-100 text-green-700 border border-green-200">付款</th>
                   )}
-                  <th className="px-2 py-2 text-center text-xs font-medium bg-gray-200 border border-gray-300 sticky right-0 z-10">操作</th>
                 </tr>
                 {/* 表头Row4: 实际列名（按可见列过滤） */}
                 <tr>
@@ -1043,7 +1048,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                       </th>
                     );
                   })}
-                  <th className="px-2 py-2 text-center text-xs font-medium bg-gray-200 border border-gray-300 sticky right-0 z-10">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
@@ -1082,7 +1086,6 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                         )}
                         {/* 项目环节：每行显示对应阶段 */}
                         <td
-                          style={cellStyle("projectStage")}
                           className={`px-2 py-2 text-sm text-center border border-gray-200 ${stageColor.bg} ${stageColor.text}`}
                         >
                           {s.label}
@@ -1094,26 +1097,29 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                         }).map(col => (
                           <td
                             key={col.key}
-                            style={cellStyle(col.key)}
                             className={`px-2 py-2 text-sm border border-gray-200 ${alignClass(col)}`}
                           >
                             {rowData[col.key] !== undefined && rowData[col.key] !== 0 ? String(rowData[col.key]) : ""}
                           </td>
                         ))}
-                        {/* 查看按钮 */}
-                        <td className="px-2 py-2 text-center border border-gray-200 bg-white sticky right-0 z-10">
-                          <button
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const isPinned = detailPanel.pinned && detailPanel.row === rowData;
-                              setDetailPanel({ row: rowData, pinned: !isPinned });
-                            }}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            {detailPanel.row === rowData && detailPanel.pinned ? "关闭" : "查看"}
-                          </button>
-                        </td>
+                        {/* 查看按钮：只在第一行显示，合并4行 */}
+                        {isFirst && (
+                          <td
+                            rowSpan={4}
+                            className="px-2 py-2 text-center border border-gray-200 bg-white sticky right-0 z-10">
+                            <button
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const isPinned = detailPanel.pinned && detailPanel.row === rowData;
+                                setDetailPanel({ row: rowData, pinned: !isPinned });
+                              }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              {detailPanel.row === rowData && detailPanel.pinned ? "关闭" : "查看"}
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     );
                   });

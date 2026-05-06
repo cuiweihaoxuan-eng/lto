@@ -1,10 +1,18 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { Checkbox } from "./ui/checkbox";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { Download, RotateCcw, Search, Eye, ChevronDown, ChevronRight } from "lucide-react";
+import { Download, RotateCcw, Search, Eye, ChevronDown, ChevronRight, X, Upload } from "lucide-react";
 import { SixPositioningDetail } from "./SixPositioningDetail";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
 
 interface QueryParams {
   city: string;
@@ -169,6 +177,8 @@ export function SixPositioning() {
   const [showAllConditions, setShowAllConditions] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<{name: string; code: string} | null>(null);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [taskDownloadModalOpen, setTaskDownloadModalOpen] = useState(false);
   const handleNavigateForwardBid = (oppCode: string) => {
     window.open(`/opp-forward-bid?code=${oppCode}`, "_blank");
   };
@@ -470,11 +480,11 @@ export function SixPositioning() {
                     <Button variant="outline" size="sm" onClick={handleReset}>
                       <RotateCcw className="w-4 h-4 mr-1" />重置
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setDownloadModalOpen(true)}>
                       <Download className="w-4 h-4 mr-1" />下载清单
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="w-4 h-4 mr-1" />下载附件
+                    <Button variant="outline" size="sm" onClick={() => setTaskDownloadModalOpen(true)}>
+                      <Download className="w-4 h-4 mr-1" />任务下载列表
                     </Button>
                   </div>
                 </div>
@@ -785,6 +795,98 @@ export function SixPositioning() {
         opportunityCode={selectedOpportunity?.code}
         onNavigateForwardBid={handleNavigateForwardBid}
       />
+
+      {/* 下载清单弹窗 */}
+      <Dialog open={downloadModalOpen} onOpenChange={setDownloadModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>下载清单</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 leading-relaxed">
+              请勾选需要下载的内容，下载后将生成对应的清单文件。
+              支持同时勾选多个类型，系统将分别生成对应的清单。
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Checkbox id="download-opp" />
+                <label htmlFor="download-opp" className="text-sm text-gray-700 cursor-pointer">商机</label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Checkbox id="download-contract" />
+                <label htmlFor="download-contract" className="text-sm text-gray-700 cursor-pointer">合同</label>
+              </div>
+            </div>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors cursor-pointer">
+              <Upload className="w-8 h-8 text-gray-400" />
+              <span className="text-sm text-gray-500">点击上传附件或将文件拖拽到此处</span>
+              <input type="file" className="hidden" multiple />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" />下载模版
+            </Button>
+            <Button size="sm" onClick={() => setDownloadModalOpen(false)}>提交</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 任务下载列表弹窗 */}
+      <Dialog open={taskDownloadModalOpen} onOpenChange={setTaskDownloadModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>任务下载列表</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto py-4">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">创建时间</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">文件名</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">创建人</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">是否可下载</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">操作</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">2026-05-06 10:30:25</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">商机清单_20260506.xlsx</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">张三</td>
+                  <td className="px-4 py-3 text-center text-sm"><span className="text-green-600">是</span></td>
+                  <td className="px-4 py-3 text-center text-sm">
+                    <button className="text-blue-600 hover:text-blue-700">
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">2026-05-06 09:15:10</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">合同清单_20260506.xlsx</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">李四</td>
+                  <td className="px-4 py-3 text-center text-sm"><span className="text-green-600">是</span></td>
+                  <td className="px-4 py-3 text-center text-sm">
+                    <button className="text-blue-600 hover:text-blue-700">
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">2026-05-05 16:45:30</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">商机信息_汇总表.xlsx</td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-900">王五</td>
+                  <td className="px-4 py-3 text-center text-sm"><span className="text-red-600">否</span></td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-400">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <DialogFooter>
+            <Button size="sm" onClick={() => setTaskDownloadModalOpen(false)}>关闭</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
