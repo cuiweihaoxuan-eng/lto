@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router";
 import { BarChart3, Loader2 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
@@ -9,6 +9,7 @@ import { FunctionMenu } from "./components/FunctionMenu";
 import { FloatAIBtn } from "./components/FloatAIBtn";
 import { AISidebar } from "./components/AISidebar";
 import { ResizeDivider } from "./components/ResizeDivider";
+import { PrdPanel } from "./components/PrdPanel";
 
 // 懒加载组件 - 使用命名导入
 const Dashboard = lazy(() => import("./components/Dashboard").then(m => ({ default: m.default })));
@@ -24,6 +25,7 @@ const IctShareAbnormalReport = lazy(() => import("./components/IctShareAbnormalR
 const IctGrossProfitReport = lazy(() => import("./components/IctGrossProfitReport").then(m => ({ default: m.IctGrossProfitReport })));
 const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail").then(m => ({ default: m.IctBudgetDetail })));
 const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense").then(m => ({ default: m.ConstructNotFixedNoExpense })));
+const CostEstimateReport = lazy(() => import("./components/CostEstimateReport").then(m => ({ default: m.CostEstimateReport })));
 const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement").then(m => ({ default: m.BusinessInfoManagement })));
 const LeadAcquisition = lazy(() => import("./components/LeadAcquisition").then(m => ({ default: m.LeadAcquisition })));
 const LeadPoolManagement = lazy(() => import("./components/LeadPoolManagement").then(m => ({ default: m.LeadPoolManagement })));
@@ -57,6 +59,15 @@ export default function App() {
   const [oppDetailId, setOppDetailId] = useState<string | null>(null);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [aiSidebarWidth, setAiSidebarWidth] = useState(400);
+  const [prdSidebarOpen, setPrdSidebarOpen] = useState(false);
+
+// 注入当前路由给 prd-inject.js（SPA 无法从 URL 识别路由）
+useEffect(() => {
+  window.__PRD_ROUTE__ = activeSidebarItem;
+  const meta = document.querySelector('meta[name="prd-route"]');
+  if (meta) meta.setAttribute('content', activeSidebarItem);
+  else document.head.insertAdjacentHTML('beforeend', `<meta name="prd-route" content="${activeSidebarItem}">`);
+}, [activeSidebarItem]);
 
   // 从 URL 获取商机编码参数（用于六到位跳转）
   const params = new URLSearchParams(window.location.search);
@@ -77,7 +88,7 @@ export default function App() {
     "full-flow-table", "low-margin-report", "revenue-plan-actual-diff",
     "revenue-cost-diff", "first-payment-diff",
     "ict-share-abnormal", "ict-budget-detail", "construct-not-fixed-no-expense",
-    "ict-gross-profit-report"
+    "ict-gross-profit-report", "cost-estimate-report"
   ];
   const isReportPage = ["report", "expert-report", "yecai-report-group", ...yecaiReportIds].includes(activeSidebarItem);
   const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info"].includes(activeSidebarItem) || isReportPage;
@@ -117,6 +128,7 @@ export default function App() {
     if (activeSidebarItem === "ict-gross-profit-report") return <Suspense fallback={<LoadingSpinner />}><IctGrossProfitReport /></Suspense>;
     if (activeSidebarItem === "ict-budget-detail") return <Suspense fallback={<LoadingSpinner />}><IctBudgetDetail /></Suspense>;
     if (activeSidebarItem === "construct-not-fixed-no-expense") return <Suspense fallback={<LoadingSpinner />}><ConstructNotFixedNoExpense /></Suspense>;
+    if (activeSidebarItem === "cost-estimate-report") return <Suspense fallback={<LoadingSpinner />}><CostEstimateReport /></Suspense>;
     if (activeSidebarItem === "business-info") return <Suspense fallback={<LoadingSpinner />}><BusinessInfoManagement /></Suspense>;
     if (["invest-fixed-unbilled", "cooperation-share-report", "cost-provision-report", "project-budget-detail", "ict-gross-profit-report", "monthly-revenue-detail"].includes(activeSidebarItem)) {
       return (
@@ -234,10 +246,16 @@ export default function App() {
             />
           )}
 
-          {/* Content Area - 宽度随AI侧边栏变化 */}
+          {/* Content Area - 宽度随AI侧边栏和PRD侧边栏变化 */}
           <div
             className="overflow-auto transition-all duration-300 bg-[#f0f5ff]"
-            style={{ width: aiSidebarOpen ? `calc(100% - ${aiSidebarWidth}px - 6px)` : "100%" }}
+            style={{
+              width: aiSidebarOpen
+                ? `calc(100% - ${aiSidebarWidth + 6}px)`
+                : prdSidebarOpen
+                  ? `calc(100% - 560px)`
+                  : '100%'
+            }}
           >
             <div className="p-6 h-full flex flex-col">
               <div className="bg-white rounded shadow-sm flex-1">
@@ -246,7 +264,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Resize Divider */}
+          {/* Resize Divider - 仅在AI侧边栏打开时显示 */}
           <ResizeDivider
             onWidthChange={setAiSidebarWidth}
             minWidth={300}
@@ -261,6 +279,14 @@ export default function App() {
             onClose={() => setAiSidebarOpen(false)}
             width={aiSidebarWidth}
           />
+
+          {/* PRD Panel */}
+          <PrdPanel
+            route={activeSidebarItem}
+            basePath="/lto"
+            isOpen={prdSidebarOpen}
+            onToggle={() => setPrdSidebarOpen(!prdSidebarOpen)}
+          />
         </div>
       </div>
 
@@ -269,6 +295,7 @@ export default function App() {
         isOpen={aiSidebarOpen}
         onClick={() => setAiSidebarOpen(!aiSidebarOpen)}
       />
+
     </div>
   );
 }

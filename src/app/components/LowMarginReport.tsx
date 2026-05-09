@@ -347,15 +347,15 @@ export function LowMarginReport() {
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">模式会毛利率(%)</label>
-                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 27.6" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">模式会服务毛利率(%)</label>
-                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 25.0" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">模式会设备销售、租赁毛利率(%)</label>
-                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 30.8" />
                   </div>
                 </div>
               </div>
@@ -399,15 +399,79 @@ export function LowMarginReport() {
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">合同签约毛利率(%)</label>
-                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 26.8" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">合同签约服务毛利率(%)</label>
-                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 24.2" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">合同签约设备销售、租赁毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 30.0" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 执行过程 */}
+            {showAllConditions && (
+              <div className="mb-4 pt-4 border-t border-gray-100">
+                <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                  <span className="w-1 h-4 bg-blue-500 rounded mr-2"></span>
+                  执行过程
+                </div>
+                <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">执行过程实际收入总金额</label>
                     <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">执行过程实际支出总金额</label>
+                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">执行过程毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 25.0" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">执行过程服务毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 22.4" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">执行过程设备销售、租赁毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 28.3" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 决算 */}
+            {showAllConditions && (
+              <div className="mb-4 pt-4 border-t border-gray-100">
+                <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                  <span className="w-1 h-4 bg-green-500 rounded mr-2"></span>
+                  决算
+                </div>
+                <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">决算实际收入总金额</label>
+                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">决算实际支出总金额</label>
+                    <input type="text" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="请输入" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">决算毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 22.9" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">决算服务毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 20.4" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">决算设备销售、租赁毛利率(%)</label>
+                    <input type="number" className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="如: 26.2" />
                   </div>
                 </div>
               </div>

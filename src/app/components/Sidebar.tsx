@@ -31,6 +31,7 @@ const yecaiChildren: MenuItem[] = [
   { id: "ict-budget-detail", label: "ICT项目预算明细" },
   { id: "ict-gross-profit-report", label: "政企口径ICT毛利额（区县维度）" },
   { id: "construct-not-fixed-no-expense", label: "已列收工程未转固无支出" },
+  { id: "cost-estimate-report", label: "成本暂估列账率报表" },
 ];
 
 const menuItems: MenuItem[] = [

@@ -2,6 +2,7 @@
  * PRD 注入脚本 - Vanilla JS 实现，适配所有前端框架
  * 功能：段落双击编辑 / 折叠标题 / Mermaid / 版本徽章 / 未保存提示
  * 支持双模式：静态读取（无需服务）+ API 模式（支持编辑）
+ * 自动更新：每次加载检查远程版本，有更新时提示刷新
  */
 (function() {
   if (window.__PRD_INJECTED__) return;
@@ -9,6 +10,85 @@
 
   const PRD_PORT = window.__PRD_PORT__ || 3004;
   const PRD_BASE = `http://localhost:${PRD_PORT}`;
+
+  // ── 版本检查与自动更新 ───────────────────────────────
+  const SCRIPT_VERSION = '1.1.0'; // 与 skills/prd-inject.js 同步更新
+
+  async function checkAndUpdate() {
+    try {
+      const r = await fetch(PRD_BASE + '/api/prd/version');
+      if (!r.ok) return;
+      const { version } = await r.json();
+      if (version && version !== SCRIPT_VERSION) {
+        // 版本不同，尝试自动更新
+        const scriptR = await fetch(PRD_BASE + '/api/prd/script');
+        if (scriptR.ok) {
+          const scriptContent = await scriptR.text();
+          if (scriptContent && scriptContent.includes('__PRD_INJECTED__')) {
+            // 移除旧样式
+            document.getElementById('__prd-styles__')?.remove();
+            // 执行新脚本
+            eval(scriptContent);
+            // 重新创建按钮
+            createFloatBtn();
+            showToast('PRD 脚本已自动更新，请刷新或继续使用');
+            return;
+          }
+        }
+        // 自动更新失败，显示提示
+        showUpdateBanner(version);
+      }
+    } catch {}
+  }
+
+  function showUpdateBanner(remoteVersion) {
+    const banner = document.createElement('div');
+    banner.id = '__prd-update-banner__';
+    banner.innerHTML = `
+      <span>PRD 脚本有新版本 (v${remoteVersion})</span>
+      <button onclick="location.reload()">刷新页面</button>
+      <style>
+        #__prd-update-banner__{
+          position:fixed;bottom:70px;left:24px;z-index:99999;
+          background:linear-gradient(135deg,#ff6b6b,#ee5a5a);
+          color:#fff;padding:10px 16px;border-radius:8px;
+          font-size:13px;display:flex;align-items:center;gap:10px;
+          box-shadow:0 4px 12px rgba(238,90,90,0.4);
+          animation:__prd-slide-up 0.3s ease;
+        }
+        @keyframes __prd-slide-up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        #__prd-update-banner__ button{
+          background:#fff;color:#ee5a5a;border:none;padding:4px 12px;
+          border-radius:4px;font-size:12px;cursor:pointer;font-weight:600;
+        }
+        #__prd-update-banner__ button:hover{background:#ffeaea}
+      </style>
+    `;
+    document.body.appendChild(banner);
+  }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.id = '__prd-toast__';
+    toast.textContent = msg;
+    toast.style.cssText = `
+      position:fixed;top:80px;right:24px;z-index:99999;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:#fff;padding:12px 20px;border-radius:8px;
+      font-size:13px;box-shadow:0 4px 12px rgba(102,126,234,0.4);
+      animation:__prd-toast-in 0.3s ease;
+    `;
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        @keyframes __prd-toast-in{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+      </style>
+    `);
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+  }
+
+  // 启动时检查更新（非阻塞）
+  checkAndUpdate();
 
   // ── 状态 ─────────────────────────────────────────────
   let panelOpen = false;
@@ -27,19 +107,44 @@
   function getCurrentRoute() {
     const meta = document.querySelector('meta[name="prd-route"]');
     if (meta) return meta.content;
+    // 兼容 LTO SPA：App.tsx 注入的路由名
+    if (window.__PRD_ROUTE__) return window.__PRD_ROUTE__;
     const parts = window.location.pathname.split('/').filter(Boolean);
-    for (let i = parts.length - 1; i >= 0; i--) {
-      if (!/^\d+$/.test(parts[i])) return parts[i];
+    // 跳过 base 路径
+    const skipSet = new Set(['lto', 'lto-app']);
+    let startIdx = 0;
+    if (parts.length > 0 && skipSet.has(parts[0])) startIdx = 1;
+    for (let i = parts.length - 1; i >= startIdx; i--) {
+      if (!/^\d+$/.test(parts[i])) {
+        try { return decodeURIComponent(parts[i]); } catch { return parts[i]; }
+      }
     }
     return parts[parts.length - 1] || 'index';
   }
 
-  // ── 静态读取 PRD（无需服务）────────────────────────────
+  // ── 静态读取 PRD（window.__PRD_DATA__ 优先）────────────────────────────
+  function loadPRDFromDataVar(route) {
+    if (window.__PRD_DATA__ && window.__PRD_DATA__[route]) {
+      return { content: window.__PRD_DATA__[route], source: 'window.__PRD_DATA__', mode: 'static' };
+    }
+    return null;
+  }
+
+  // ── 静态读取 PRD 文件（无需服务）────────────────────────────
   async function loadPRDStatic(route) {
+    // 优先从 window.__PRD_DATA__ 读取（静态部署模式）
+    const dataVarResult = loadPRDFromDataVar(route);
+    if (dataVarResult) return dataVarResult;
+
+    // 对路由进行 URL 编码，用于文件路径
+    const encodedRoute = encodeURIComponent(route);
     const mdPaths = [
+      `.prd/_routes/_${encodedRoute}.md`,
       `.prd/_routes/_${route}.md`,
+      `public/prd/_routes/_${encodedRoute}.md`,
       `public/prd/_routes/_${route}.md`,
       `.prd/_routes/_index.md`,
+      `public/prd/_routes/_index.md`,
     ];
     for (const mdPath of mdPaths) {
       try {
@@ -57,25 +162,32 @@
     try {
       const r = await fetch(PRD_BASE + '/api/prd/read?route=' + encodeURIComponent(route));
       if (r.ok) {
-        const d = await r.json();
-        return { content: d.content || '', source: 'api', mode: 'api' };
+        const text = await r.text();
+        // 尝试解析 JSON，如果失败则直接使用纯文本
+        try {
+          const d = JSON.parse(text);
+          return { content: d.content || '', source: 'api', mode: 'api' };
+        } catch {
+          // API 直接返回 Markdown 文本
+          return { content: text, source: 'api', mode: 'api' };
+        }
       }
     } catch {}
     return { content: '', source: null, mode: 'api' };
   }
 
-  // ── 加载 PRD（双模式）─────────────────────────────────
+  // ── 加载 PRD（静态模式优先，GitHub Pages 部署）─────────────────────────
   async function loadPRD(route) {
     currentRoute = route;
     apiMode = false;
     staticMode = false;
 
-    // 优先尝试 API 模式
-    let result = await loadPRDApi(route);
-    if (result.content) {
-      apiMode = true;
+    // 优先从 window.__PRD_DATA__ 静态读取（GitHub Pages 模式）
+    let result = loadPRDFromDataVar(route);
+    if (result) {
+      staticMode = true;
     } else {
-      // API 失败，降级到静态读取
+      // 降级到静态文件
       result = await loadPRDStatic(route);
       if (result.content) {
         staticMode = true;
@@ -97,7 +209,8 @@
       '.__prd-panel__{',
         'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;',
         'position:fixed;top:0;right:0;width:min(560px,100vw);height:100vh;',
-        'background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,0.1);',
+        'background:rgba(255,255,255,0.82);box-shadow:-4px 0 20px rgba(0,0,0,0.1);',
+        'backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);',
         'z-index:99998;display:flex;flex-direction:column;',
         'transform:translateX(100%);transition:transform 0.3s ease;',
       '}',
@@ -107,16 +220,14 @@
       '.__prd-content__{padding:24px;overflow-y:auto;flex:1;min-height:0}',
 
       '.__prd-header__{',
-        'display:flex;justify-content:space-between;align-items:center;',
+        'display:flex;justify-content:space-between;align-items:flex-start;',
         'padding:16px 20px;background:linear-gradient(135deg,#f5f7fa,#e4e8ec);',
         'border-bottom:1px solid #e5e7eb;flex-shrink:0;',
       '}',
-      '.__prd-title__{display:flex;align-items:center;gap:10px}',
-      '.__prd-title__ h3{margin:0;font-size:16px;font-weight:600;color:#1a1a2e}',
-      '.__prd-ver__{',
-        'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;',
-        'padding:3px 10px;border-radius:12px;font-size:12px;font-weight:500;',
-      '}',
+      '.__prd-title__{display:flex;flex-direction:column;gap:6px}',
+      '.__prd-title__ h3{margin:0;font-size:16px;font-weight:600;color:#1a1a2e;line-height:1.4}',
+      '.__prd-meta__{display:flex;align-items:center;gap:6px;flex-wrap:wrap}',
+      '.__prd-ver__{padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;background:#e8eaf6;color:#3949ab}',
       '.__prd-dot__{width:8px;height:8px;border-radius:50%;background:#f59e0b;animation:__prd-pulse 1.5s infinite}',
       '@keyframes __prd-pulse{0%,100%{opacity:1}50%{opacity:0.5}}',
       '.__prd-actions__{display:flex;gap:8px;align-items:center}',
@@ -132,7 +243,7 @@
 
       '.__prd-error__{padding:10px 20px;background:#fed7d7;color:#c53030;font-size:13px;border-bottom:1px solid #feb2b2}',
       '.__prd-loading__{padding:60px 20px;text-align:center;color:#718096}',
-      '.__prd-mode-badge__{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}',
+      '.__prd-mode-badge__{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}',
       '.__prd-mode-badge__.api{background:#d1fae5;color:#065f46}',
       '.__prd-mode-badge__.static{background:#fef3c7;color:#92400e}',
 
@@ -150,21 +261,21 @@
       '.prd-h3-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0;border-radius:4px}',
       '.prd-h3-header:hover{background:rgba(102,126,234,0.08)}',
       '.prd-h3-header:hover .__prd-collapse-icon__{background:#667eea;color:#fff}',
-      '.prd-h3-title{font-size:17px;font-weight:600;color:#3d4a5c;margin:0;padding:12px 0 6px}',
+      '.prd-h3-title{font-size:17px;font-weight:600;color:#1a1a2e;margin:0;padding:12px 0 6px}',
       '.prd-h3-line{height:1px;background:#667eea;margin-bottom:12px;opacity:0.6}',
       '.prd-h4-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}',
-      '.prd-h4-title{font-size:15px;font-weight:600;color:#4a5568;margin:0;padding:10px 0 6px}',
+      '.prd-h4-title{font-size:15px;font-weight:600;color:#1a1a2e;margin:0;padding:10px 0 6px}',
       '.prd-h4-line{height:1px;background:#a0aec0;margin-bottom:10px}',
       '.prd-h5-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}',
-      '.prd-h5-title{font-size:14px;font-weight:600;color:#5a6578;margin:0;padding:8px 0 4px}',
+      '.prd-h5-title{font-size:14px;font-weight:600;color:#1a1a2e;margin:0;padding:8px 0 4px}',
       '.prd-h5-line{height:1px;background:#cbd5e0;margin-bottom:8px}',
       '.prd-h6-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}',
-      '.prd-h6-title{font-size:13px;font-weight:600;color:#6b7280;margin:0;padding:6px 0 4px}',
+      '.prd-h6-title{font-size:13px;font-weight:600;color:#1a1a2e;margin:0;padding:6px 0 4px}',
       '.prd-h6-line{height:1px;background:#e2e8f0;margin-bottom:6px}',
       '.__prd-collapse-icon__{font-size:10px;color:#667eea;background:transparent;border-radius:3px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;transition:all 0.15s}',
 
-      '.__prd-p__{color:#4a5568;line-height:1.8;margin:0 0 14px}',
-      '.__prd-ul_,.__prd-ol__{color:#4a5568;margin:0 0 14px;padding-left:24px}',
+      '.__prd-p__{color:#2d3748;line-height:1.8;margin:0 0 14px}',
+      '.__prd-ul_,.__prd-ol__{color:#2d3748;margin:0 0 14px;padding-left:24px}',
       '.__prd-li__{margin:6px 0;line-height:1.7}',
       '.__prd-block__{cursor:text;border-radius:4px;transition:background 0.15s;margin-bottom:4px}',
       '.__prd-block__:hover{background:rgba(102,126,234,0.05)}',
@@ -172,7 +283,8 @@
       '.__prd-twrap__{overflow-x:auto;margin:16px 0;border-radius:8px;border:1px solid #e2e8f0}',
       '.__prd-tbl__{width:100%;border-collapse:collapse;font-size:13px}',
       '.__prd-tbl__ th,.__prd-tbl__ td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}',
-      '.__prd-tbl__ th{background:linear-gradient(135deg,#f5f7fa,#edf2f7);font-weight:600;color:#2d3748}',
+      '.__prd-tbl__ th{background:linear-gradient(135deg,#f5f7fa,#edf2f7);font-weight:600;color:#1a1a2e}',
+      '.__prd-tbl__ td{color:#2d3748}',
       '.__prd-tbl__ tr:last-child td{border-bottom:none}',
       '.__prd-tbl__ tr:nth-child(even){background:#fafbfc}',
 
@@ -183,7 +295,7 @@
 
       '.__prd-hr__{border:none;border-top:1px solid #e2e8f0;margin:24px 0}',
 
-      '.__prd-mermaid__{background:#fff;padding:16px;border-radius:8px;border:1px solid #e2e8f0;margin:16px 0;overflow-x:auto;text-align:center}',
+      '.__prd-mermaid__{background:rgba(255,255,255,0.9);padding:16px;border-radius:8px;border:1px solid #e2e8f0;margin:16px 0;overflow-x:auto;text-align:center}',
       '.__prd-mermaid__ svg{max-width:100%;height:auto}',
       '.__prd-merr__{color:#c53030;background:#fed7d7;padding:12px;border-radius:6px;margin:12px 0;font-size:13px}',
 
@@ -549,9 +661,11 @@
       '<div class="__prd-header__">',
         '<div class="__prd-title__">',
           '<h3>PRD: ' + escHtml(route) + '</h3>',
-          modeBadge,
-          `<span class="__prd-ver__">v${ver}${date ? ' - ' + date : ''}</span>`,
-          hasChanges ? '<span class="__prd-dot__" title="有未保存的修改"></span>' : '',
+          `<div class="__prd-meta__">`,
+            `<span class="__prd-ver__">v${ver}${date ? ' · ' + date : ''}</span>`,
+            modeBadge,
+            hasChanges ? '<span class="__prd-dot__" title="有未保存的修改"></span>' : '',
+          '</div>',
         '</div>',
         '<div class="__prd-actions__">',
           `<button class="__prd-btn__ __prd-btn-pri__" id="__prd_edit_btn__" ${editBtnDisabled ? 'disabled title="需启动 PRD 服务"' : ''}>${editBtnLabel}</button>`,

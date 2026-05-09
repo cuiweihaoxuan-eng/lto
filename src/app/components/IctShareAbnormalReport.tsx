@@ -210,6 +210,12 @@ export function IctShareAbnormalReport() {
       { label: "合同", value: "contract" }, { label: "订单", value: "order" }
     ]},
     { key: "auditResult", label: "稽核结果", type: "text" as const, placeholder: "请输入" },
+    { key: "monthIncomeProgress", label: "本月收入进度(%)", type: "text" as const, placeholder: "如: 7.8" },
+    { key: "monthReductionProgress", label: "本月减收进度(%)", type: "text" as const, placeholder: "如: 84.0" },
+    { key: "totalIncomeProgress", label: "累计收入进度(%)", type: "text" as const, placeholder: "如: 23.3" },
+    { key: "totalReductionProgress", label: "累计减收进度(%)", type: "text" as const, placeholder: "如: 252.0" },
+    { key: "yearIncomeProgress", label: "本年收入进度(%)", type: "text" as const, placeholder: "如: 7.8" },
+    { key: "yearReductionProgress", label: "本年减收进度(%)", type: "text" as const, placeholder: "如: 84.0" },
   ];
 
   return (
@@ -310,7 +316,10 @@ export function IctShareAbnormalReport() {
               <div className="grid grid-cols-5 gap-x-6 gap-y-3">
                 {extraFields.map((field) => (
                   <div key={field.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {field.label}
+                      {(field.label.includes("%") || field.key.includes("Progress") || field.key.includes("进度")) && <span className="text-gray-400 ml-0.5">%</span>}
+                    </label>
                     {field.type === "select" ? (
                       <Select value={(queryParams[field.key] as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, [field.key]: v }))}>
                         <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
@@ -319,8 +328,13 @@ export function IctShareAbnormalReport() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
-                        onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
+                      <div className="relative">
+                        <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
+                          onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
+                        {(field.key.includes("Progress") || field.key.includes("DiffRate")) && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

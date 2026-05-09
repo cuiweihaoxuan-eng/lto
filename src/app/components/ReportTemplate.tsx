@@ -743,17 +743,25 @@ export function ReportTemplate({
                     <div className="flex gap-2 items-center">
                       <Input type="number" placeholder="起" value={(queryParams[`${field.key}Min`] as string) ?? ""}
                         onChange={e => updateParam(`${field.key}Min`, e.target.value)} />
+                      {field.label.includes("%") && <span className="text-gray-400">%</span>}
                       <span className="text-gray-400">-</span>
                       <Input type="number" placeholder="止" value={(queryParams[`${field.key}Max`] as string) ?? ""}
                         onChange={e => updateParam(`${field.key}Max`, e.target.value)} />
+                      {field.label.includes("%") && <span className="text-gray-400">%</span>}
                     </div>
                   ) : (
-                    <Input
-                      placeholder={field.placeholder ?? "请输入"}
-                      type={field.showPercent ? "number" : "text"}
-                      value={(queryParams[field.key] as string) ?? ""}
-                      onChange={e => updateParam(field.key, e.target.value)}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder={field.placeholder ?? "请输入"}
+                        type={field.showPercent ? "number" : "text"}
+                        value={(queryParams[field.key] as string) ?? ""}
+                        onChange={e => updateParam(field.key, e.target.value)}
+                        className={field.showPercent || field.label.includes("%") ? "pr-8" : ""}
+                      />
+                      {(field.showPercent || field.label.includes("%")) && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
