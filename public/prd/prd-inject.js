@@ -671,7 +671,8 @@
           '</div>',
         '</div>',
         '<div class="__prd-actions__">',
-          `<button class="__prd-btn__ __prd-btn-sec__" id="__prd_download_btn__" title="下载 Markdown">下载</button>`,
+          `<button class="__prd-btn__ __prd-btn-sec__" id="__prd_download_btn__" title="下载当前 Markdown">下载</button>`,
+          `<button class="__prd-btn__ __prd-btn-sec__" id="__prd_download_all_btn__" title="导出全部 PRD 为 zip">导出全部</button>`,
           `<button class="__prd-btn__ __prd-btn-pri__" id="__prd_edit_btn__" ${editBtnDisabled ? 'disabled title="需启动 PRD 服务"' : ''}>${editBtnLabel}</button>`,
           '<button class="__prd-btn__ __prd-btn-close__" id="__prd_close_btn__">✕</button>',
         '</div>',
@@ -777,6 +778,62 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // ── 批量下载全部 PRD（zip）────────────────────────────
+  async function downloadAllPRDs() {
+    if (!window.__PRD_DATA__) {
+      alert('无可用 PRD 数据，请确保 prd-data.js 已加载');
+      return;
+    }
+    const data = window.__PRD_DATA__;
+    const routes = Object.keys(data).filter(k => !k.startsWith('_'));
+    if (routes.length === 0) {
+      alert('没有可下载的 PRD 文件');
+      return;
+    }
+    try {
+      // 动态加载 JSZip（首次使用）
+      if (!window.JSZip) {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js';
+        document.head.appendChild(s);
+        await new Promise((res, rej) => { s.onload = res; s.onerror = rej; });
+      }
+      const zip = new JSZip();
+      const folder = zip.folder('prd');
+      for (const route of routes) {
+        const content = data[route] || '';
+        // 文件名：route名.md，避免特殊字符
+        const safeName = route.replace(/[/\\:*?"<>|]/g, '_');
+        folder.file(`${safeName}.md`, content);
+      }
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'prd-all.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      // JSZip 加载失败时，降级为拼接文本文件
+      let content = `# PRD 全部文档\n\n导出时间: ${new Date().toLocaleString()}\n\n`;
+      for (const route of routes) {
+        content += `\n${'='.repeat(60)}\n路由: ${route}\n${'='.repeat(60)}\n\n`;
+        content += (data[route] || '') + '\n\n';
+      }
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'prd-all.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   }
   let lastPath = location.pathname;
   setInterval(() => {
