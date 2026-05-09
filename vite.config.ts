@@ -84,7 +84,10 @@ function prdPlugin() {
     },
     transformIndexHtml(html) {
       if (!html.includes('__PRD_PORT__')) {
-        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};</script>\n</body>`);
+        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};</script>\n<script src="/lto/prd-inject.js"></script>\n</body>`);
+      }
+      if (!html.includes('prd-inject.js')) {
+        return html.replace('<script src="/prd-inject.js"></script>', `<script src="/lto/prd-inject.js"></script>`);
       }
       return html;
     },
