@@ -234,19 +234,23 @@ async function main() {
   // 自动检测 base 路径（支持 GitHub Pages 子路径部署）
   const BASE_PATH = guessBasePath(PROJECT_ROOT);
 
-  // 1. 清理旧版 prd-inject.js 并复制新版
+  // 1. 清理旧版 prd-inject.js 并复制新版（同时同步到两个路径：public/prd-inject.js + public/prd/prd-inject.js）
   const srcInject = path.join(skillsDir, 'prd-inject.js');
-  const destInjectDir = path.join(PROJECT_ROOT, 'public');
-  const destInject = path.join(destInjectDir, 'prd-inject.js');
-  if (fs.existsSync(srcInject)) {
-    if (!fs.existsSync(destInjectDir)) fs.mkdirSync(destInjectDir, { recursive: true });
-    // 删除旧版（防止缓存问题）
-    if (fs.existsSync(destInject)) fs.unlinkSync(destInject);
-    fs.copyFileSync(srcInject, destInject);
-    console.log('[PRD] ✅ prd-inject.js → public/prd-inject.js（已更新）');
-  } else {
-    console.log('[PRD] ⚠️  未找到 prd-inject.js，跳过');
+  const destInjectRoot = path.join(PROJECT_ROOT, 'public', 'prd-inject.js');   // Vite 构建后入口路径
+  const destInjectPrd = path.join(PROJECT_ROOT, 'public', 'prd', 'prd-inject.js'); // 旧版项目路径（兼容）
+  function syncFile(src, dest) {
+    if (!fs.existsSync(src)) return false;
+    const destDir = path.dirname(dest);
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    if (fs.existsSync(dest)) fs.unlinkSync(dest);
+    fs.copyFileSync(src, dest);
+    return true;
   }
+  const syncedRoot = syncFile(srcInject, destInjectRoot);
+  const syncedPrd = syncFile(srcInject, destInjectPrd);
+  if (syncedRoot) console.log('[PRD] ✅ prd-inject.js → public/prd-inject.js（已更新）');
+  if (syncedPrd && destInjectRoot !== destInjectPrd) console.log('[PRD] ✅ prd-inject.js → public/prd/prd-inject.js（已更新）');
+  if (!syncedRoot && !syncedPrd) console.log('[PRD] ⚠️  未找到 prd-inject.js，跳过');
 
   // 2. 创建 public/prd/_routes/ 目录
   const prdRoutes = path.join(PROJECT_ROOT, 'public', 'prd', '_routes');
