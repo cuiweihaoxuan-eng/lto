@@ -82,12 +82,13 @@ function prdPlugin() {
 
       console.log(`[PRD] 📋 打开: http://localhost:${vite.config.server?.port || 5173}/lto/，左下角有 [PRD] 按钮`)
     },
-    transformIndexHtml(html) {
+    transformIndexHtml(html, ctx) {
+      const base = (ctx?.server?.config?.base || vite.config.base || '/').replace(/\/$/, '');
       if (!html.includes('__PRD_PORT__')) {
-        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};</script>\n<script src="/lto/prd-inject.js"></script>\n</body>`);
+        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};window.__PRD_BASE__='${base}/';</script>\n<script src="${base}/prd-inject.js"></script>\n</body>`);
       }
       if (!html.includes('prd-inject.js')) {
-        return html.replace('<script src="/prd-inject.js"></script>', `<script src="/lto/prd-inject.js"></script>`);
+        return html.replace('<script src="/prd-inject.js"></script>', `<script src="${base}/prd-inject.js"></script>`);
       }
       return html;
     },

@@ -12,7 +12,7 @@
   const PRD_BASE = `http://localhost:${PRD_PORT}`;
 
   // ── 版本检查与自动更新 ───────────────────────────────
-  const SCRIPT_VERSION = '1.1.0'; // 与 skills/prd-inject.js 同步更新
+  const SCRIPT_VERSION = '1.3.0'; // 与 skills/prd-inject.js 同步更新
 
   async function checkAndUpdate() {
     try {
@@ -138,13 +138,16 @@
 
     // 对路由进行 URL 编码，用于文件路径
     const encodedRoute = encodeURIComponent(route);
+    // 自动检测 base 路径（GitHub Pages /lto/ 或本地 /）
+    const base = window.__PRD_BASE__ || '';
     const mdPaths = [
-      `.prd/_routes/_${encodedRoute}.md`,
-      `.prd/_routes/_${route}.md`,
-      `public/prd/_routes/_${encodedRoute}.md`,
-      `public/prd/_routes/_${route}.md`,
-      `.prd/_routes/_index.md`,
-      `public/prd/_routes/_index.md`,
+      `${base}prd/_routes/_${encodedRoute}.md`,
+      `${base}prd/_routes/_${route}.md`,
+      `${base}public/prd/_routes/_${encodedRoute}.md`,
+      `${base}public/prd/_routes/_${route}.md`,
+      `${base}.prd/_routes/_${encodedRoute}.md`,
+      `${base}.prd/_routes/_${route}.md`,
+      `${base}prd/_routes/_index.md`,
     ];
     for (const mdPath of mdPaths) {
       try {
@@ -668,6 +671,7 @@
           '</div>',
         '</div>',
         '<div class="__prd-actions__">',
+          `<button class="__prd-btn__ __prd-btn-sec__" id="__prd_download_btn__" title="下载 Markdown">下载</button>`,
           `<button class="__prd-btn__ __prd-btn-pri__" id="__prd_edit_btn__" ${editBtnDisabled ? 'disabled title="需启动 PRD 服务"' : ''}>${editBtnLabel}</button>`,
           '<button class="__prd-btn__ __prd-btn-close__" id="__prd_close_btn__">✕</button>',
         '</div>',
@@ -680,6 +684,7 @@
       '</div>',
     ].join('');
 
+    document.getElementById('__prd_download_btn__').onclick = downloadPRD;
     document.getElementById('__prd_edit_btn__').onclick = () => { if (apiMode) renderEdit(route); };
     document.getElementById('__prd_close_btn__').onclick = togglePanel;
     renderMermaid();
@@ -760,7 +765,19 @@
     }
   }
 
-  // ── SPA 路由切换监听 ───────────────────────────────────
+  // ── 下载 Markdown 文件 ─────────────────────────────────
+  function downloadPRD() {
+    if (!currentMarkdown) return;
+    const blob = new Blob([currentMarkdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (currentRoute || 'prd') + '.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
   let lastPath = location.pathname;
   setInterval(() => {
     if (location.pathname !== lastPath) {
