@@ -12,7 +12,7 @@
   const PRD_BASE = `http://localhost:${PRD_PORT}`;
 
   // ── 版本检查与自动更新 ───────────────────────────────
-  const SCRIPT_VERSION = '1.3.0'; // 与 skills/prd-inject.js 同步更新
+  const SCRIPT_VERSION = '1.4.0'; // 与 skills/prd-inject.js 同步更新
 
   async function checkAndUpdate() {
     try {
