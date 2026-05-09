@@ -1,5 +1,9 @@
 import { defineConfig } from 'vite'
 import path from 'path'
+import fs from 'fs'
+import http from 'http'
+import os from 'os'
+import { spawn } from 'child_process'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
@@ -15,16 +19,96 @@ function figmaAssetResolver() {
   }
 }
 
+// PRD 插件（使用独立 prd-daemon.js）
+function prdPlugin() {
+  const PRD_PORT = 3001
+  const SKILLS_DIR = path.join(os.homedir(), '.claude', 'skills', 'prd')
+
+  let daemonProcess = null
+
+  return {
+    name: 'vite-plugin-prd',
+    async configureServer(vite) {
+      const projectRoot = vite.config.root || process.cwd()
+
+      // 复制 prd.html
+      const srcHtml = path.join(SKILLS_DIR, 'prd.html')
+      const destHtml = path.join(projectRoot, 'public', 'prd.html')
+      if (fs.existsSync(srcHtml) && !fs.existsSync(destHtml)) {
+        fs.copyFileSync(srcHtml, destHtml)
+        console.log('[PRD] ✅ prd.html → public/prd.html')
+      }
+
+      // 创建目录
+      const pd = path.join(projectRoot, 'public', 'prd', '_routes')
+      if (!fs.existsSync(pd)) fs.mkdirSync(pd, { recursive: true })
+
+      // 启动独立 prd-daemon.js
+      const daemonFile = path.join(SKILLS_DIR, 'prd-daemon.js')
+      if (fs.existsSync(daemonFile)) {
+        daemonProcess = spawn('node', [daemonFile], {
+          cwd: projectRoot,
+          detached: true,
+          stdio: 'ignore',
+          env: { ...process.env, PRD_PORT: String(PRD_PORT), PROJECT_ROOT: projectRoot },
+        })
+        daemonProcess.unref()
+        console.log(`[PRD] 🚀 PRD 服务启动中 (端口 ${PRD_PORT})...`)
+      }
+
+      // 等待 daemon 启动
+      await new Promise(r => setTimeout(r, 1500))
+
+      // 代理 PRD API
+      vite.middlewares.use((req, res, next) => {
+        const p = (req.url || '').split('?')[0]
+        if (p.startsWith('/api/prd')) {
+          const opts = {
+            hostname: 'localhost',
+            port: PRD_PORT,
+            path: req.url,
+            method: req.method,
+            headers: { ...req.headers },
+          }
+          const pr = http.request(opts, prRes => {
+            res.writeHead(prRes.statusCode, prRes.headers)
+            prRes.pipe(res, { end: true })
+          })
+          req.pipe(pr, { end: true })
+          return
+        }
+        next()
+      })
+
+      console.log(`[PRD] 📋 打开: http://localhost:${vite.config.server?.port || 5173}/lto/，左下角有 [PRD] 按钮`)
+    },
+    transformIndexHtml(html) {
+      if (!html.includes('__PRD_PORT__')) {
+        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};</script>\n</body>`);
+      }
+      return html;
+    },
+    closeBundle() {
+      if (daemonProcess) {
+        daemonProcess.kill()
+        daemonProcess = null
+        console.log('[PRD] 🛑 PRD 服务已关闭')
+      }
+    },
+  }
+}
+
 export default defineConfig({
   plugins: [
     figmaAssetResolver(),
     react(),
     tailwindcss(),
+    prdPlugin(),  // ← PRD 全自动
   ],
   server: {
     proxy: {
       '/api/ai': {
-        target: 'http://localhost:8080', // 后端地址，改成实际端口
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
     },
@@ -46,12 +130,8 @@ export default defineConfig({
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
         passes: 2,
       },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false,
-      },
+      mangle: { safari10: true },
+      format: { comments: false },
     },
     rollupOptions: {
       output: {
