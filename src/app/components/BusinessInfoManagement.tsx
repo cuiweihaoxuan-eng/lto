@@ -1,5 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, RefreshCw, ChevronDown, ChevronUp, Star, FileText } from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Badge } from "./ui/badge";
 import { BusinessInfoModal } from "./BusinessInfoModal";
 import { LinkOpportunityDialog } from "./LinkOpportunityDialog";
 
@@ -7,27 +11,6 @@ interface FilterCategory {
   label: string;
   value: string;
   count: number;
-}
-
-interface SearchForm {
-  businessInfoCode: string;
-  projectName: string;
-  projectCode: string;
-  biddingUnit: string;
-  industryType: string;
-  businessInfoStatus: string;
-  controlDepartment: string;
-  businessInfoArea: string;
-  dataType: string;
-  operatorLabel: string;
-  groupDispatchTimeStart: string;
-  groupDispatchTimeEnd: string;
-  biddingAmountMin: string;
-  biddingAmountMax: string;
-  biddingPublishTime: string;
-  winningTime: string;
-  currentOperationStep: string;
-  currentOperationRole: string;
 }
 
 const defaultColumnWidths = {
@@ -45,8 +28,6 @@ const defaultColumnWidths = {
   groupBusinessCode: 112,
   businessName: 160,
   groupBusinessTime: 112,
-  enterpriseName: 160,
-  areaGroup: 64,
   dataType: 80,
   biddingAmount: 96,
   biddingPublishTime: 112,
@@ -76,6 +57,28 @@ export function BusinessInfoManagement() {
   const [resizing, setResizing] = useState<string | null>(null);
   const [resizeStartX, setResizeStartX] = useState(0);
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
+
+  // 查询条件状态
+  const [searchForm, setSearchForm] = useState({
+    businessInfoCode: "",
+    projectName: "",
+    projectCode: "",
+    biddingUnit: "",
+    industryType: "",
+    businessInfoStatus: "",
+    controlDepartment: "",
+    businessInfoArea: "",
+    dataType: "",
+    operatorLabel: "",
+    groupDispatchTimeStart: "",
+    groupDispatchTimeEnd: "",
+    biddingAmountMin: "",
+    biddingAmountMax: "",
+    biddingPublishTime: "",
+    winningTime: "",
+    currentOperationStep: "",
+    currentOperationRole: "",
+  });
 
   const handleResizeStart = (e: React.MouseEvent, columnId: string, startWidth: number) => {
     e.preventDefault();
@@ -141,27 +144,6 @@ export function BusinessInfoManagement() {
   };
 
   const currentSecondFilters = secondLevelFiltersMap[firstLevelFilter] || [];
-
-  const [searchForm, setSearchForm] = useState<SearchForm>({
-    businessInfoCode: "",
-    projectName: "",
-    projectCode: "",
-    biddingUnit: "",
-    industryType: "",
-    businessInfoStatus: "",
-    controlDepartment: "",
-    businessInfoArea: "",
-    dataType: "",
-    operatorLabel: "",
-    groupDispatchTimeStart: "",
-    groupDispatchTimeEnd: "",
-    biddingAmountMin: "",
-    biddingAmountMax: "",
-    biddingPublishTime: "",
-    winningTime: "",
-    currentOperationStep: "",
-    currentOperationRole: "",
-  });
 
   const mockData = [
     {
@@ -397,521 +379,507 @@ export function BusinessInfoManagement() {
   };
 
   const statusBadgeClass = (status: string) => {
-    if (status === "未处理") return "bg-orange-100 text-orange-700";
-    if (status === "转商机") return "bg-blue-100 text-blue-700";
-    return "bg-green-100 text-green-700";
+    if (status === "未处理") return "bg-orange-100 text-orange-700 border-orange-200";
+    if (status === "转商机") return "bg-blue-100 text-blue-700 border-blue-200";
+    return "bg-green-100 text-green-700 border-green-200";
   };
 
-  const setField = (key: keyof SearchForm, value: string) => {
+  const setField = (key: string, value: string) => {
     setSearchForm(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleQuery = () => {
+    console.log("查询商情:", searchForm);
+  };
+
   return (
-    <div className="flex flex-col h-full w-full p-4">
-      {/* 顶部过滤标签页 */}
-      <div className="bg-white rounded-lg shadow-sm mb-4">
-        <div className="flex items-center gap-2 px-4 py-3 border-b">
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* 页面标题 */}
+      <div className="px-6 pt-6 pb-4 flex-shrink-0">
+        <h2 className="text-lg font-medium text-gray-900">商情管理</h2>
+        <p className="text-sm text-gray-500 mt-1">商情信息查询与管理</p>
+      </div>
+
+      {/* Tab 切换 */}
+      <div className="px-6 flex-shrink-0">
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
           {firstLevelFilters.map((filter) => (
             <button
               key={filter.value}
               onClick={() => handleFirstLevelChange(filter.value)}
-              className={`px-4 py-2 rounded text-sm flex items-center gap-2 transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 firstLevelFilter === filter.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              <span>{filter.label}</span>
-              <span className={`text-xs ${firstLevelFilter === filter.value ? "text-blue-100" : "text-gray-500"}`}>
-                ({filter.count})
-              </span>
+              {filter.label} ({filter.count})
             </button>
           ))}
         </div>
-
-        {currentSecondFilters.length > 0 && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b overflow-x-auto">
-            {currentSecondFilters.map((subFilter) => (
-              <button
-                key={subFilter.value}
-                onClick={() => setSecondLevelFilter(subFilter.value)}
-                className={`px-3 py-1.5 rounded text-xs flex items-center gap-2 whitespace-nowrap ${
-                  secondLevelFilter === subFilter.value
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-300"
-                }`}
-              >
-                <span>{subFilter.label}</span>
-                <span className={`text-xs ${secondLevelFilter === subFilter.value ? "text-blue-100" : "text-gray-400"}`}>
-                  ({subFilter.count})
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* 主内容区 */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-        {/* 查询条件 */}
-        <div className="p-4 border-b mb-4">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">商情编号</label>
-              <input
-                type="text"
-                value={searchForm.businessInfoCode}
-                onChange={(e) => setField("businessInfoCode", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
+      {/* 内容区 */}
+      <div className="flex-1 overflow-auto px-6 pb-6">
+        <div className="mt-4 space-y-4">
+          {/* 子Tab标签页 */}
+          {currentSecondFilters.length > 0 && (
+            <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+              <div className="flex items-center gap-1">
+                {currentSecondFilters.map((subFilter) => (
+                  <button
+                    key={subFilter.value}
+                    onClick={() => setSecondLevelFilter(subFilter.value)}
+                    className={`px-4 py-1.5 text-sm rounded transition-colors ${
+                      secondLevelFilter === subFilter.value
+                        ? "bg-[#1890ff] text-white"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {subFilter.label} ({subFilter.count})
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">项目名称</label>
-              <input
-                type="text"
-                value={searchForm.projectName}
-                onChange={(e) => setField("projectName", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">项目编码</label>
-              <input
-                type="text"
-                value={searchForm.projectCode}
-                onChange={(e) => setField("projectCode", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">招标单位</label>
-              <input
-                type="text"
-                value={searchForm.biddingUnit}
-                onChange={(e) => setField("biddingUnit", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
-            </div>
+          )}
 
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">行业类型</label>
-              <input
-                type="text"
-                value={searchForm.industryType}
-                onChange={(e) => setField("industryType", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">商情状态</label>
-              <select
-                value={searchForm.businessInfoStatus}
-                onChange={(e) => setField("businessInfoStatus", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="all">全部</option>
-                <option value="unprocessed">未处理</option>
-                <option value="to-opportunity">转商机</option>
-                <option value="related">已关联</option>
-                <option value="returned">已退回</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">管控部门</label>
-              <input
-                type="text"
-                value={searchForm.controlDepartment}
-                onChange={(e) => setField("controlDepartment", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-600">商情区域</label>
-              <input
-                type="text"
-                value={searchForm.businessInfoArea}
-                onChange={(e) => setField("businessInfoArea", e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="请输入"
-              />
+          {/* 查询条件卡片 */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商情编号</label>
+                <Input
+                  value={searchForm.businessInfoCode}
+                  onChange={(e) => setField("businessInfoCode", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                <Input
+                  value={searchForm.projectName}
+                  onChange={(e) => setField("projectName", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
+                <Input
+                  value={searchForm.projectCode}
+                  onChange={(e) => setField("projectCode", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">招标单位</label>
+                <Input
+                  value={searchForm.biddingUnit}
+                  onChange={(e) => setField("biddingUnit", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">行业类型</label>
+                <Input
+                  value={searchForm.industryType}
+                  onChange={(e) => setField("industryType", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商情状态</label>
+                <Select value={searchForm.businessInfoStatus} onValueChange={(v) => setField("businessInfoStatus", v)}>
+                  <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部</SelectItem>
+                    <SelectItem value="unprocessed">未处理</SelectItem>
+                    <SelectItem value="to-opportunity">转商机</SelectItem>
+                    <SelectItem value="related">已关联</SelectItem>
+                    <SelectItem value="returned">已退回</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">管控部门</label>
+                <Input
+                  value={searchForm.controlDepartment}
+                  onChange={(e) => setField("controlDepartment", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商情区域</label>
+                <Input
+                  value={searchForm.businessInfoArea}
+                  onChange={(e) => setField("businessInfoArea", e.target.value)}
+                  placeholder="请输入"
+                />
+              </div>
             </div>
 
             {showMoreFilters && (
-              <>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">数据类型</label>
-                  <input
-                    type="text"
+              <div className="grid grid-cols-4 gap-x-6 gap-y-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">数据类型</label>
+                  <Input
                     value={searchForm.dataType}
                     onChange={(e) => setField("dataType", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="请输入"
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">运营商标签</label>
-                  <input
-                    type="text"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">运营商标签</label>
+                  <Input
                     value={searchForm.operatorLabel}
                     onChange={(e) => setField("operatorLabel", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="请输入"
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">集团派发时间</label>
-                  <div className="flex items-center gap-1">
-                    <input
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">集团派发时间</label>
+                  <div className="flex gap-2 items-center">
+                    <Input
                       type="date"
                       value={searchForm.groupDispatchTimeStart}
                       onChange={(e) => setField("groupDispatchTimeStart", e.target.value)}
-                      className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 h-8 text-sm"
                     />
-                    <span className="text-xs text-gray-500">-</span>
-                    <input
+                    <span className="text-gray-400">-</span>
+                    <Input
                       type="date"
                       value={searchForm.groupDispatchTimeEnd}
                       onChange={(e) => setField("groupDispatchTimeEnd", e.target.value)}
-                      className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 h-8 text-sm"
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">招标/中标金额(万)</label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="text"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">招标/中标金额(万)</label>
+                  <div className="flex gap-2 items-center">
+                    <Input
                       value={searchForm.biddingAmountMin}
                       onChange={(e) => setField("biddingAmountMin", e.target.value)}
-                      className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       placeholder="最小"
                     />
-                    <span className="text-xs text-gray-500">-</span>
-                    <input
-                      type="text"
+                    <span className="text-gray-400">-</span>
+                    <Input
                       value={searchForm.biddingAmountMax}
                       onChange={(e) => setField("biddingAmountMax", e.target.value)}
-                      className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       placeholder="最大"
                     />
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">招标发布时间</label>
-                  <input
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">招标发布时间</label>
+                  <Input
                     type="date"
                     value={searchForm.biddingPublishTime}
                     onChange={(e) => setField("biddingPublishTime", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">中标时间</label>
-                  <input
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">中标时间</label>
+                  <Input
                     type="date"
                     value={searchForm.winningTime}
                     onChange={(e) => setField("winningTime", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">当前操作步骤</label>
-                  <input
-                    type="text"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">当前操作步骤</label>
+                  <Input
                     value={searchForm.currentOperationStep}
                     onChange={(e) => setField("currentOperationStep", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="请输入"
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm text-gray-600">当前操作角色</label>
-                  <select
-                    value={searchForm.currentOperationRole}
-                    onChange={(e) => setField("currentOperationRole", e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="all">全部</option>
-                    <option value="province">省管理员</option>
-                    <option value="city">地市管理员</option>
-                    <option value="district">区县管理员</option>
-                    <option value="manager">客户经理</option>
-                  </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">当前操作角色</label>
+                  <Select value={searchForm.currentOperationRole} onValueChange={(v) => setField("currentOperationRole", v)}>
+                    <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部</SelectItem>
+                      <SelectItem value="province">省管理员</SelectItem>
+                      <SelectItem value="city">地市管理员</SelectItem>
+                      <SelectItem value="district">区县管理员</SelectItem>
+                      <SelectItem value="manager">客户经理</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </>
+              </div>
             )}
-          </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => console.log("搜索参数:", searchForm)}
-                className="px-4 py-1.5 text-sm text-white bg-blue-600 rounded hover:bg-blue-700 flex items-center gap-1"
+            <div className="flex items-center justify-between mt-4">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setShowMoreFilters(!showMoreFilters)}
+                className="text-blue-600 p-0"
               >
-                <Search className="w-4 h-4" />
-                查询
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
-              >
-                重置
-              </button>
+                {showMoreFilters ? (
+                  <><ChevronUp className="w-4 h-4 mr-1 inline" />收起更多条件</>
+                ) : (
+                  <><ChevronDown className="w-4 h-4 mr-1 inline" />展开更多条件</>
+                )}
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="default" size="sm" onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                  <Search className="w-4 h-4 mr-1" />查询
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleReset}>
+                  <RefreshCw className="w-4 h-4 mr-1" />重置
+                </Button>
+              </div>
             </div>
-            <button
-              onClick={() => setShowMoreFilters(!showMoreFilters)}
-              className="px-4 py-1.5 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-            >
-              {showMoreFilters ? (
-                <><ChevronUp className="w-4 h-4" />收起</>
-              ) : (
-                <><ChevronDown className="w-4 h-4" />更多</>
-              )}
-            </button>
           </div>
-        </div>
 
-        {/* 表格 */}
-        <div className="flex-1 overflow-auto bg-white">
-          <div style={{ minWidth: '100%' }}>
-            <table className="divide-y divide-gray-200" style={{ tableLayout: "fixed", minWidth: "2800px" }}>
-
-              <thead className="sticky top-0 bg-gray-100 z-20">
-                <tr className="divide-x divide-gray-300">
-                  <th
-                    colSpan={6}
-                    className="px-3 py-3 text-center text-gray-700 font-medium bg-blue-50 sticky left-0 z-30"
-                    style={{ width: 640, minWidth: 640 }}
-                  >
-                    商情基本信息
-                  </th>
-                  <th
-                    colSpan={8}
-                    className="px-3 py-3 text-center text-gray-700 font-medium bg-green-50"
-                  >
-                    商情处理信息
-                  </th>
-                  <th
-                    colSpan={16}
-                    className="px-3 py-3 text-center text-gray-700 font-medium bg-yellow-50"
-                  >
-                    商情信息
-                  </th>
-                  <th
-                    rowSpan={2}
-                    className="px-3 py-3 text-center text-gray-700 font-medium bg-gray-100 sticky right-0 z-30"
-                    style={{ width: columnWidths.actions, minWidth: columnWidths.actions }}
-                  >
-                    操作
-                  </th>
-                </tr>
-
-                <tr className="divide-x divide-gray-300">
-                  <th style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-0 bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">集团派发时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupDispatchTime', columnWidths.groupDispatchTime)} />
-                  </th>
-                  <th style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[96px] bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">地市</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
-                  </th>
-                  <th style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[160px] bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">区县</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'district', columnWidths.district)} />
-                  </th>
-                  <th style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[224px] bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">商情编号</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoCode', columnWidths.businessInfoCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[336px] bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">项目编码</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectCode', columnWidths.projectCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[448px] bg-blue-50 z-30 relative select-none">
-                    <div className="pr-3">项目名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectName', columnWidths.projectName)} />
-                  </th>
-                  <th style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">商情状态</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoStatus', columnWidths.businessInfoStatus)} />
-                  </th>
-                  <th style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">当前操作步骤</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationStep', columnWidths.currentOperationStep)} />
-                  </th>
-                  <th style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">当前操作角色</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationRole', columnWidths.currentOperationRole)} />
-                  </th>
-                  <th style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">当前操作人</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperator', columnWidths.currentOperator)} />
-                  </th>
-                  <th style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">客户经理</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'accountManager', columnWidths.accountManager)} />
-                  </th>
-                  <th style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">集团商机编码</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessCode', columnWidths.groupBusinessCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">商机名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessName', columnWidths.businessName)} />
-                  </th>
-                  <th style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
-                    <div className="pr-3">集团商机编码时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessTime', columnWidths.groupBusinessTime)} />
-                  </th>
-                  <th style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">数据类型</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'dataType', columnWidths.dataType)} />
-                  </th>
-                  <th style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-right text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">招标/中标金额(万)</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingAmount', columnWidths.biddingAmount)} />
-                  </th>
-                  <th style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">招标发布时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingPublishTime', columnWidths.biddingPublishTime)} />
-                  </th>
-                  <th style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">开标时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'openingTime', columnWidths.openingTime)} />
-                  </th>
-                  <th style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">招标截至时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingDeadline', columnWidths.biddingDeadline)} />
-                  </th>
-                  <th style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">中标时间</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningTime', columnWidths.winningTime)} />
-                  </th>
-                  <th style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">招标单位</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnit', columnWidths.biddingUnit)} />
-                  </th>
-                  <th style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">企业派发名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'companyDispatchName', columnWidths.companyDispatchName)} />
-                  </th>
-                  <th style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">中标单位</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningUnit', columnWidths.winningUnit)} />
-                  </th>
-                  <th style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">运营商标签</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'operatorLabel', columnWidths.operatorLabel)} />
-                  </th>
-                  <th style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">项目类型</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectType', columnWidths.projectType)} />
-                  </th>
-                  <th style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">管控部门</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'controlDepartment', columnWidths.controlDepartment)} />
-                  </th>
-                  <th style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">招标单位所属区域</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnitArea', columnWidths.biddingUnitArea)} />
-                  </th>
-                  <th style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">附件</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'attachment', columnWidths.attachment)} />
-                  </th>
-                  <th style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">企业派发名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'enterpriseName', columnWidths.enterpriseName)} />
-                  </th>
-                  <th style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
-                    <div className="pr-3">区域分组</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'areaGroup', columnWidths.areaGroup)} />
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {mockData.map((row) => (
-                  <tr key={row.id} className="divide-x divide-gray-100 hover:bg-gray-50">
-                    <td style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-0 bg-white z-10">
-                      {row.groupDispatchTime}
-                    </td>
-                    <td style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[96px] bg-white z-10">{row.city}</td>
-                    <td style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[160px] bg-white z-10">{row.district}</td>
-                    <td style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-blue-600 text-sm whitespace-nowrap sticky left-[224px] bg-white z-10">
-                      {row.businessInfoCode}
-                    </td>
-                    <td style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[336px] bg-white z-10">
-                      {row.projectCode}
-                    </td>
-                    <td style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[448px] bg-white z-10" title={row.projectName}>
-                      <div className="w-48 truncate">{row.projectName}</div>
-                    </td>
-                    <td style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 whitespace-nowrap">
-                      <span className={`inline-block px-2 py-0.5 text-xs rounded ${statusBadgeClass(row.businessInfoStatus)}`}>
-                        {row.businessInfoStatus}
-                      </span>
-                    </td>
-                    <td style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 whitespace-nowrap">
-                      <button onClick={() => handleViewFlow(row)} className="text-blue-600 hover:underline">
-                        {row.currentOperationStep}
-                      </button>
-                    </td>
-                    <td style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.currentOperationRole}</td>
-                    <td style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-gray-700 whitespace-nowrap" title={row.currentOperator}>
-                      {row.currentOperator.length > 10 ? `${row.currentOperator.substring(0, 10)}...` : row.currentOperator}
-                    </td>
-                    <td style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.accountManager}</td>
-                    <td style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessCode}</td>
-                    <td style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.businessName}</td>
-                    <td style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessTime}</td>
-                    <td style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.dataType}</td>
-                    <td style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-right text-gray-700 whitespace-nowrap">{row.biddingAmount}</td>
-                    <td style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingPublishTime}</td>
-                    <td style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.openingTime}</td>
-                    <td style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingDeadline}</td>
-                    <td style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningTime || "-"}</td>
-                    <td style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnit}</td>
-                    <td style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.companyDispatchName}</td>
-                    <td style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningUnit || "-"}</td>
-                    <td style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.operatorLabel}</td>
-                    <td style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.projectType}</td>
-                    <td style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.controlDepartment}</td>
-                    <td style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnitArea}</td>
-                    <td style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-blue-600 whitespace-nowrap">
-                      <a href="#" className="hover:underline">{row.attachment || (row.attachmentCount ? `${row.attachmentCount}个附件` : '-')}</a>
-                    </td>
-                    <td style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.enterpriseName || row.companyDispatchName}</td>
-                    <td style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.areaGroup || '-'}</td>
-                    <td style={{ width: columnWidths.actions, minWidth: columnWidths.actions }} className="px-3 py-3 whitespace-nowrap sticky right-0 bg-white z-10">
-                      <div className="flex gap-1">
-                        <button onClick={() => handleFollow(row)} className={`px-2 py-1 text-xs ${row.isFavorite ? 'text-orange-500' : 'text-blue-600'} hover:opacity-80`}>
-                          {row.isFavorite ? '★ 已关注' : '☆ 关注'}
-                        </button>
-                        <button onClick={() => handleViewDetail(row)} className="px-2 py-1 text-xs text-blue-600 hover:text-blue-700">详情</button>
-                      </div>
-                    </td>
+          {/* 数据表格区 */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="divide-y divide-gray-200" style={{ tableLayout: "fixed", minWidth: "2800px" }}>
+                <thead className="bg-gray-50">
+                  <tr className="divide-x divide-gray-300">
+                    <th colSpan={6} className="px-3 py-3 text-center text-gray-700 font-medium bg-blue-50 sticky left-0 z-30" style={{ width: 640, minWidth: 640 }}>
+                      商情基本信息
+                    </th>
+                    <th colSpan={8} className="px-3 py-3 text-center text-gray-700 font-medium bg-green-50">
+                      商情处理信息
+                    </th>
+                    <th colSpan={15} className="px-3 py-3 text-center text-gray-700 font-medium bg-yellow-50">
+                      商情信息
+                    </th>
+                    <th rowSpan={2} className="px-3 py-3 text-center text-gray-700 font-medium bg-gray-50 sticky right-0 z-30" style={{ width: columnWidths.actions, minWidth: columnWidths.actions }}>
+                      操作
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+
+                  <tr className="divide-x divide-gray-300">
+                    <th style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-0 bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">集团派发时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupDispatchTime', columnWidths.groupDispatchTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[96px] bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">地市</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
+                    </th>
+                    <th style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[160px] bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">区县</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'district', columnWidths.district)} />
+                    </th>
+                    <th style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[224px] bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">商情编号</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoCode', columnWidths.businessInfoCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[336px] bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">项目编码</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectCode', columnWidths.projectCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[448px] bg-blue-50 z-30 relative select-none">
+                      <div className="pr-3">项目名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectName', columnWidths.projectName)} />
+                    </th>
+                    <th style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">商情状态</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoStatus', columnWidths.businessInfoStatus)} />
+                    </th>
+                    <th style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">当前操作步骤</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationStep', columnWidths.currentOperationStep)} />
+                    </th>
+                    <th style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">当前操作角色</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationRole', columnWidths.currentOperationRole)} />
+                    </th>
+                    <th style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">当前操作人</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperator', columnWidths.currentOperator)} />
+                    </th>
+                    <th style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">客户经理</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'accountManager', columnWidths.accountManager)} />
+                    </th>
+                    <th style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">集团商机编码</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessCode', columnWidths.groupBusinessCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">商机名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessName', columnWidths.businessName)} />
+                    </th>
+                    <th style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">集团商机编码时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessTime', columnWidths.groupBusinessTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">数据类型</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'dataType', columnWidths.dataType)} />
+                    </th>
+                    <th style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-right text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">招标/中标金额(万)</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingAmount', columnWidths.biddingAmount)} />
+                    </th>
+                    <th style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">招标发布时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingPublishTime', columnWidths.biddingPublishTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">开标时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'openingTime', columnWidths.openingTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">招标截至时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingDeadline', columnWidths.biddingDeadline)} />
+                    </th>
+                    <th style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">中标时间</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningTime', columnWidths.winningTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">招标单位</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnit', columnWidths.biddingUnit)} />
+                    </th>
+                    <th style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">企业派发名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'companyDispatchName', columnWidths.companyDispatchName)} />
+                    </th>
+                    <th style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">中标单位</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningUnit', columnWidths.winningUnit)} />
+                    </th>
+                    <th style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">运营商标签</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'operatorLabel', columnWidths.operatorLabel)} />
+                    </th>
+                    <th style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">项目类型</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectType', columnWidths.projectType)} />
+                    </th>
+                    <th style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">管控部门</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'controlDepartment', columnWidths.controlDepartment)} />
+                    </th>
+                    <th style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">招标单位所属区域</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnitArea', columnWidths.biddingUnitArea)} />
+                    </th>
+                    <th style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">附件</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'attachment', columnWidths.attachment)} />
+                    </th>
+                    <th style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">企业派发名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'enterpriseName', columnWidths.enterpriseName)} />
+                    </th>
+                    <th style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                      <div className="pr-3">区域分组</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'areaGroup', columnWidths.areaGroup)} />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {mockData.map((row) => (
+                    <tr key={row.id} className="divide-x divide-gray-100 hover:bg-gray-50">
+                      <td style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-0 bg-white z-10">
+                        {row.groupDispatchTime}
+                      </td>
+                      <td style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[96px] bg-white z-10">{row.city}</td>
+                      <td style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[160px] bg-white z-10">{row.district}</td>
+                      <td style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-blue-600 text-sm whitespace-nowrap sticky left-[224px] bg-white z-10">
+                        {row.businessInfoCode}
+                      </td>
+                      <td style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[336px] bg-white z-10">
+                        {row.projectCode}
+                      </td>
+                      <td style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[448px] bg-white z-10" title={row.projectName}>
+                        <div className="w-48 truncate">{row.projectName}</div>
+                      </td>
+                      <td style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 whitespace-nowrap">
+                        <Badge className={statusBadgeClass(row.businessInfoStatus)}>{row.businessInfoStatus}</Badge>
+                      </td>
+                      <td style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 whitespace-nowrap">
+                        <button onClick={() => handleViewFlow(row)} className="text-blue-600 hover:underline">
+                          {row.currentOperationStep}
+                        </button>
+                      </td>
+                      <td style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.currentOperationRole}</td>
+                      <td style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-gray-700 whitespace-nowrap" title={row.currentOperator}>
+                        {row.currentOperator.length > 10 ? `${row.currentOperator.substring(0, 10)}...` : row.currentOperator}
+                      </td>
+                      <td style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.accountManager}</td>
+                      <td style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessCode}</td>
+                      <td style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.businessName}</td>
+                      <td style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessTime}</td>
+                      <td style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.dataType}</td>
+                      <td style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-right text-gray-700 whitespace-nowrap">{row.biddingAmount}</td>
+                      <td style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingPublishTime}</td>
+                      <td style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.openingTime}</td>
+                      <td style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingDeadline}</td>
+                      <td style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningTime || "-"}</td>
+                      <td style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnit}</td>
+                      <td style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.companyDispatchName}</td>
+                      <td style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningUnit || "-"}</td>
+                      <td style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.operatorLabel}</td>
+                      <td style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.projectType}</td>
+                      <td style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.controlDepartment}</td>
+                      <td style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnitArea}</td>
+                      <td style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-blue-600 whitespace-nowrap">
+                        <a href="#" className="hover:underline flex items-center gap-1">
+                          <FileText className="w-3.5 h-3.5" />
+                          {row.attachment || (row.attachmentCount ? `${row.attachmentCount}个附件` : '-')}
+                        </a>
+                      </td>
+                      <td style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.enterpriseName || row.companyDispatchName}</td>
+                      <td style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.areaGroup || '-'}</td>
+                      <td style={{ width: columnWidths.actions, minWidth: columnWidths.actions }} className="px-3 py-3 whitespace-nowrap sticky right-0 bg-white z-10">
+                        <div className="flex gap-1">
+                          <button onClick={() => handleFollow(row)} className={`px-2 py-1 text-xs flex items-center gap-0.5 ${row.isFavorite ? 'text-orange-500' : 'text-blue-600'} hover:opacity-80`}>
+                            {row.isFavorite ? <><Star className="w-3 h-3 fill-current" />已关注</> : <><Star className="w-3 h-3" />关注</>}
+                          </button>
+                          <button onClick={() => handleViewDetail(row)} className="px-2 py-1 text-xs text-blue-600 hover:text-blue-700">详情</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center justify-between px-4 py-3 border-t">
-          <span className="text-sm text-gray-600">共 {mockData.length} 条</span>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">10条/页</span>
+
+          {/* 底部统计和分页 */}
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
+            <div className="text-sm text-gray-500">共 {mockData.length} 条</div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded">1</button>
-              <span className="text-sm text-gray-600">共1页</span>
-              <button className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">&lt;</button>
-              <button className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">&gt;</button>
+              <Select defaultValue="10">
+                <SelectTrigger className="w-24 h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10条/页</SelectItem>
+                  <SelectItem value="20">20条/页</SelectItem>
+                  <SelectItem value="50">50条/页</SelectItem>
+                  <SelectItem value="100">100条/页</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>
+                <span className="text-xs">‹</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]">
+                <span className="text-xs">1</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="text-xs">2</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 px-2">
+                ...
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="text-xs">›</span>
+              </Button>
+              <div className="flex items-center gap-1 ml-2">
+                <span className="text-sm text-gray-500">前往</span>
+                <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
+                <span className="text-sm text-gray-500">页</span>
+              </div>
             </div>
           </div>
         </div>

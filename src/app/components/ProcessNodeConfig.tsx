@@ -15,29 +15,27 @@ export function ProcessNodeConfig() {
 
       {/* Tab Header */}
       <div className="px-6 flex-shrink-0">
-        <div className="border-b border-gray-200">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("process")}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
-                activeTab === "process"
-                  ? "text-[#1890ff] border-b-2 border-[#1890ff]"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              流程列表
-            </button>
-            <button
-              onClick={() => setActiveTab("node")}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
-                activeTab === "node"
-                  ? "text-[#1890ff] border-b-2 border-[#1890ff]"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              节点列表
-            </button>
-          </div>
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+          <button
+            onClick={() => setActiveTab("process")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === "process"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            流程列表
+          </button>
+          <button
+            onClick={() => setActiveTab("node")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === "node"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            节点列表
+          </button>
         </div>
       </div>
 

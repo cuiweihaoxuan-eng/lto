@@ -40,6 +40,7 @@ const ContractDemolition = lazy(() => import("./components/ContractDemolition").
 const ImplementationMonitoring = lazy(() => import("./components/ImplementationMonitoring").then(m => ({ default: m.ImplementationMonitoring })));
 const QualityControl = lazy(() => import("./components/QualityControl").then(m => ({ default: m.QualityControl })));
 const InvoiceApplication = lazy(() => import("./components/InvoiceApplication").then(m => ({ default: m.InvoiceApplication })));
+const RiskManagement = lazy(() => import("./components/RiskManagement").then(m => ({ default: m.default })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -69,6 +70,14 @@ useEffect(() => {
   else document.head.insertAdjacentHTML('beforeend', `<meta name="prd-route" content="${activeSidebarItem}">`);
 }, [activeSidebarItem]);
 
+// 切换到风险管理页面时清除流程节点状态
+useEffect(() => {
+  if (activeSidebarItem === "risk-dispatch") {
+    setActiveNode("acceptance");
+    setProcessFlowCollapsed(true);
+  }
+}, [activeSidebarItem]);
+
   // 从 URL 获取商机编码参数（用于六到位跳转）
   const params = new URLSearchParams(window.location.search);
   const urlOppCode = params.get("code");
@@ -91,7 +100,7 @@ useEffect(() => {
     "ict-gross-profit-report", "cost-estimate-report"
   ];
   const isReportPage = ["report", "expert-report", "yecai-report-group", ...yecaiReportIds].includes(activeSidebarItem);
-  const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info"].includes(activeSidebarItem) || isReportPage;
+  const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info", "risk-dispatch"].includes(activeSidebarItem) || isReportPage;
 
   // 判断当前节点是否需要显示左侧子功能菜单和流程导航
   const isAcceptanceNode = activeNode === "acceptance";
@@ -170,6 +179,11 @@ useEffect(() => {
         return <Suspense fallback={<LoadingSpinner />}><OpportunityDetail onBack={() => { if (isOppDetailFromUrl) { window.close(); } else { setOppDetailId(null); } }} /></Suspense>;
       }
       return <Suspense fallback={<LoadingSpinner />}><OpportunityQuery onRowClick={(id) => setOppDetailId(id)} /></Suspense>;
+    }
+
+    // 风险管理页面 - 放在验收节点判断之前，避免被拦截
+    if (activeSidebarItem === "risk-dispatch") {
+      return <Suspense fallback={<LoadingSpinner />}><RiskManagement /></Suspense>;
     }
 
     // 验收节点子功能

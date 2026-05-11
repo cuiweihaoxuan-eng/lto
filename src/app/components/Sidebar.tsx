@@ -69,7 +69,10 @@ const menuItems: MenuItem[] = [
   {
     id: "risk",
     label: "风险管理",
-    icon: <AlertTriangle className="w-4 h-4" />
+    icon: <AlertTriangle className="w-4 h-4" />,
+    children: [
+      { id: "risk-dispatch", label: "风险派单" },
+    ]
   },
   {
     id: "finance-report",
@@ -109,7 +112,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem, onItemChange }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["report"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk"]);
   const [activeItem, setActiveItem] = useState("dashboard");
   const [cascadeParent, setCascadeParent] = useState<string | null>(null);
   const [cascadePos, setCascadePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });

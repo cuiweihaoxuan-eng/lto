@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { Search, RefreshCw, Plus, Edit2, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { NodeConfigEditor } from "./NodeConfigEditor";
@@ -87,7 +87,7 @@ export function NodeList() {
 
   const handleSave = (nodeData: any) => {
     if (editingNode) {
-      setNodes(nodes.map(n => 
+      setNodes(nodes.map(n =>
         n.id === editingNode.id ? { ...n, ...nodeData } : n
       ));
     } else {
@@ -111,6 +111,21 @@ export function NodeList() {
     ));
   };
 
+  const handleQuery = () => {
+    console.log("查询节点:", searchParams);
+  };
+
+  const handleReset = () => {
+    setSearchParams({
+      name: "",
+      region: "",
+      businessType: "",
+      stage: "",
+      type: "",
+      status: ""
+    });
+  };
+
   if (isEditing) {
     return (
       <NodeConfigEditor
@@ -122,58 +137,61 @@ export function NodeList() {
   }
 
   return (
-    <div className="h-full flex flex-col pt-4">
-      {/* Search and Action Bar */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          <Input
-            placeholder="节点名称"
-            value={searchParams.name}
-            onChange={(e) => setSearchParams({ ...searchParams, name: e.target.value })}
-            className="h-9"
-          />
-          <Input
-            placeholder="适用区域"
-            value={searchParams.region}
-            onChange={(e) => setSearchParams({ ...searchParams, region: e.target.value })}
-            className="h-9"
-          />
-          <Input
-            placeholder="业务类型"
-            value={searchParams.businessType}
-            onChange={(e) => setSearchParams({ ...searchParams, businessType: e.target.value })}
-            className="h-9"
-          />
-          <Input
-            placeholder="阶段"
-            value={searchParams.stage}
-            onChange={(e) => setSearchParams({ ...searchParams, stage: e.target.value })}
-            className="h-9"
-          />
+    <div className="h-full flex flex-col">
+      {/* 查询条件卡片 */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">节点名称</label>
+            <Input
+              placeholder="请输入"
+              value={searchParams.name}
+              onChange={(e) => setSearchParams({ ...searchParams, name: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">适用区域</label>
+            <Input
+              placeholder="请输入"
+              value={searchParams.region}
+              onChange={(e) => setSearchParams({ ...searchParams, region: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
+            <Input
+              placeholder="请输入"
+              value={searchParams.businessType}
+              onChange={(e) => setSearchParams({ ...searchParams, businessType: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">阶段</label>
+            <Input
+              placeholder="请输入"
+              value={searchParams.stage}
+              onChange={(e) => setSearchParams({ ...searchParams, stage: e.target.value })}
+            />
+          </div>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between mt-4">
+          <div />
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-9">
-              <Search className="w-4 h-4 mr-1" />
-              查询
+            <Button variant="default" size="sm" onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea]">
+              <Search className="w-4 h-4 mr-1" />查询
             </Button>
-            <Button variant="outline" size="sm" className="h-9">
-              重置
+            <Button variant="outline" size="sm" onClick={handleReset}>
+              <RefreshCw className="w-4 h-4 mr-1" />重置
+            </Button>
+            <Button onClick={handleAdd} size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+              <Plus className="w-4 h-4 mr-1" />新增节点
             </Button>
           </div>
-          <Button 
-            onClick={handleAdd}
-            size="sm" 
-            className="h-9 bg-[#1890ff] hover:bg-[#40a9ff]"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            新增节点
-          </Button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="flex-1 bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+      {/* 数据表格区 */}
+      <div className="flex-1 mt-4 bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden">
@@ -194,7 +212,7 @@ export function NodeList() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {nodes.map((node, index) => (
-                    <tr 
+                    <tr
                       key={node.id}
                       className={`hover:bg-gray-50 ${
                         index % 2 === 0 ? 'bg-white' : 'bg-gray-50'

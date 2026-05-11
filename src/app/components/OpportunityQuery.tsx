@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  Search, RefreshCw, Download, Plus, X, ChevronDown, FileText, BarChart3, DollarSign
-} from "lucide-react";
+import { Search, RefreshCw, Download, Plus, X, ChevronDown, FileText, BarChart3, DollarSign } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -132,12 +130,6 @@ const mockOpportunities: Opportunity[] = [
   }
 ];
 
-const functionMenuItems = [
-  { id: "matching", label: "前后向匹配", icon: <FileText className="w-4 h-4" /> },
-  { id: "progress", label: "形象进度管理", icon: <BarChart3 className="w-4 h-4" /> },
-  { id: "payment", label: "合同收付款确认", icon: <DollarSign className="w-4 h-4" /> }
-];
-
 const viewTabs = [
   { id: "list", label: "我发起的商机" },
   { id: "card", label: "我管理的商机" },
@@ -185,6 +177,7 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showAllConditions, setShowAllConditions] = useState(false);
 
   const [columnWidths, setColumnWidths] = useState(defaultColumnWidths);
   const [resizing, setResizing] = useState<string | null>(null);
@@ -304,11 +297,13 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
+      {/* 页面标题 */}
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">商机管理</h2>
         <p className="text-sm text-gray-500 mt-1">商机信息查询与管理</p>
       </div>
 
+      {/* Tab 切换 */}
       <div className="px-6 flex-shrink-0">
         <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
           {viewTabs.map(tab => (
@@ -327,81 +322,97 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
         </div>
       </div>
 
+      {/* 内容区 */}
       <div className="flex-1 overflow-auto px-6 pb-6">
-        {/* 查询筛选区 */}
-
-          {/* 查询筛选区 */}
-          <div className="bg-white border-b border-gray-200 px-4 py-4">
-            <div className="grid grid-cols-5 gap-4 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">商机创建日期：</span>
-                <Input type="date" value={createDateStart} onChange={e => setCreateDateStart(e.target.value)} className="flex-1 h-8 text-sm" />
-                <span className="text-gray-400">-</span>
-                <Input type="date" value={createDateEnd} onChange={e => setCreateDateEnd(e.target.value)} className="flex-1 h-8 text-sm" />
+        <div className="mt-4 space-y-4">
+          {/* 查询条件卡片 */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机创建日期</label>
+                <div className="flex gap-2 items-center">
+                  <Input type="date" value={createDateStart} onChange={e => setCreateDateStart(e.target.value)} className="flex-1 h-8 text-sm" />
+                  <span className="text-gray-400">-</span>
+                  <Input type="date" value={createDateEnd} onChange={e => setCreateDateEnd(e.target.value)} className="flex-1 h-8 text-sm" />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">商机金额区间：</span>
-                <Input placeholder="最小值" value={amountMin} onChange={e => setAmountMin(e.target.value)} className="flex-1 h-8 text-sm" />
-                <span className="text-gray-400">-</span>
-                <Input placeholder="最大值" value={amountMax} onChange={e => setAmountMax(e.target.value)} className="flex-1 h-8 text-sm" />
-                <span className="text-sm text-gray-500">万元</span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机金额区间(万元)</label>
+                <div className="flex gap-2 items-center">
+                  <Input placeholder="最小值" value={amountMin} onChange={e => setAmountMin(e.target.value)} className="flex-1 h-8 text-sm" />
+                  <span className="text-gray-400">-</span>
+                  <Input placeholder="最大值" value={amountMax} onChange={e => setAmountMax(e.target.value)} className="flex-1 h-8 text-sm" />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">合同金额区间：</span>
-                <Input placeholder="最小值" value={contractAmountMin} onChange={e => setContractAmountMin(e.target.value)} className="flex-1 h-8 text-sm" />
-                <span className="text-gray-400">-</span>
-                <Input placeholder="最大值" value={contractAmountMax} onChange={e => setContractAmountMax(e.target.value)} className="flex-1 h-8 text-sm" />
-                <span className="text-sm text-gray-500">万元</span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">合同金额区间(万元)</label>
+                <div className="flex gap-2 items-center">
+                  <Input placeholder="最小值" value={contractAmountMin} onChange={e => setContractAmountMin(e.target.value)} className="flex-1 h-8 text-sm" />
+                  <span className="text-gray-400">-</span>
+                  <Input placeholder="最大值" value={contractAmountMax} onChange={e => setContractAmountMax(e.target.value)} className="flex-1 h-8 text-sm" />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">商机名称：</span>
-                <Input placeholder="请输入" value={oppName} onChange={e => setOppName(e.target.value)} className="flex-1 h-8 text-sm" />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机名称</label>
+                <Input placeholder="请输入" value={oppName} onChange={e => setOppName(e.target.value)} />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">商机编码：</span>
-                <Input placeholder="请输入" value={oppCode} onChange={e => setOppCode(e.target.value)} className="flex-1 h-8 text-sm" />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机编码</label>
+                <Input placeholder="请输入" value={oppCode} onChange={e => setOppCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                <Input placeholder="请输入" value={projectName} onChange={e => setProjectName(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
+                <Input placeholder="请输入" value={projectCode} onChange={e => setProjectCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">合同名称</label>
+                <Input placeholder="请输入" value={contractName} onChange={e => setContractName(e.target.value)} />
               </div>
             </div>
 
-            <div className="grid grid-cols-6 gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">项目名称：</span>
-                <Input placeholder="请输入" value={projectName} onChange={e => setProjectName(e.target.value)} className="flex-1 h-8 text-sm" />
+            {showAllConditions && (
+              <div className="grid grid-cols-4 gap-x-6 gap-y-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">合同编码</label>
+                  <Input placeholder="请输入" value={contractCode} onChange={e => setContractCode(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">客户名称</label>
+                  <Input placeholder="请输入" value={customerName} onChange={e => setCustomerName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">客户编码</label>
+                  <Input placeholder="请输入" value={customerCode} onChange={e => setCustomerCode(e.target.value)} />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">项目编码：</span>
-                <Input placeholder="请输入" value={projectCode} onChange={e => setProjectCode(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">合同名称：</span>
-                <Input placeholder="请输入" value={contractName} onChange={e => setContractName(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">合同编码：</span>
-                <Input placeholder="请输入" value={contractCode} onChange={e => setContractCode(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">客户名称：</span>
-                <Input placeholder="请输入" value={customerName} onChange={e => setCustomerName(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 whitespace-nowrap">客户编码：</span>
-                <Input placeholder="请输入" value={customerCode} onChange={e => setCustomerCode(e.target.value)} className="flex-1 h-8 text-sm" />
+            )}
+
+            <div className="flex items-center justify-between mt-4">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setShowAllConditions(!showAllConditions)}
+                className="text-blue-600 p-0"
+              >
+                {showAllConditions ? "收起更多条件" : "展开更多条件"}
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="default" size="sm" onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                  <Search className="w-4 h-4 mr-1" />查询
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleReset}>
+                  <RefreshCw className="w-4 h-4 mr-1" />重置
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* 操作按钮 */}
-          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
-            <Button onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-8 px-4">
-              <Search className="w-3.5 h-3.5 mr-1" />
-              查询
-            </Button>
-            <Button variant="outline" onClick={handleReset} className="h-8 px-4">
-              <RefreshCw className="w-3.5 h-3.5 mr-1" />
-              重置
-            </Button>
-            <div className="flex-1" />
+          {/* 操作按钮卡片 */}
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-2">
             <Button className="bg-green-600 hover:bg-green-700 text-white h-8 px-4">
               <Download className="w-3.5 h-3.5 mr-1" />
               同步集团
@@ -414,6 +425,7 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
               <X className="w-3.5 h-3.5 mr-1" />
               关闭商机
             </Button>
+            <div className="flex-1" />
             <div className="relative">
               <Button variant="outline" onClick={() => setShowMoreMenu(!showMoreMenu)} className="h-8 px-3">
                 更多
@@ -430,8 +442,8 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
           </div>
 
           {/* 状态标签页 */}
-          <div className="bg-white border-b border-gray-200 px-4">
-            <div className="flex items-center gap-1 py-2">
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+            <div className="flex items-center gap-1">
               {statusTabs.map(tab => (
                 <button
                   key={tab}
@@ -449,188 +461,184 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
           </div>
 
           {/* 数据表格区 */}
-          <div className="flex-1 overflow-auto bg-white">
-            <div className="overflow-x-auto" style={{ minWidth: '100%' }}>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="divide-y divide-gray-200" style={{ tableLayout: 'fixed', minWidth: '2800px' }}>
-              <thead className="bg-gray-50">
-                <tr>
-                  <th style={{ width: columnWidths.select }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-0 bg-gray-50 z-10 relative select-none">
-                    <Checkbox checked={selectAll} onCheckedChange={handleSelectAll} />
-                  </th>
-                  <th style={{ width: columnWidths.oppName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 sticky left-[40px] bg-gray-50 z-10 relative select-none">
-                    <div className="pr-3">商机名称</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'oppName', columnWidths.oppName)} />
-                  </th>
-                  <th style={{ width: columnWidths.stage }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-[296px] bg-gray-50 z-10 relative select-none">
-                    <div className="pr-3">阶段</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'stage', columnWidths.stage)} />
-                  </th>
-                  <th style={{ width: columnWidths.provinceCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">省内商机编码</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'provinceCode', columnWidths.provinceCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.groupCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">集团商机编码</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupCode', columnWidths.groupCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.receiveDate }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">商机接收日期</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'receiveDate', columnWidths.receiveDate)} />
-                  </th>
-                  <th style={{ width: columnWidths.modifyDate }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">商机修改日期</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'modifyDate', columnWidths.modifyDate)} />
-                  </th>
-                  <th style={{ width: columnWidths.customerId }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">政企客户身份证</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerId', columnWidths.customerId)} />
-                  </th>
-                  <th style={{ width: columnWidths.customerName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">客户名称</div>
-                    <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerName', columnWidths.customerName)} />
-                  </th>
-                  <th style={{ width: columnWidths.city }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">市</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
-                  </th>
-                  <th style={{ width: columnWidths.city }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">市</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
-                  </th>
-                  <th style={{ width: columnWidths.district }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">区/县</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'district', columnWidths.district)} />
-                  </th>
-                  <th style={{ width: columnWidths.bu }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">BU</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'bu', columnWidths.bu)} />
-                  </th>
-                  <th style={{ width: columnWidths.customerIndustry }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">客户行业</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerIndustry', columnWidths.customerIndustry)} />
-                  </th>
-                  <th style={{ width: columnWidths.controlDept }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">管控部门</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'controlDept', columnWidths.controlDept)} />
-                  </th>
-                  <th style={{ width: columnWidths.contractName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">合同名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'contractName', columnWidths.contractName)} />
-                  </th>
-                  <th style={{ width: columnWidths.contractCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">合同编码</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'contractCode', columnWidths.contractCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.contractAmount }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">合同金额(万元)</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'contractAmount', columnWidths.contractAmount)} />
-                  </th>
-                  <th style={{ width: columnWidths.projectName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">项目名称</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'projectName', columnWidths.projectName)} />
-                  </th>
-                  <th style={{ width: columnWidths.projectCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">项目编码</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'projectCode', columnWidths.projectCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.status }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">商机状态</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'status', columnWidths.status)} />
-                  </th>
-                  <th style={{ width: columnWidths.isTeamFormed }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">是否组建团队</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'isTeamFormed', columnWidths.isTeamFormed)} />
-                  </th>
-                  <th style={{ width: columnWidths.myScore }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">我的积分</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'myScore', columnWidths.myScore)} />
-                  </th>
-                  <th style={{ width: columnWidths.scoreDistRate }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">项目积分已分配比例</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'scoreDistRate', columnWidths.scoreDistRate)} />
-                  </th>
-                  <th style={{ width: columnWidths.groupCustomerCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">集团客户编码</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'groupCustomerCode', columnWidths.groupCustomerCode)} />
-                  </th>
-                  <th style={{ width: columnWidths.source }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">商机来源</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'source', columnWidths.source)} />
-                  </th>
-                  <th style={{ width: columnWidths.customerManager }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
-                    <div className="pr-3">客户经理</div>
-                    <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'customerManager', columnWidths.customerManager)} />
-                  </th>
-                  <th style={{ width: columnWidths.actions }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky right-0 bg-gray-50 z-10">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {opportunities.map(opp => (
-                  <tr key={opp.id} className="hover:bg-gray-50">
-                    <td className="px-3 py-3 sticky left-0 bg-white z-10">
-                      <Checkbox
-                        checked={selectedRows.has(opp.id)}
-                        onCheckedChange={checked => handleSelectRow(opp.id, checked as boolean)}
-                      />
-                    </td>
-                    <td className="px-3 py-3 text-sm font-medium max-w-[256px] truncate sticky left-[40px] bg-white z-10">
-                      <span
-                      className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
-                      onClick={() => onRowClick?.(opp.id)}
-                    >
-                      {opp.oppName}{getIctBadge(opp.oppName)}
-                    </span>
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center sticky left-[296px] bg-white z-10">
-                      {opp.stage}
-                    </td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.provinceCode}</td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.groupCode}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-xs">{opp.receiveDate}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-xs">{opp.modifyDate}</td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.customerId}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 max-w-[256px] truncate">{opp.customerName}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.city}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.district}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.bu}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.customerIndustry}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.controlDept}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 max-w-[192px] truncate">{opp.contractName}</td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.contractCode}</td>
-                    <td className="px-3 py-3 text-sm text-right font-medium">
-                      {opp.contractAmount === "-" ? "-" : `¥${opp.contractAmount}`}
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-600 max-w-[192px] truncate">{opp.projectName}</td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.projectCode}</td>
-                    <td className="px-3 py-3">{getStatusBadge(opp.status)}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.isTeamFormed}</td>
-                    <td className="px-3 py-3 text-sm text-right font-medium text-orange-600">
-                      {opp.amount.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-3 text-sm text-right text-gray-600">{opp.myScore}</td>
-                    <td className="px-3 py-3 text-sm text-right text-gray-600">{opp.scoreDistRate}</td>
-                    <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.groupCustomerCode}</td>
-                    <td className="px-3 py-3 text-sm text-gray-600">{opp.source}</td>
-                    <td className="px-3 py-3 text-sm text-gray-700">{opp.customerManager}</td>
-                    <td className="px-3 py-3 sticky right-0 bg-white z-10">
-                      <button
-                        className={`text-xs ${opp.followed ? "text-gray-400" : "text-blue-600 hover:text-blue-700"}`}
-                        onClick={() => handleFollow(opp.id)}
-                      >
-                        {opp.followed ? "已关注" : "+ 关注"}
-                      </button>
-                    </td>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th style={{ width: columnWidths.select }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-0 bg-gray-50 z-10 relative select-none">
+                      <Checkbox checked={selectAll} onCheckedChange={handleSelectAll} />
+                    </th>
+                    <th style={{ width: columnWidths.oppName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 sticky left-[40px] bg-gray-50 z-10 relative select-none">
+                      <div className="pr-3">商机名称</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'oppName', columnWidths.oppName)} />
+                    </th>
+                    <th style={{ width: columnWidths.stage }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-[296px] bg-gray-50 z-10 relative select-none">
+                      <div className="pr-3">阶段</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'stage', columnWidths.stage)} />
+                    </th>
+                    <th style={{ width: columnWidths.provinceCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">省内商机编码</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'provinceCode', columnWidths.provinceCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.groupCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">集团商机编码</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupCode', columnWidths.groupCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.receiveDate }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">商机接收日期</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'receiveDate', columnWidths.receiveDate)} />
+                    </th>
+                    <th style={{ width: columnWidths.modifyDate }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">商机修改日期</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'modifyDate', columnWidths.modifyDate)} />
+                    </th>
+                    <th style={{ width: columnWidths.customerId }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">政企客户身份证</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerId', columnWidths.customerId)} />
+                    </th>
+                    <th style={{ width: columnWidths.customerName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">客户名称</div>
+                      <div className="absolute inset-y-0 right-0 w-3 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerName', columnWidths.customerName)} />
+                    </th>
+                    <th style={{ width: columnWidths.city }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">市</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
+                    </th>
+                    <th style={{ width: columnWidths.district }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">区/县</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'district', columnWidths.district)} />
+                    </th>
+                    <th style={{ width: columnWidths.bu }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">BU</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'bu', columnWidths.bu)} />
+                    </th>
+                    <th style={{ width: columnWidths.customerIndustry }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">客户行业</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'customerIndustry', columnWidths.customerIndustry)} />
+                    </th>
+                    <th style={{ width: columnWidths.controlDept }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">管控部门</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'controlDept', columnWidths.controlDept)} />
+                    </th>
+                    <th style={{ width: columnWidths.contractName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">合同名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'contractName', columnWidths.contractName)} />
+                    </th>
+                    <th style={{ width: columnWidths.contractCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">合同编码</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'contractCode', columnWidths.contractCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.contractAmount }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">合同金额(万元)</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'contractAmount', columnWidths.contractAmount)} />
+                    </th>
+                    <th style={{ width: columnWidths.projectName }} className="px-3 py-3 text-left text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">项目名称</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'projectName', columnWidths.projectName)} />
+                    </th>
+                    <th style={{ width: columnWidths.projectCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">项目编码</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'projectCode', columnWidths.projectCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.status }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">商机状态</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'status', columnWidths.status)} />
+                    </th>
+                    <th style={{ width: columnWidths.isTeamFormed }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">是否组建团队</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'isTeamFormed', columnWidths.isTeamFormed)} />
+                    </th>
+                    <th style={{ width: columnWidths.myScore }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">我的积分</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'myScore', columnWidths.myScore)} />
+                    </th>
+                    <th style={{ width: columnWidths.scoreDistRate }} className="px-3 py-3 text-right text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">项目积分已分配比例</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'scoreDistRate', columnWidths.scoreDistRate)} />
+                    </th>
+                    <th style={{ width: columnWidths.groupCustomerCode }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">集团客户编码</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'groupCustomerCode', columnWidths.groupCustomerCode)} />
+                    </th>
+                    <th style={{ width: columnWidths.source }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">商机来源</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'source', columnWidths.source)} />
+                    </th>
+                    <th style={{ width: columnWidths.customerManager }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 relative select-none">
+                      <div className="pr-3">客户经理</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: "6px" }} onMouseDown={(e) => handleResizeStart(e, 'customerManager', columnWidths.customerManager)} />
+                    </th>
+                    <th style={{ width: columnWidths.actions }} className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky right-0 bg-gray-50 z-10">
+                      操作
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {opportunities.map(opp => (
+                    <tr key={opp.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-3 sticky left-0 bg-white z-10">
+                        <Checkbox
+                          checked={selectedRows.has(opp.id)}
+                          onCheckedChange={checked => handleSelectRow(opp.id, checked as boolean)}
+                        />
+                      </td>
+                      <td className="px-3 py-3 text-sm font-medium max-w-[256px] truncate sticky left-[40px] bg-white z-10">
+                        <span
+                          className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
+                          onClick={() => onRowClick?.(opp.id)}
+                        >
+                          {opp.oppName}{getIctBadge(opp.oppName)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center sticky left-[296px] bg-white z-10">
+                        {opp.stage}
+                      </td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.provinceCode}</td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.groupCode}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-xs">{opp.receiveDate}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-xs">{opp.modifyDate}</td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.customerId}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 max-w-[256px] truncate">{opp.customerName}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.city}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.district}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.bu}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.customerIndustry}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.controlDept}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 max-w-[192px] truncate">{opp.contractName}</td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.contractCode}</td>
+                      <td className="px-3 py-3 text-sm text-right font-medium">
+                        {opp.contractAmount === "-" ? "-" : `¥${opp.contractAmount}`}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-gray-600 max-w-[192px] truncate">{opp.projectName}</td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.projectCode}</td>
+                      <td className="px-3 py-3">{getStatusBadge(opp.status)}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 text-center">{opp.isTeamFormed}</td>
+                      <td className="px-3 py-3 text-sm text-right font-medium text-orange-600">
+                        {opp.amount.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-right text-gray-600">{opp.myScore}</td>
+                      <td className="px-3 py-3 text-sm text-right text-gray-600">{opp.scoreDistRate}</td>
+                      <td className="px-3 py-3 text-sm font-mono text-gray-600 text-xs">{opp.groupCustomerCode}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600">{opp.source}</td>
+                      <td className="px-3 py-3 text-sm text-gray-700">{opp.customerManager}</td>
+                      <td className="px-3 py-3 sticky right-0 bg-white z-10">
+                        <button
+                          className={`text-xs ${opp.followed ? "text-gray-400" : "text-blue-600 hover:text-blue-700"}`}
+                          onClick={() => handleFollow(opp.id)}
+                        >
+                          {opp.followed ? "已关注" : "+ 关注"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* 底部统计和分页 */}
-          <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
             <div className="text-sm text-gray-500">
               共 {opportunities.length} 条
             </div>
@@ -673,5 +681,6 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
           </div>
         </div>
       </div>
+    </div>
   );
 }
