@@ -793,13 +793,32 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
               </div>
               <div className="prd-actions">
                 {!state.isEditing ? (
-                  <button
-                    className="prd-btn prd-btn-primary"
-                    onClick={handleEdit}
-                    disabled={state.loading}
-                  >
-                    编辑
-                  </button>
+                  <>
+                    <button
+                      className="prd-btn prd-btn-secondary"
+                      onClick={() => {
+                        const blob = new Blob([state.content], { type: 'text/markdown;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `_${route}.md`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }}
+                      disabled={!state.content}
+                    >
+                      下载
+                    </button>
+                    <button
+                      className="prd-btn prd-btn-primary"
+                      onClick={handleEdit}
+                      disabled={state.loading}
+                    >
+                      编辑
+                    </button>
+                  </>
                 ) : (
                   <>
                     <button
