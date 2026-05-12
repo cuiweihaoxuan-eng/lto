@@ -546,13 +546,12 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
   const loadPrd = useCallback(async () => {
     setState(s => ({ ...s, loading: true, error: null }));
     try {
-      // basePath 为空时读取 public/prd/_routes/，不为空时拼接路径
-      const url = basePath
-        ? `${basePath}/prd/_routes/_${route}.md`
-        : `/prd/_routes/_${route}.md`;
-      const response = await fetch(url);
+      // 优先通过 PRD 服务 API 加载（与 skills prd-inject.js 方式一致）
+      const apiUrl = `${resolvedApiBaseUrl}/read?route=${route}`;
+      const response = await fetch(apiUrl);
       if (response.ok) {
-        const text = await response.text();
+        const data = await response.json();
+        const text = typeof data === 'string' ? data : (data.content || '');
         setState(s => ({
           ...s,
           content: text,
@@ -561,16 +560,31 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
           hasChanges: false,
         }));
       } else {
-        // 文件不存在，使用模板
-        const template = DEFAULT_TEMPLATE(route);
-        setState(s => ({
-          ...s,
-          content: template,
-          originalContent: '',
-          loading: false,
-          hasChanges: true,
-          isEditing: true,
-        }));
+        // API 失败则降级读取本地 public/prd/_routes/ 文件
+        const localUrl = basePath
+          ? `/${basePath}/prd/_routes/_${route}.md`
+          : `/prd/_routes/_${route}.md`;
+        const localResp = await fetch(localUrl);
+        if (localResp.ok) {
+          const text = await localResp.text();
+          setState(s => ({
+            ...s,
+            content: text,
+            originalContent: text,
+            loading: false,
+            hasChanges: false,
+          }));
+        } else {
+          const template = DEFAULT_TEMPLATE(route);
+          setState(s => ({
+            ...s,
+            content: template,
+            originalContent: '',
+            loading: false,
+            hasChanges: true,
+            isEditing: true,
+          }));
+        }
       }
     } catch (err) {
       setState(s => ({
@@ -579,7 +593,7 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
         loading: false,
       }));
     }
-  }, [route, basePath]);
+  }, [route, basePath, resolvedApiBaseUrl]);
 
   // 内容最新值（用于 handleSave 中读取最新 content）
   const contentRef = useRef('');
@@ -794,6 +808,14 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
               <div className="prd-actions">
                 {!state.isEditing ? (
                   <>
+                    <button
+                      className="prd-btn prd-btn-secondary"
+                      onClick={() => loadPrd()}
+                      disabled={state.loading}
+                      title="刷新"
+                    >
+                      ↻
+                    </button>
                     <button
                       className="prd-btn prd-btn-secondary"
                       onClick={() => {

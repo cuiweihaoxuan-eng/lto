@@ -26,6 +26,19 @@
   position: relative;
   height: 100%;
   flex-shrink: 0;
+  width: 560px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 99998;
+  height: 100vh;
+  animation: prd-slide-in 0.3s ease;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes prd-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 /* PRD 面板 */
@@ -36,17 +49,32 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .prd-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
+  height: 52px;
+  box-sizing: border-box;
+}
+
+.prd-header .prd-title h3 {
+  color: #fff;
+}
+
+.prd-header .prd-version-badge {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.prd-header .prd-unsaved-dot {
+  background: #fbbf24;
 }
 
 .prd-title {
@@ -127,6 +155,49 @@
 .prd-btn-secondary:hover:not(:disabled) {
   background: #f7fafc;
   border-color: #cbd5e0;
+}
+
+/* PRD 面板头部操作按钮样式（覆盖默认样式） */
+.prd-header .prd-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.prd-header .prd-btn-primary {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.prd-header .prd-btn-primary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.3);
+  box-shadow: none;
+}
+
+.prd-header .prd-btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.prd-header .prd-btn-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.prd-header .prd-btn-close {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.1);
+}
+
+.prd-header .prd-btn-close:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
 }
 
 .prd-btn-close {
