@@ -595,6 +595,15 @@ export const PrdPanel: React.FC<PrdPanelProps> = ({
     }
   }, [route, basePath, resolvedApiBaseUrl]);
 
+  // 路由变化时自动重新加载 PRD（面板打开状态下）
+  const prevRouteRef = useRef(route);
+  useEffect(() => {
+    if (actualIsOpen && route !== prevRouteRef.current) {
+      prevRouteRef.current = route;
+      loadPrd();
+    }
+  }, [route]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // 内容最新值（用于 handleSave 中读取最新 content）
   const contentRef = useRef('');
 
