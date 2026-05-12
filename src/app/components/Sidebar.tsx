@@ -11,7 +11,8 @@ import {
   BarChart3,
   Menu,
   Target,
-  ChevronLeft
+  ChevronLeft,
+  DollarSign
 } from "lucide-react";
 
 interface MenuItem {
@@ -83,6 +84,11 @@ const menuItems: MenuItem[] = [
     id: "six-positioning",
     label: "六到位",
     icon: <Target className="w-4 h-4" />
+  },
+  {
+    id: "revenue-management",
+    label: "录收管理",
+    icon: <DollarSign className="w-4 h-4" />
   },
   {
     id: "report",

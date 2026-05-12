@@ -41,6 +41,7 @@ const ImplementationMonitoring = lazy(() => import("./components/ImplementationM
 const QualityControl = lazy(() => import("./components/QualityControl").then(m => ({ default: m.QualityControl })));
 const InvoiceApplication = lazy(() => import("./components/InvoiceApplication").then(m => ({ default: m.InvoiceApplication })));
 const RiskManagement = lazy(() => import("./components/RiskManagement").then(m => ({ default: m.default })));
+const RevenueManagement = lazy(() => import("./components/RevenueManagement").then(m => ({ default: m.RevenueManagement })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -100,7 +101,7 @@ useEffect(() => {
     "ict-gross-profit-report", "cost-estimate-report"
   ];
   const isReportPage = ["report", "expert-report", "yecai-report-group", ...yecaiReportIds].includes(activeSidebarItem);
-  const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info", "risk-dispatch"].includes(activeSidebarItem) || isReportPage;
+  const isConfigOrSixPositioningPage = ["process-config", "six-positioning", "business-info", "risk-dispatch", "revenue-management"].includes(activeSidebarItem) || isReportPage;
 
   // 判断当前节点是否需要显示左侧子功能菜单和流程导航
   const isAcceptanceNode = activeNode === "acceptance";
@@ -120,6 +121,11 @@ useEffect(() => {
     // 六到位
     if (activeSidebarItem === "six-positioning") {
       return <Suspense fallback={<LoadingSpinner />}><SixPositioning /></Suspense>;
+    }
+
+    // 录收管理
+    if (activeSidebarItem === "revenue-management") {
+      return <Suspense fallback={<LoadingSpinner />}><RevenueManagement /></Suspense>;
     }
 
     // 专家任务报表
