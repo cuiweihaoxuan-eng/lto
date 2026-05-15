@@ -132,7 +132,7 @@ export default defineConfig({
       },
     },
   },
-  base: '/lto/',
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
