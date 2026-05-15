@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Printer, Download, FileEdit } from "lucide-react";
 import { FinancialProgressTimeline } from "./FinancialProgressTimeline";
-import { TabNav } from "./ui/TabNav";
+import { TabNav } from "./ui/tab-nav";
 
 interface ProgressRow {
   id: string;

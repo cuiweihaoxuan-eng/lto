@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
-import { TabNav } from "./ui/TabNav";
+import { TabNav } from "./ui/tab-nav";
 import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 
 // 专家调用清单 mock 数据

@@ -5,9 +5,9 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
-import { TabNav } from "./ui/TabNav";
-import { StatusBadge, AutoStatusBadge } from "./ui/StatusBadge";
-import { Pagination } from "./ui/Pagination";
+import { TabNav } from "./ui/tab-nav";
+import { StatusBadge, AutoStatusBadge } from "./ui/status-badge";
+import { Pagination } from "./ui/pagination";
 
 interface Opportunity {
   id: string;

@@ -6,8 +6,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from ".
 import { Badge } from "./ui/badge";
 import { Download, RotateCcw, Search, Eye, ChevronDown, ChevronRight, X, Upload } from "lucide-react";
 import { SixPositioningDetail } from "./SixPositioningDetail";
-import { TabNav } from "./ui/TabNav";
-import { StatusBadge } from "./ui/StatusBadge";
+import { TabNav } from "./ui/tab-nav";
+import { StatusBadge } from "./ui/status-badge";
 import { Pagination } from "./ui/pagination";
 import {
   Dialog,

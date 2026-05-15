@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Button } from "./ui/button";
 import { Settings2, Eye, X, FileText, TrendingUp, TrendingDown, Percent } from "lucide-react";
-import { ColumnVisibilityModal } from "./ui/ColumnVisibilityModal";
+import { ColumnVisibilityModal } from "./ui/column-visibility-modal";
 import { useColumnVisibility } from "./hooks/useColumnVisibility";
 
 // 配色

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TabNav } from "./ui/TabNav";
+import { TabNav } from "./ui/tab-nav";
 import { ForwardReceiptConfirmation } from "./ForwardReceiptConfirmation";
 import { BackwardPaymentConfirmation } from "./BackwardPaymentConfirmation";
 

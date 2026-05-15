@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { RotateCcw, Settings2, Eye, X, FileText, TrendingUp, TrendingDown, Wallet } from "lucide-react";
-import { ColumnVisibilityModal } from "./ui/ColumnVisibilityModal";
+import { ColumnVisibilityModal } from "./ui/column-visibility-modal";
 import { useColumnVisibility } from "./hooks/useColumnVisibility";
 
 // ==================== 两层表头定义 ====================

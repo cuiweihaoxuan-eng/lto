@@ -3,8 +3,8 @@ import { Search, RefreshCw, ChevronDown, ChevronUp, Star, FileText } from "lucid
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { TabNav } from "./ui/TabNav";
-import { StatusBadge } from "./ui/StatusBadge";
+import { TabNav } from "./ui/tab-nav";
+import { StatusBadge } from "./ui/status-badge";
 import { BusinessInfoModal } from "./BusinessInfoModal";
 import { LinkOpportunityDialog } from "./LinkOpportunityDialog";
 
