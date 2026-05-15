@@ -1,9 +1,12 @@
 # Dependencies
 node_modules/
 
-# Build outputs
-dist/
-dist.zip
+# Dependencies
+node_modules/
+
+# Build outputs (except for GitHub Pages deployment)
+# dist/ is tracked for GitHub Pages auto-deployment
+# dist.zip
 
 # Environment files
 .env
