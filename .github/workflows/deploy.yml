@@ -37,6 +37,14 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Copy PRD files
+        run: |
+          mkdir -p dist/prd/_routes
+          cp -r prd/_routes/*.md dist/prd/_routes/ 2>/dev/null || true
+          cp -r .prd/_routes/*.md dist/prd/_routes/ 2>/dev/null || true
+          cp prd/prd-inject.js dist/ 2>/dev/null || true
+          cp prd/prd.html dist/ 2>/dev/null || true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
