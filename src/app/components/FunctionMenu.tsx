@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, BarChart3, DollarSign } from "lucide-react";
+import { BarChart3, DollarSign } from "lucide-react";
 
 interface MenuItem {
   id: string;
@@ -9,11 +9,6 @@ interface MenuItem {
 
 // 验收节点下的子功能
 const menuItems: MenuItem[] = [
-  {
-    id: "matching",
-    label: "前后向匹配",
-    icon: <FileText className="w-4 h-4" />
-  },
   {
     id: "progress",
     label: "形象进度管理",
@@ -44,7 +39,7 @@ export function FunctionMenu({ activeItem, onItemChange }: FunctionMenuProps) {
             onClick={() => onItemChange(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
               activeItem === item.id
-                ? 'bg-[#1890ff] text-white'
+                ? 'bg-[var(--color-primary)] text-white'
                 : 'text-gray-700 hover:bg-[#e6f7ff]'
             }`}
           >

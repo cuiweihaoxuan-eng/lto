@@ -239,17 +239,17 @@ export function BusinessInfoModal({ isOpen, onClose, data, initialTab = "detail"
         {/* 底部按钮 */}
         <div className="flex items-center justify-center gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50" onClick={e => e.stopPropagation()}>
           {activeTab === "flow" && (
-            <Button variant="default" size="sm">确定</Button>
+            <Button className="btn btn-primary">确定</Button>
           )}
           {data.businessInfoStatus === "未处理" && (
             <>
-              <Button variant="default" size="sm" onClick={onLinkOpportunity}>关联商机</Button>
-              <Button variant="default" size="sm">创建商机</Button>
-              <Button variant="outline" size="sm">回退集团</Button>
-              <Button variant="outline" size="sm">取回</Button>
+              <Button className="btn btn-primary" onClick={onLinkOpportunity}>关联商机</Button>
+              <Button className="btn btn-primary">创建商机</Button>
+              <Button className="btn btn-outline">回退集团</Button>
+              <Button className="btn btn-outline">取回</Button>
             </>
           )}
-          <Button variant="outline" size="sm" onClick={onClose}>关闭</Button>
+          <Button className="btn btn-outline" onClick={onClose}>关闭</Button>
         </div>
       </div>
     </div>

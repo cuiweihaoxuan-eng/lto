@@ -5,6 +5,9 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
+import { TabNav } from "./ui/TabNav";
+import { StatusBadge } from "./ui/StatusBadge";
+import { Pagination } from "./ui/pagination";
 import { RiskDispatchDialog } from "./RiskDispatchDialog";
 import { RiskDetailDialog } from "./RiskDetailDialog";
 import { RiskRecordDialog } from "./RiskRecordDialog";
@@ -238,12 +241,12 @@ type TabType = "all" | "todo" | "done" | "riskProject";
 // 表头配置（标签中只允许一个换行符，用 \n 分隔）
 const tableColumns = [
   { key: "city", label: "地市", width: 100 },
-  { key: "riskType", label: "风险类型", width: 140 },
+  { key: "riskType", label: "风险类型", width: 160 },
   { key: "riskFindTime", label: "风险发现时间", width: 150 },
   { key: "riskModel", label: "风险模型", width: 120 },
   { key: "bizCode", label: "商机编码/商情编码", width: 160 },
   { key: "bizName", label: "商机名称/商情名称", width: 200 },
-  { key: "projectCode", label: "项目编码", width: 150 },
+  { key: "projectCode", label: "项目编码", width: 160 },
   { key: "projectName", label: "项目名称", width: 200 },
   { key: "projectAmount", label: "项目金额", width: 120 },
   { key: "isDispatched", label: "是否已派单", width: 100 },
@@ -251,13 +254,13 @@ const tableColumns = [
   { key: "currentLink", label: "当前环节", width: 120 },
   { key: "currentHandler", label: "当前处理人", width: 100 },
   // 新增字段
-  { key: "riskAccumulateDuration", label: "风险累积处理时长", width: 120 },
-  { key: "isConfirmedRisk", label: "是否确认为风险", width: 100 },
-  { key: "isRectified", label: "风险是否已整改", width: 100 },
-  { key: "riskDescription", label: "风险说明", width: 180 },
-  { key: "handlingOpinion", label: "处理意见", width: 180 },
-  { key: "isTerminateProject", label: "是否终止或取消项目", width: 110 },
-  { key: "isNetIncome", label: "是否净额列收", width: 110 },
+  { key: "riskAccumulateDuration", label: "风险累积处理时长", width: 128 },
+  { key: "isConfirmedRisk", label: "是否确认为风险", width: 112 },
+  { key: "isRectified", label: "风险是否已整改", width: 112 },
+  { key: "riskDescription", label: "风险说明", width: 200 },
+  { key: "handlingOpinion", label: "处理意见", width: 200 },
+  { key: "isTerminateProject", label: "是否终止或取消项目", width: 128 },
+  { key: "isNetIncome", label: "是否净额列收", width: 112 },
 ];
 
 export default function RiskManagement() {
@@ -373,11 +376,11 @@ export default function RiskManagement() {
   };
 
   // 获取状态标签样式
-  const getStatusBadge = (status: string) => {
-    if (status === "是") return "bg-green-50 text-green-600 border-green-200";
-    if (status === "否") return "bg-gray-100 text-gray-600 border-gray-200";
-    if (status === "待确认" || status === "待核实") return "bg-orange-50 text-orange-600 border-orange-200";
-    return "bg-gray-50 text-gray-600 border-gray-200";
+  const getStatusVariant = (status: string): "success" | "warning" | "neutral" => {
+    if (status === "是") return "success";
+    if (status === "否") return "neutral";
+    if (status === "待确认" || status === "待核实") return "warning";
+    return "neutral";
   };
 
   // 计算表格总宽度
@@ -393,21 +396,12 @@ export default function RiskManagement() {
 
       {/* Tab 切换 */}
       <div className="px-6 flex-shrink-0">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === tab.key
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <TabNav
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          style="pill"
+        />
       </div>
 
       {/* 内容区 */}
@@ -543,12 +537,12 @@ export default function RiskManagement() {
                   {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-8 px-4">
-                    <Search className="w-3.5 h-3.5 mr-1" />
+                  <Button className="btn btn-primary" onClick={handleQuery}>
+                    <Search className="w-4 h-4 mr-1" />
                     查询
                   </Button>
-                  <Button variant="outline" onClick={handleReset} className="h-8 px-4">
-                    <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  <Button className="btn btn-outline" onClick={handleReset}>
+                    <RefreshCw className="w-4 h-4 mr-1" />
                     重置
                   </Button>
                 </div>
@@ -558,7 +552,7 @@ export default function RiskManagement() {
             {/* 操作按钮 */}
             {activeTab === "all" && (
               <div className="flex items-center gap-2">
-                <Button className="bg-yellow-500 hover:bg-yellow-600 text-white h-8 px-4" disabled={selectedRows.length === 0}>
+                <Button className="btn btn-warning" disabled={selectedRows.length === 0}>
                   <Upload className="w-3.5 h-3.5 mr-1" />
                   批量派单
                 </Button>
@@ -625,7 +619,7 @@ export default function RiskManagement() {
                         <td className="px-3 py-3 text-sm text-gray-600 truncate" style={{ width: 200 }} title={row.projectName}>{row.projectName}</td>
                         <td className="px-3 py-3 text-sm text-gray-600 text-right" style={{ width: 120 }}>{row.projectAmount.toLocaleString()}</td>
                         <td className="px-3 py-3 text-sm text-center" style={{ width: 100 }}>
-                          <Badge className={getStatusBadge(row.isDispatched)}>{row.isDispatched}</Badge>
+                          <StatusBadge label={row.isDispatched} variant={getStatusVariant(row.isDispatched)} />
                         </td>
                         <td className="px-3 py-3 text-sm text-gray-600" style={{ width: 150 }}>{row.dispatchTime}</td>
                         <td className="px-3 py-3 text-sm text-gray-600" style={{ width: 120 }}>{row.currentLink}</td>
@@ -633,18 +627,18 @@ export default function RiskManagement() {
                         {/* 新增字段 */}
                         <td className="px-3 py-3 text-sm text-gray-600 text-center" style={{ width: 120 }}>{row.riskAccumulateDuration}</td>
                         <td className="px-3 py-3 text-sm text-center" style={{ width: 100 }}>
-                          <Badge className={getStatusBadge(row.isConfirmedRisk)}>{row.isConfirmedRisk}</Badge>
+                          <StatusBadge label={row.isConfirmedRisk} variant={getStatusVariant(row.isConfirmedRisk)} />
                         </td>
                         <td className="px-3 py-3 text-sm text-center" style={{ width: 100 }}>
-                          <Badge className={getStatusBadge(row.isRectified)}>{row.isRectified}</Badge>
+                          <StatusBadge label={row.isRectified} variant={getStatusVariant(row.isRectified)} />
                         </td>
                         <td className="px-3 py-3 text-sm text-gray-600 truncate" style={{ width: 180 }} title={row.riskDescription}>{row.riskDescription}</td>
                         <td className="px-3 py-3 text-sm text-gray-600 truncate" style={{ width: 180 }} title={row.handlingOpinion}>{row.handlingOpinion}</td>
                         <td className="px-3 py-3 text-sm text-center" style={{ width: 110 }}>
-                          <Badge className={getStatusBadge(row.isTerminateProject)}>{row.isTerminateProject}</Badge>
+                          <StatusBadge label={row.isTerminateProject} variant={getStatusVariant(row.isTerminateProject)} />
                         </td>
                         <td className="px-3 py-3 text-sm text-center" style={{ width: 110 }}>
-                          <Badge className={getStatusBadge(row.isNetIncome)}>{row.isNetIncome}</Badge>
+                          <StatusBadge label={row.isNetIncome} variant={getStatusVariant(row.isNetIncome)} />
                         </td>
                         {/* 操作列 - 固定在最右侧 */}
                         <td className="px-3 py-3 text-sm text-center sticky right-0 bg-white z-10" style={{ width: 140 }}>
@@ -665,26 +659,14 @@ export default function RiskManagement() {
               </div>
 
               {/* 分页 */}
-              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-500">共 {mockDispatchData.length} 条</div>
-                <div className="flex items-center gap-2">
-                  <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                    <SelectTrigger className="w-24 h-8 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10条/页</SelectItem>
-                      <SelectItem value="20">20条/页</SelectItem>
-                      <SelectItem value="50">50条/页</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={currentPage === 1}><span className="text-xs">‹</span></Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]"><span className="text-xs">1</span></Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0"><span className="text-xs">›</span></Button>
-                  <div className="flex items-center gap-1 ml-2">
-                    <span className="text-sm text-gray-500">前往</span>
-                    <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
-                    <span className="text-sm text-gray-500">页</span>
-                  </div>
-                </div>
+              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end">
+                <Pagination
+                  current={currentPage}
+                  total={mockDispatchData.length}
+                  pageSize={pageSize}
+                  onChange={(page, size) => { setCurrentPage(page); setPageSize(size); }}
+                  showQuickJumper={false}
+                />
               </div>
             </div>
           </div>
@@ -758,12 +740,12 @@ export default function RiskManagement() {
 
               <div className="flex items-center justify-between mt-4">
                 <div className="flex gap-2">
-                  <Button onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-8 px-4">
-                    <Search className="w-3.5 h-3.5 mr-1" />
+                  <Button className="btn btn-primary" onClick={handleQuery}>
+                    <Search className="w-4 h-4 mr-1" />
                     查询
                   </Button>
-                  <Button variant="outline" onClick={handleReset} className="h-8 px-4">
-                    <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  <Button className="btn btn-outline" onClick={handleReset}>
+                    <RefreshCw className="w-4 h-4 mr-1" />
                     重置
                   </Button>
                 </div>
@@ -772,7 +754,7 @@ export default function RiskManagement() {
                     <Download className="w-3.5 h-3.5 mr-1" />
                     导出
                   </Button>
-                  <Button className="bg-yellow-500 hover:bg-yellow-600 text-white h-8 px-4" disabled={selectedRows.length === 0}>
+                  <Button className="btn btn-warning" disabled={selectedRows.length === 0}>
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     批量生成
                   </Button>
@@ -851,26 +833,14 @@ export default function RiskManagement() {
               </div>
 
               {/* 分页 */}
-              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-500">共 {mockRiskProjectData.length} 条</div>
-                <div className="flex items-center gap-2">
-                  <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                    <SelectTrigger className="w-24 h-8 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10条/页</SelectItem>
-                      <SelectItem value="20">20条/页</SelectItem>
-                      <SelectItem value="50">50条/页</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={currentPage === 1}><span className="text-xs">‹</span></Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]"><span className="text-xs">1</span></Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0"><span className="text-xs">›</span></Button>
-                  <div className="flex items-center gap-1 ml-2">
-                    <span className="text-sm text-gray-500">前往</span>
-                    <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
-                    <span className="text-sm text-gray-500">页</span>
-                  </div>
-                </div>
+              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end">
+                <Pagination
+                  current={currentPage}
+                  total={mockRiskProjectData.length}
+                  pageSize={pageSize}
+                  onChange={(page, size) => { setCurrentPage(page); setPageSize(size); }}
+                  showQuickJumper={false}
+                />
               </div>
             </div>
           </div>

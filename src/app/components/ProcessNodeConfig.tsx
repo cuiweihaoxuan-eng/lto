@@ -40,7 +40,7 @@ export function ProcessNodeConfig() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto px-6 pb-6">
+      <div className="flex-1 overflow-auto px-6 pb-6 mt-4">
         {activeTab === "process" ? <ProcessList /> : <NodeList />}
       </div>
     </div>

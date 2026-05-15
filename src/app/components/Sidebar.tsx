@@ -76,11 +76,6 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
-    id: "finance-report",
-    label: "业财融合报表管理",
-    icon: <BarChart3 className="w-4 h-4" />
-  },
-  {
     id: "six-positioning",
     label: "六到位",
     icon: <Target className="w-4 h-4" />
@@ -88,6 +83,11 @@ const menuItems: MenuItem[] = [
   {
     id: "revenue-management",
     label: "录收管理",
+    icon: <DollarSign className="w-4 h-4" />
+  },
+  {
+    id: "self-delivery-settlement",
+    label: "自交付结算管理",
     icon: <DollarSign className="w-4 h-4" />
   },
   {
@@ -102,6 +102,16 @@ const menuItems: MenuItem[] = [
         children: yecaiChildren
       }
     ]
+  },
+  {
+    id: "progress-management",
+    label: "形象进度管理",
+    icon: <TrendingUp className="w-4 h-4" />
+  },
+  {
+    id: "contract-payment-confirmation",
+    label: "合同收付款确认",
+    icon: <DollarSign className="w-4 h-4" />
   },
   {
     id: "settings",
@@ -192,7 +202,7 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
         <div className="h-14 flex items-center justify-between px-4 border-b border-[#bae7ff] bg-gradient-to-r from-[#E6F4FF] to-[#bae7ff]">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#1890ff] rounded flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 bg-[var(--color-primary)] rounded flex items-center justify-center text-white text-sm font-bold">
                 产
               </div>
               <span className="font-medium text-sm text-gray-700">产数质量运营平台</span>
@@ -200,7 +210,7 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
           )}
           <button
             onClick={onToggle}
-            className="p-1.5 hover:bg-[#bae7ff] rounded transition-colors"
+            className="p-1.5 hover:bg-[var(--color-primary-light)] rounded transition-colors"
           >
             <Menu className="w-4 h-4 text-gray-600" />
           </button>
@@ -220,8 +230,8 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
                 }}
                 className={`w-full flex items-center justify-between px-4 py-2.5 transition-colors ${
                   currentActiveItem === item.id
-                    ? 'bg-[#1890ff] text-white'
-                    : 'text-gray-700 hover:bg-[#bae7ff]'
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'text-gray-700 hover:bg-[var(--color-primary-light)]'
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 <div className="flex items-center gap-3">
@@ -266,8 +276,8 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
                         onMouseLeave={handleCascadeLeave}
                         className={`w-full flex items-center justify-between px-4 py-2 pl-12 text-sm transition-colors ${
                           currentActiveItem === child.id
-                            ? 'bg-[#1890ff] text-white'
-                            : 'text-gray-600 hover:bg-[#bae7ff]'
+                            ? 'bg-[var(--color-primary)] text-white'
+                            : 'text-gray-600 hover:bg-[var(--color-primary-light)]'
                         }`}
                       >
                         <span className="flex-1 text-left truncate">{child.label}</span>
@@ -309,7 +319,7 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
                 }}
                 className={`block w-full text-left px-4 py-2 text-sm transition-colors whitespace-nowrap ${
                   currentActiveItem === child.id
-                    ? 'bg-[#1890ff] text-white'
+                    ? 'bg-[var(--color-primary)] text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >

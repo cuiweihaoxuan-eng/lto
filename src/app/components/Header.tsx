@@ -28,7 +28,7 @@ export function Header() {
         
         {/* User Info */}
         <div className="flex items-center gap-2 pl-4 border-l">
-          <div className="w-8 h-8 bg-[#1890ff] rounded-full flex items-center justify-center text-white text-sm">
+          <div className="w-8 h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-white text-sm">
             A
           </div>
           <div className="text-sm">

@@ -384,7 +384,7 @@ export function LinkOpportunityDialog({ open, onClose, onLink }: LinkOpportunity
                   <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                     <AlertTriangle className="w-5 h-5 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900">重要提醒</h3>
+                  <h3 className="text-base font-medium text-gray-900">重要提醒</h3>
                 </div>
                 <div className="text-sm text-gray-700 mb-4">
                   商情中标前30天内请勿对关联的商机作以下两类修改(如强行修改，集团会判为虚假商机，算作漏单!!!):

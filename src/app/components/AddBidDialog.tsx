@@ -209,7 +209,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
     <div className={dialogStyle} onClick={onClose}>
       <div className={cardStyle} onClick={e => e.stopPropagation()}>
         {/* 标题栏 */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#1890ff] text-white rounded-t-lg flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 bg-[var(--color-primary)] text-white rounded-t-lg flex-shrink-0">
           <span className="text-base font-medium">新增投标-项目发标</span>
           <div className="flex items-center gap-2">
             <button
@@ -230,7 +230,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
             {/* 发标信息 */}
             <div>
               <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
-                <span className="w-1 h-4 bg-[#1890ff] rounded mr-2"></span>
+                <span className="w-1 h-4 bg-[var(--color-primary)] rounded mr-2"></span>
                 发标信息
               </div>
               <div className="grid grid-cols-3 gap-x-6 gap-y-4">
@@ -305,7 +305,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
                         value="1"
                         checked={form.isBid === "1"}
                         onChange={e => set("isBid", e.target.value)}
-                        className="accent-[#1890ff]"
+                        className="accent-[var(--color-primary)]"
                       />
                       是
                     </label>
@@ -316,7 +316,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
                         value="0"
                         checked={form.isBid === "0"}
                         onChange={e => set("isBid", e.target.value)}
-                        className="accent-[#1890ff]"
+                        className="accent-[var(--color-primary)]"
                       />
                       否
                     </label>
@@ -616,8 +616,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3 flex-shrink-0">
           <Button variant="outline" className="h-9 text-sm" onClick={onClose}>取消</Button>
           <Button variant="outline" className="h-9 text-sm" onClick={() => {}}>暂存</Button>
-          <Button
-            className="h-9 text-sm bg-[#1890ff] hover:bg-[#0d7dea] text-white"
+          <Button className="btn btn-primary h-9 text-sm"
             onClick={() => {
               onSubmit?.(form);
               onClose();

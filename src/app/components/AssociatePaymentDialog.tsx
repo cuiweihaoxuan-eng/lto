@@ -168,7 +168,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
     >
       <div className="flex flex-col h-full p-6">
         <div className="dialog-drag-handle cursor-move">
-          <h2 className="text-xl">关联列账信息</h2>
+          <h2 className="text-base font-semibold text-gray-900">关联列账信息</h2>
           <p className="text-sm text-gray-500">选择需要关联的列账信息</p>
         </div>
 
@@ -227,8 +227,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
               />
             </div>
             <div className="flex items-end gap-2">
-              <Button 
-                className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+              <Button className="btn btn-primary"
                 onClick={handleSearch}
               >
                 <Search className="w-4 h-4 mr-2" />
@@ -248,7 +247,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
         <div className="border rounded-lg overflow-hidden flex-1 min-h-0 mt-4">
           <div className="overflow-auto h-full">
             <table className="w-full text-sm">
-              <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+              <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
                 <tr>
                   <th className="px-3 py-3 min-w-[50px]">
                     <Checkbox 
@@ -256,33 +255,33 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
                       onCheckedChange={handleSelectAll}
                     />
                   </th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[70px] max-w-[90px]">序号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[200px] max-w-[280px]">项目名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">项目编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">后向合同名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">后合同编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">操作人</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">报账人</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[130px] max-w-[170px]">报账单号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">科目编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[120px] max-w-[160px]">成本要素名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[130px] max-w-[170px]">成本要素编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[110px] max-w-[140px]">借方金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[130px] max-w-[170px]">已关联付款金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[110px] max-w-[140px]">贷方金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">凭证号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[110px] max-w-[140px]">凭证日期</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[130px] max-w-[170px]">采购凭证号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">物料号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[70px] max-w-[90px]">数量</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[220px]">物料描述</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">利润中心</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">成本中心</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[70px] max-w-[90px]">序号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[200px] max-w-[280px]">项目名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">项目编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">后向合同名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">后合同编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">操作人</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">报账人</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[130px] max-w-[170px]">报账单号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">科目编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[120px] max-w-[160px]">成本要素名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[130px] max-w-[170px]">成本要素编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[110px] max-w-[140px]">借方金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[130px] max-w-[170px]">已关联付款金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[110px] max-w-[140px]">贷方金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">凭证号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[110px] max-w-[140px]">凭证日期</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[130px] max-w-[170px]">采购凭证号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">物料号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[70px] max-w-[90px]">数量</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[220px]">物料描述</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">利润中心</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">成本中心</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, index) => (
-                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[var(--color-table-stripe)]"}>
                     <td className="px-3 py-3 min-w-[50px]">
                       <Checkbox 
                         checked={item.selected}
@@ -324,8 +323,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button 
-            className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+          <Button className="btn btn-primary"
             onClick={handleConfirm}
           >
             确认

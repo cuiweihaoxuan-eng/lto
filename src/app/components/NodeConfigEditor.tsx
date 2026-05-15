@@ -295,7 +295,7 @@ export function NodeConfigEditor({ node, onSave, onCancel }: NodeConfigEditorPro
         <Button variant="outline" onClick={onCancel}>
           取消
         </Button>
-        <Button onClick={handleSave} className="bg-[#1890ff] hover:bg-[#40a9ff]">
+        <Button onClick={handleSave} className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]">
           <Save className="w-4 h-4 mr-1" />
           确认
         </Button>

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Printer, Download, FileEdit } from "lucide-react";
 import { FinancialProgressTimeline } from "./FinancialProgressTimeline";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { TabNav } from "./ui/TabNav";
 
 interface ProgressRow {
   id: string;
@@ -167,7 +165,7 @@ export function ProgressManagement() {
     return (
       <div className="space-y-4">
         {/* Summary Section */}
-        <div className="bg-[#f7f8fa] p-4 rounded space-y-3">
+        <div className="bg-gray-50 p-4 rounded space-y-3">
           <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
             <div className="flex">
               <span className="text-gray-600 w-40">所属会计期：</span>
@@ -211,29 +209,29 @@ export function ProgressManagement() {
         <div className="border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-max">
-              <thead className="bg-[#f5f6f7]">
+              <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">序号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">类型</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">合同编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">科目</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">A.金额（含税）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">B.增值税税率（%）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">C.金额（不含税）<br/>A/(1+B)</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">D.前期已确认<br/>进度（%）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">E.前期已确认<br/>金额（含税）<br/>A*D</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">F.前期已确认<br/>金额（不含税）<br/>C*D</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">G.本期确认<br/>进度（%）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">H.本期确认<br/>金额（含税）<br/>A*G</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">I.本期确认<br/>金额（不含税）<br/>C*G</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">J.累计确认<br/>进度（%）<br/>D+G</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">K.累计确认<br/>金额（含税）<br/>A*J=E+H</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap">L.累计确认<br/>金额（不含税）<br/>C*J=F+I</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">序号</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">类型</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">合同编码</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">科目</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">A.金额（含税）</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">B.增值税税率（%）</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">C.金额（不含税）<br/>A/(1+B)</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">D.前期已确认<br/>进度（%）</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">E.前期已确认<br/>金额（含税）<br/>A*D</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">F.前期已确认<br/>金额（不含税）<br/>C*D</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">G.本期确认<br/>进度（%）</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">H.本期确认<br/>金额（含税）<br/>A*G</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r bg-yellow-50">I.本期确认<br/>金额（不含税）<br/>C*G</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">J.累计确认<br/>进度（%）<br/>D+G</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap border-r">K.累计确认<br/>金额（含税）<br/>A*J=E+H</th>
+                  <th className="px-3 py-3 text-sm text-left font-medium text-gray-600 whitespace-nowrap">L.累计确认<br/>金额（不含税）<br/>C*J=F+I</th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((item, index) => (
-                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.serialNo}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.type}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.contractCode}</td>
@@ -270,7 +268,7 @@ export function ProgressManagement() {
                 ))}
                 
                 {/* Subtotal Row */}
-                <tr className="bg-[#f5f6f7] font-medium">
+                <tr className="bg-gray-100 font-medium">
                   <td colSpan={4} className="px-3 py-3 whitespace-nowrap border-r">小计</td>
                   <td className="px-3 py-3 whitespace-nowrap border-r">
                     ¥{totals.amountTax.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
@@ -307,7 +305,7 @@ export function ProgressManagement() {
         </div>
 
         {/* Signature Section */}
-        <div className="bg-[#f7f8fa] p-4 rounded space-y-3">
+        <div className="bg-gray-50 p-4 rounded space-y-3">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-600">甲方单位签字人（签字）：</span>
@@ -348,52 +346,24 @@ export function ProgressManagement() {
 
           {/* Progress Tabs */}
           <div>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start border-b rounded-none h-12 bg-transparent p-0">
-                <TabsTrigger
-                  value="income"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-                >
-                  收入进度
-                </TabsTrigger>
-                <TabsTrigger
-                  value="expense"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-                >
-                  支出进度
-                </TabsTrigger>
-                <TabsTrigger
-                  value="receipt"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-                >
-                  收款进度
-                </TabsTrigger>
-                <TabsTrigger
-                  value="payment"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-                >
-                  付款进度
-                </TabsTrigger>
-              </TabsList>
+            <TabNav
+              tabs={[
+                { id: "income", label: "收入进度" },
+                { id: "expense", label: "支出进度" },
+                { id: "receipt", label: "收款进度" },
+                { id: "payment", label: "付款进度" },
+              ]}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              style="underlined"
+            />
 
-              <div className="mt-6">
-                <TabsContent value="income" className="m-0">
-                  {renderProgressTable(incomeData, "收入")}
-                </TabsContent>
-
-                <TabsContent value="expense" className="m-0">
-                  {renderProgressTable(expenseData, "支出")}
-                </TabsContent>
-
-                <TabsContent value="receipt" className="m-0">
-                  {renderProgressTable(receiptData, "收款")}
-                </TabsContent>
-
-                <TabsContent value="payment" className="m-0">
-                  {renderProgressTable(paymentData, "付款")}
-                </TabsContent>
-              </div>
-            </Tabs>
+            <div className="mt-6">
+              {activeTab === "income" && renderProgressTable(incomeData, "收入")}
+              {activeTab === "expense" && renderProgressTable(expenseData, "支出")}
+              {activeTab === "receipt" && renderProgressTable(receiptData, "收款")}
+              {activeTab === "payment" && renderProgressTable(paymentData, "付款")}
+            </div>
           </div>
         </div>
       </div>

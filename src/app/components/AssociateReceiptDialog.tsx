@@ -126,7 +126,7 @@ export function AssociateReceiptDialog({ open, onOpenChange }: AssociateReceiptD
         <div className="border rounded-lg overflow-hidden flex-1 min-h-0 mt-4">
           <div className="overflow-auto h-full">
             <table className="w-full text-sm">
-              <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+              <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
                 <tr>
                   <th className="px-3 py-3 min-w-[50px]">
                     <Checkbox 
@@ -134,26 +134,26 @@ export function AssociateReceiptDialog({ open, onOpenChange }: AssociateReceiptD
                       onCheckedChange={handleSelectAll}
                     />
                   </th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[120px]">会计年度</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">会计期间</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">项目编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[200px] max-w-[280px]">项目名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[180px] max-w-[250px]">合同名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">合同编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[120px] max-w-[160px]">产品收入项名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[140px] max-w-[180px]">产品收入项编码</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[180px]">已确认收入金额（含税）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[160px] max-w-[200px]">已确认收入金额（不含税）</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[140px] max-w-[180px]">已关联收款金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">会计科目</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">公司</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">利润中心</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">成本中心</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[120px]">会计年度</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">会计期间</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">项目编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[200px] max-w-[280px]">项目名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[180px] max-w-[250px]">合同名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">合同编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[120px] max-w-[160px]">产品收入项名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[140px] max-w-[180px]">产品收入项编码</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[180px]">已确认收入金额（含税）</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[160px] max-w-[200px]">已确认收入金额（不含税）</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[140px] max-w-[180px]">已关联收款金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">会计科目</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">公司</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">利润中心</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">成本中心</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, index) => (
-                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[var(--color-table-stripe)]"}>
                     <td className="px-3 py-3 min-w-[50px]">
                       <Checkbox 
                         checked={item.selected}
@@ -186,8 +186,7 @@ export function AssociateReceiptDialog({ open, onOpenChange }: AssociateReceiptD
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button 
-            className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+          <Button className="btn btn-primary"
             onClick={handleConfirm}
           >
             确认

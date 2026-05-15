@@ -201,8 +201,7 @@ export function ForwardReceiptConfirmation() {
 
       {/* Action Button */}
       <div>
-        <Button 
-          className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+        <Button className="btn btn-primary"
           onClick={() => setShowAddDialog(true)}
         >
           新增收款确认
@@ -213,31 +212,31 @@ export function ForwardReceiptConfirmation() {
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-max">
-            <thead className="bg-[#f5f6f7]">
+            <thead className="bg-[var(--color-table-header)]">
               <tr>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">序号</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">项目编码</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">项目名称</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">前向合同编号</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">前向合同名称</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">银行流水号</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">收款认领金额</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">认领日期</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">资金用途（销账/预存款）</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">认领人</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">认领人号码</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">利润中心</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">利润中心名称</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">成本中心</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r">成本中心名称</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap border-r sticky right-[140px] bg-[#f5f6f7] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">关联确收记录</th>
-                <th className="px-3 py-3 text-left font-medium text-gray-600 whitespace-nowrap sticky right-0 bg-[#f5f6f7] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">操作</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">序号</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">项目编码</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">项目名称</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">前向合同编号</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">前向合同名称</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">银行流水号</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">收款认领金额</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">认领日期</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">资金用途（销账/预存款）</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">认领人</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">认领人号码</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">利润中心</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">利润中心名称</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">成本中心</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r">成本中心名称</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap border-r sticky right-[140px] bg-[var(--color-table-header)] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">关联确收记录</th>
+                <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 whitespace-nowrap sticky right-0 bg-[var(--color-table-header)] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">操作</th>
               </tr>
             </thead>
             <tbody>
               {receiptData.map((item, index) => (
                 <React.Fragment key={item.id}>
-                  <tr className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr className={index % 2 === 0 ? "bg-white" : "bg-[var(--color-table-stripe)]"}>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.serialNo}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.projectCode}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.projectName}</td>
@@ -261,7 +260,7 @@ export function ForwardReceiptConfirmation() {
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.profitCenterName}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.costCenter}</td>
                     <td className="px-3 py-3 whitespace-nowrap border-r">{item.costCenterName}</td>
-                    <td className={`px-3 py-3 whitespace-nowrap border-r sticky right-[140px] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}`}>
+                    <td className={`px-3 py-3 whitespace-nowrap border-r sticky right-[140px] z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}`}>
                       <button
                         className="flex items-center gap-1 text-[#2e7cff] hover:underline"
                         onClick={() => toggleExpand(item.id)}
@@ -270,7 +269,7 @@ export function ForwardReceiptConfirmation() {
                         {item.expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
                     </td>
-                    <td className={`px-3 py-3 whitespace-nowrap sticky right-0 z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}`}>
+                    <td className={`px-3 py-3 whitespace-nowrap sticky right-0 z-10 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}`}>
                       <div className="flex gap-2">
                         <button 
                           className="text-[#2e7cff] hover:underline"
@@ -294,19 +293,19 @@ export function ForwardReceiptConfirmation() {
                       <td colSpan={19} className="px-4 py-2 bg-[#f0f7ff]">
                         <div className="ml-8">
                           <table className="w-full text-sm min-w-max">
-                            <thead className="bg-[#e6f2ff]">
+                            <thead className="bg-[var(--color-info-light)]">
                               <tr>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[150px]">合同编码</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[100px]">账期</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[120px]">产品收入项</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[150px]">产品收入项编码</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[140px]">列收金额（含税）</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[140px]">本次收款金额</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[120px]">已收款金额</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[140px]">剩余未收款金额</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[120px]">关联日期</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[100px]">关联人</th>
-                                <th className="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap min-w-[120px]">操作</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[150px]">合同编码</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[100px]">账期</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[120px]">产品收入项</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[150px]">产品收入项编码</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[140px]">列收金额（含税）</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[140px]">本次收款金额</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[120px]">已收款金额</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[140px]">剩余未收款金额</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[120px]">关联日期</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[100px]">关联人</th>
+                                <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 whitespace-nowrap min-w-[120px]">操作</th>
                               </tr>
                             </thead>
                             <tbody>

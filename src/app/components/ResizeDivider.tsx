@@ -62,7 +62,7 @@ export function ResizeDivider({
     <div
       ref={containerRef}
       className={`relative flex-shrink-0 h-full group cursor-ew-resize transition-all duration-200 ${
-        isDragging ? "bg-[#1890ff]/20" : "hover:bg-[#1890ff]/10"
+        isDragging ? "bg-[var(--color-primary)]/20" : "hover:bg-[var(--color-primary)]/10"
       }`}
       style={{ width: 6 }}
       onMouseDown={handleMouseDown}

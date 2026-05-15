@@ -117,7 +117,7 @@ export function ProjectInfo({ isCollapsed, onToggle }: ProjectInfoProps) {
         <button className="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors whitespace-nowrap">
           查看工单
         </button>
-        <button className="px-4 py-1.5 bg-[#2e7cff] text-white rounded text-sm hover:bg-[#1e6eef] transition-colors whitespace-nowrap">
+        <button className="btn btn-primary px-4 py-1.5 text-sm whitespace-nowrap">
           合同审批流程
         </button>
       </div>

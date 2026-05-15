@@ -320,7 +320,7 @@ export function ReportTemplate({
               <Button variant="outline" size="sm" onClick={() => {
                 toggleAllColumns(true);
               }}>恢复默认</Button>
-              <Button variant="default" size="sm" onClick={() => setShowColumnModal(false)}>确定</Button>
+              <Button className="btn btn-primary" onClick={() => setShowColumnModal(false)}>确定</Button>
             </div>
           </div>
         </div>
@@ -399,8 +399,8 @@ export function ReportTemplate({
             </div>
           </div>
           <div className="flex justify-end gap-2 px-6 py-3 border-t border-gray-200 bg-gray-50">
-            <Button variant="outline" size="sm" onClick={() => toggleAllColumns(true)}>恢复默认</Button>
-            <Button variant="default" size="sm" onClick={() => setShowColumnModal(false)}>确定</Button>
+            <Button className="btn btn-outline" onClick={() => toggleAllColumns(true)}>恢复默认</Button>
+            <Button className="btn btn-primary" onClick={() => setShowColumnModal(false)}>确定</Button>
           </div>
         </div>
       </div>
@@ -798,11 +798,11 @@ export function ReportTemplate({
                 {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </Button>
               <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={handleQuery}>查询</Button>
-                <Button variant="outline" size="sm" onClick={handleReset}>
+                <Button className="btn btn-primary" onClick={handleQuery}>查询</Button>
+                <Button className="btn btn-outline" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => {}}>导出</Button>
+                <Button className="btn btn-outline" onClick={() => {}}>导出</Button>
               </div>
             </div>
           </div>

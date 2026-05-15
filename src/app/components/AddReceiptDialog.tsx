@@ -134,7 +134,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
     >
       <div className="flex flex-col h-full p-6">
         <div className="dialog-drag-handle cursor-move">
-          <h2 className="text-xl">添加银行流水明细</h2>
+          <h2 className="text-base font-semibold text-gray-900">添加银行流水明细</h2>
           <p className="text-sm text-gray-500">选择并添加银行流水明细到收据中。</p>
         </div>
 
@@ -205,8 +205,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
               />
             </div>
             <div className="col-span-2 flex items-end gap-2">
-              <Button 
-                className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+              <Button className="btn btn-primary"
                 onClick={handleSearch}
               >
                 <Search className="w-4 h-4 mr-2" />
@@ -226,7 +225,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
         <div className="border rounded-lg overflow-hidden flex-1 min-h-0 mt-4">
           <div className="overflow-auto h-full">
             <table className="w-full text-sm">
-              <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+              <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
                 <tr>
                   <th className="px-3 py-3 min-w-[50px]">
                     <Checkbox 
@@ -234,24 +233,24 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
                       onCheckedChange={handleSelectAll}
                     />
                   </th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">交易流水号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[110px] max-w-[130px]">借方金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[110px] max-w-[130px]">贷方金额</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[180px]">交易时间</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[160px] max-w-[200px]">对方账号</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">对方账号名称</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[120px]">认领人</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[180px] max-w-[250px]">认领人组织</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[120px] max-w-[150px]">电话</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[100px] max-w-[130px]">用途</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[120px] max-w-[180px]">附言</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">摘要</th>
-                  <th className="px-3 py-3 text-left font-medium text-gray-600 min-w-[150px] max-w-[200px]">备注</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">交易流水号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[110px] max-w-[130px]">借方金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[110px] max-w-[130px]">贷方金额</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[180px]">交易时间</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[160px] max-w-[200px]">对方账号</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">对方账号名称</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[120px]">认领人</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[180px] max-w-[250px]">认领人组织</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[120px] max-w-[150px]">电话</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[100px] max-w-[130px]">用途</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[120px] max-w-[180px]">附言</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">摘要</th>
+                  <th className="px-3 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px] max-w-[200px]">备注</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((item, index) => (
-                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-[var(--color-table-stripe)]"}>
                     <td className="px-3 py-3 min-w-[50px]">
                       <Checkbox 
                         checked={item.selected}
@@ -286,8 +285,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button 
-            className="bg-[#2e7cff] hover:bg-[#1e6eef]"
+          <Button className="btn btn-primary"
             onClick={handleConfirm}
           >
             确认

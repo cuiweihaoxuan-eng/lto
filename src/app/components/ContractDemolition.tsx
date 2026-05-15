@@ -170,7 +170,7 @@ export function ContractDemolition() {
             </Select>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
+            <Button className="btn btn-outline" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
               重置
             </Button>
           </div>
@@ -180,7 +180,7 @@ export function ContractDemolition() {
       {/* 操作按钮区 */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex gap-2">
-          <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+          <Button className="btn btn-primary">
             <Plus className="w-4 h-4 mr-1" />
             新增解构
           </Button>
@@ -311,7 +311,7 @@ export function ContractDemolition() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled>上一页</Button>
-          <Button variant="outline" size="sm" className="bg-[#1890ff] text-white border-[#1890ff]">1</Button>
+          <Button variant="outline" size="sm" className="bg-[var(--color-primary)] text-white border-[var(--color-primary)]">1</Button>
           <Button variant="outline" size="sm">2</Button>
           <Button variant="outline" size="sm">下一页</Button>
         </div>

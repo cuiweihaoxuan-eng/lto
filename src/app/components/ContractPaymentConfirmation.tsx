@@ -1,35 +1,29 @@
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import React, { useState } from "react";
+import { TabNav } from "./ui/TabNav";
 import { ForwardReceiptConfirmation } from "./ForwardReceiptConfirmation";
 import { BackwardPaymentConfirmation } from "./BackwardPaymentConfirmation";
 
 export function ContractPaymentConfirmation() {
+  const [activeTab, setActiveTab] = useState("forward");
+
   return (
     <div className="h-full overflow-auto">
-      <Tabs defaultValue="forward" className="w-full h-full">
-        <TabsList className="w-full justify-start border-b rounded-none h-12 bg-transparent p-0">
-          <TabsTrigger
-            value="forward"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-          >
-            前向收款确认
-          </TabsTrigger>
-          <TabsTrigger
-            value="backward"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-[#2e7cff] rounded-none px-6 data-[state=active]:bg-transparent data-[state=active]:text-[#2e7cff]"
-          >
-            后向付款确认
-          </TabsTrigger>
-        </TabsList>
+      <div className="p-6">
+        <TabNav
+          tabs={[
+            { id: "forward", label: "前向收款确认" },
+            { id: "backward", label: "后向付款确认" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          style="underlined"
+        />
 
-        <TabsContent value="forward" className="p-6 m-0">
-          <ForwardReceiptConfirmation />
-        </TabsContent>
-
-        <TabsContent value="backward" className="p-6 m-0">
-          <BackwardPaymentConfirmation />
-        </TabsContent>
-      </Tabs>
+        <div className="mt-6">
+          {activeTab === "forward" && <ForwardReceiptConfirmation />}
+          {activeTab === "backward" && <BackwardPaymentConfirmation />}
+        </div>
+      </div>
     </div>
   );
 }

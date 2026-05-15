@@ -198,7 +198,7 @@ export function RiskDispatchDialog({ open, onClose, rowData }: RiskDispatchDialo
                     index < currentStepIndex
                       ? "bg-green-500 text-white"
                       : index === currentStepIndex
-                        ? "bg-[#1890ff] text-white"
+                        ? "bg-[var(--color-primary)] text-white"
                         : "bg-gray-200 text-gray-500"
                   }`}>
                     {index < currentStepIndex ? <Check className="w-4 h-4" /> : index + 1}
@@ -750,17 +750,16 @@ export function RiskDispatchDialog({ open, onClose, rowData }: RiskDispatchDialo
               </Button>
             )}
             {currentStepIndex < steps.length - 1 ? (
-              <Button
+              <Button className="btn btn-primary"
                 onClick={() => {
                   const nextStep = steps[currentStepIndex + 1];
                   setActiveStep(nextStep.key);
                 }}
-                className="bg-[#1890ff] hover:bg-[#0d7dea] text-white"
               >
                 下一步
               </Button>
             ) : (
-              <Button onClick={handleSubmit} className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+              <Button className="btn btn-primary" onClick={handleSubmit}>
                 提交派单
               </Button>
             )}

@@ -139,7 +139,7 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
             onClick={() => setActiveL3Tab(tab.id)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeL3Tab === tab.id
-                ? "border-[#1890ff] text-[#1890ff]"
+                ? "border-[var(--color-primary)] text-[#1890ff]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -153,7 +153,7 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-700 font-medium">投标管理</span>
-            <Button size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-7 px-3" onClick={onAddBid}>
+            <Button size="sm" className="btn btn-primary h-7 px-3" onClick={onAddBid}>
               维护投标信息
             </Button>
           </div>
@@ -187,7 +187,7 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
                     {/* 发标信息 */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="text-xs font-medium text-[#1890ff] mb-2 flex items-center gap-1.5">
-                        <span className="w-1 h-3 bg-[#1890ff] rounded-sm"></span>
+                        <span className="w-1 h-3 bg-[var(--color-primary)] rounded-sm"></span>
                         发标信息
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-4">
@@ -330,12 +330,12 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
               </SelectContent>
             </Select>
           </div>
-          <Button size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-8">查询</Button>
+          <Button size="sm" className="btn btn-primary h-8">查询</Button>
         </div>
 
         <div className="flex gap-2 mb-3">
           {["资质证书调用", "证书及资质下载", "申请记录", "实际使用"].map(btn => (
-            <Button key={btn} size="sm" variant="outline" className="h-8 text-[#1890ff] border-[#1890ff] hover:bg-blue-50">
+            <Button key={btn} size="sm" variant="outline" className="h-8 text-[#1890ff] border-[var(--color-primary)] hover:bg-blue-50">
               {btn}
             </Button>
           ))}
@@ -733,7 +733,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
               onClick={() => setActiveLevel1(tab.id)}
               className={`px-1 py-2 mr-4 text-sm font-medium border-b-2 transition-colors ${
                 activeLevel1 === tab.id
-                  ? "border-[#1890ff] text-[#1890ff]"
+                  ? "border-[var(--color-primary)] text-[#1890ff]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -748,7 +748,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
               onClick={() => setActiveTool(activeTool === btn.id ? null : btn.id)}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm transition-colors border-b-2 ${
                 activeTool === btn.id
-                  ? "border-[#1890ff] text-[#1890ff]"
+                  ? "border-[var(--color-primary)] text-[#1890ff]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -777,7 +777,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
                     onClick={() => setActiveProcess(step.id)}
                     className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors ${
                       isActive
-                        ? "bg-[#1890ff] text-white"
+                        ? "bg-[var(--color-primary)] text-white"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
@@ -792,7 +792,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
               })}
             </div>
             <div className="mt-4">
-              <Button size="sm" className="w-full bg-[#1890ff] hover:bg-[#0d7dea] text-white h-8 text-sm">
+              <Button size="sm" className="btn btn-primary w-full h-8 text-sm">
                 推进
               </Button>
             </div>
@@ -802,7 +802,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
           <div className="p-4 border-t border-gray-100">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-[#1890ff] flex-shrink-0" />
+                <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] flex-shrink-0" />
                 <span className="text-gray-500">进行中</span>
               </div>
               <div className="flex items-center gap-2 text-xs">

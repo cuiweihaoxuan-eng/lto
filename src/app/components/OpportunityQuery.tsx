@@ -5,6 +5,9 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
+import { TabNav } from "./ui/TabNav";
+import { StatusBadge, AutoStatusBadge } from "./ui/StatusBadge";
+import { Pagination } from "./ui/Pagination";
 
 interface Opportunity {
   id: string;
@@ -141,34 +144,34 @@ const viewTabs = [
 const statusTabs = ["全部", "跟进中", "推进中", "已转化", "已关闭"];
 
 const defaultColumnWidths = {
-  select: 40,
-  oppName: 256,
-  stage: 96,
-  provinceCode: 144,
-  groupCode: 144,
-  receiveDate: 144,
-  modifyDate: 144,
-  customerId: 144,
-  customerName: 256,
-  city: 96,
-  district: 128,
-  bu: 96,
-  customerIndustry: 96,
-  controlDept: 128,
-  contractName: 192,
-  contractCode: 128,
-  contractAmount: 112,
-  projectName: 192,
-  projectCode: 128,
-  status: 96,
-  isTeamFormed: 96,
-  amount: 112,
-  myScore: 80,
-  scoreDistRate: 112,
-  groupCustomerCode: 128,
-  source: 96,
-  customerManager: 144,
-  actions: 80
+  select: 48,
+  oppName: 280,
+  stage: 100,
+  provinceCode: 160,
+  groupCode: 160,
+  receiveDate: 160,
+  modifyDate: 160,
+  customerId: 180,
+  customerName: 280,
+  city: 100,
+  district: 120,
+  bu: 100,
+  customerIndustry: 120,
+  controlDept: 160,
+  contractName: 200,
+  contractCode: 140,
+  contractAmount: 120,
+  projectName: 200,
+  projectCode: 140,
+  status: 100,
+  isTeamFormed: 120,
+  amount: 120,
+  myScore: 100,
+  scoreDistRate: 140,
+  groupCustomerCode: 140,
+  source: 100,
+  customerManager: 160,
+  actions: 100
 };
 
 export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => void }) {
@@ -198,6 +201,8 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
   const [contractCode, setContractCode] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerCode, setCustomerCode] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const opportunities = mockOpportunities;
 
@@ -279,18 +284,12 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
   }, [resizing, handleResizeMove, handleResizeEnd]);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, string> = {
-      "跟进中": "bg-blue-50 text-blue-600 border-blue-300",
-      "推进中": "bg-blue-50 text-blue-600 border-blue-300",
-      "已转化": "bg-green-50 text-green-600 border-green-300",
-      "已关闭": "bg-gray-100 text-gray-600 border-gray-300"
-    };
-    return <Badge className={variants[status] || "bg-gray-50 text-gray-600 border-gray-300"}>{status}</Badge>;
+    return <AutoStatusBadge label={status} />;
   };
 
   const getIctBadge = (name: string) => {
     if (name.toLowerCase().includes("ict")) {
-      return <Badge className="bg-orange-50 text-orange-600 border-orange-300 text-xs ml-1">ICT</Badge>;
+      return <StatusBadge label="ICT" variant="warning" className="text-xs ml-1" />;
     }
     return null;
   };
@@ -305,21 +304,18 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
 
       {/* Tab 切换 */}
       <div className="px-6 flex-shrink-0">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-          {viewTabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveViewTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeViewTab === tab.id
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <TabNav
+          tabs={[
+            { id: "list", label: "我发起的商机" },
+            { id: "card", label: "我管理的商机" },
+            { id: "card", label: "我支撑的商机" },
+            { id: "card", label: "我管理人员所支撑的商机" },
+            { id: "card", label: "我关注的商机" },
+          ]}
+          activeTab={activeViewTab}
+          onTabChange={setActiveViewTab}
+          style="pill"
+        />
       </div>
 
       {/* 内容区 */}
@@ -401,10 +397,10 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
                 {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </Button>
               <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                <Button className="btn btn-primary" onClick={handleQuery}>
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleReset}>
+                <Button className="btn btn-outline" onClick={handleReset}>
                   <RefreshCw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>
@@ -413,15 +409,15 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
 
           {/* 操作按钮卡片 */}
           <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-2">
-            <Button className="bg-green-600 hover:bg-green-700 text-white h-8 px-4">
+            <Button className="btn btn-success">
               <Download className="w-3.5 h-3.5 mr-1" />
               同步集团
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700 text-white h-8 px-4">
+            <Button className="btn btn-success">
               <Plus className="w-3.5 h-3.5 mr-1" />
               新建项目
             </Button>
-            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white h-8 px-4">
+            <Button className="btn btn-cyan">
               <X className="w-3.5 h-3.5 mr-1" />
               关闭商机
             </Button>
@@ -443,21 +439,18 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
 
           {/* 状态标签页 */}
           <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-            <div className="flex items-center gap-1">
-              {statusTabs.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveStatusTab(tab)}
-                  className={`px-4 py-1.5 text-sm rounded transition-colors ${
-                    activeStatusTab === tab
-                      ? "bg-[#1890ff] text-white"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            <TabNav
+              tabs={[
+                { id: "全部", label: "全部" },
+                { id: "跟进中", label: "跟进中" },
+                { id: "推进中", label: "推进中" },
+                { id: "已转化", label: "已转化" },
+                { id: "已关闭", label: "已关闭" },
+              ]}
+              activeTab={activeStatusTab}
+              onTabChange={setActiveStatusTab}
+              style="pill"
+            />
           </div>
 
           {/* 数据表格区 */}
@@ -638,46 +631,16 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
           </div>
 
           {/* 底部统计和分页 */}
-          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              共 {opportunities.length} 条
-            </div>
-            <div className="flex items-center gap-2">
-              <Select defaultValue="10">
-                <SelectTrigger className="w-24 h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10条/页</SelectItem>
-                  <SelectItem value="20">20条/页</SelectItem>
-                  <SelectItem value="50">50条/页</SelectItem>
-                  <SelectItem value="100">100条/页</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>
-                <span className="text-xs">‹</span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]">
-                <span className="text-xs">1</span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <span className="text-xs">2</span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <span className="text-xs">3</span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 px-2">
-                ...
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <span className="text-xs">›</span>
-              </Button>
-              <div className="flex items-center gap-1 ml-2">
-                <span className="text-sm text-gray-500">前往</span>
-                <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
-                <span className="text-sm text-gray-500">页</span>
-              </div>
-            </div>
+          <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+            <Pagination
+              current={currentPage}
+              total={opportunities.length}
+              pageSize={pageSize}
+              onChange={(page, size) => {
+                setCurrentPage(page);
+                setPageSize(size);
+              }}
+            />
           </div>
         </div>
       </div>

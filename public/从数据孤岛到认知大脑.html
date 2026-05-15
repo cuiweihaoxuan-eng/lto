@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从"数据孤岛"到"认知大脑"——AI+本体重构政企产数业务实践</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #0d1526;
+            --bg-card: #111827;
+            --text-primary: #e8f4fc;
+            --text-secondary: #8ba3b8;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a855f7;
+            --accent-gold: #fbbf24;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.4);
+            --glow-purple: 0 0 30px rgba(168, 85, 247, 0.4);
+        }
+
+        /* 扁平图标基础样式 */
+        .flat-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1em;
+            height: 1em;
+            font-size: inherit;
+        }
+
+        .flat-icon-lg {
+            font-size: 32px;
+        }
+
+        .flat-icon-xl {
+            font-size: 36px;
+        }
+
+        .flat-icon-2xl {
+            font-size: 48px;
+        }
+
+        .flat-icon-3xl {
+            font-size: 56px;
+        }
+
+        .flat-icon-4xl {
+            font-size: 72px;
+        }
+
+        .flat-icon-5xl {
+            font-size: 80px;
+        }
+
+        /* 岛屿图标样式 */
+        .island-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .island-icon-wrap i {
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .island-crm .island-icon-wrap {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .island-finance .island-icon-wrap {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .island-dispatch .island-icon-wrap {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .island-project .island-icon-wrap {
+            background: linear-gradient(135deg, #00d4ff, #0891b2);
+        }
+
+        /* AI核心图标 */
+        .ai-core-icon-wrap {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .ai-core-icon-wrap i {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        /* 困局图标样式 */
+        .trouble-icon-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .trouble-icon-wrap i {
+            font-size: 28px;
+            color: #fff;
+        }
+
+        /* 案例图标样式 */
+        .case-icon-flat {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .case-icon-flat i {
+            font-size: 28px;
+            color: #fff;
+        }
+
+        /* 概念图标样式 */
+        .concept-icon-wrap {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .concept-icon-wrap i {
+            font-size: 32px;
+            color: #fff;
+        }
+
+        /* 理念图标样式 */
+        .philosophy-icon-wrap {
+            width: 96px;
+            height: 96px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+        }
+
+        .philosophy-icon-wrap i {
+            font-size: 40px;
+            color: #fff;
+        }
+
+        .philosophy-point-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .philosophy-point-icon-wrap i {
+            font-size: 22px;
+            color: #fff;
+        }
+
+        /* 成果图标 */
+        .achievement-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .achievement-icon-wrap i {
+            font-size: 20px;
+            color: #fff;
+        }
+
+        /* 结语图标 */
+        .ending-icon-wrap {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+        }
+
+        .ending-icon-wrap i {
+            font-size: 44px;
+            color: #fff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* 背景粒子动效 */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 头部区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 80px 0;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(168, 85, 247, 0.15));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
+            font-size: clamp(36px, 6vw, 72px);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 50%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            letter-spacing: 2px;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* 数据孤岛可视化 */
+        .island-visual {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 280px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .island {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .island-crm {
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+        }
+
+        .island-finance {
+            left: 35%;
+            top: 30%;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05));
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+        }
+
+        .island-dispatch {
+            left: 35%;
+            top: 70%;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .island-project {
+            left: 60%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.05));
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .island-label {
+            font-size: 12px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* 断开的连接线 */
+        .disconnected-lines {
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            right: 25%;
+            height: 2px;
+        }
+
+        .disconnected-line {
+            position: absolute;
+            height: 1px;
+            background: repeating-linear-gradient(90deg, rgba(239, 68, 68, 0.6) 0, rgba(239, 68, 68, 0.6) 8px, transparent 8px, transparent 16px);
+            animation: dashMove 1s linear infinite;
+        }
+
+        .line-1 { top: 0; left: 0; width: 20%; }
+        .line-2 { top: 0; left: 25%; width: 10%; }
+        .line-3 { top: 0; left: 60%; width: 20%; }
+
+        @keyframes dashMove {
+            to { background-position: 16px 0; }
+        }
+
+        /* AI本体核心球 */
+        .ai-core {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(0, 212, 255, 0.1) 70%);
+            border: 2px solid var(--accent-purple);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-purple), inset 0 0 40px rgba(168, 85, 247, 0.2);
+            animation: coreGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes coreGlow {
+            0%, 100% { box-shadow: var(--glow-purple), inset 0 0 40px rgba(168, 85, 247, 0.2); }
+            50% { box-shadow: 0 0 60px rgba(168, 85, 247, 0.6), inset 0 0 60px rgba(168, 85, 247, 0.3); }
+        }
+
+        .ai-core-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+
+        /* 连接箭头 */
+        .connection-arrow {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arrow-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: var(--glow-cyan);
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .arrow-label {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* 困局区域 */
+        .troubles-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(251, 191, 36, 0.15));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--accent-red);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 16px;
+        }
+
+        .troubles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .trouble-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .trouble-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .trouble-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-gold));
+        }
+
+        .trouble-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .trouble-num {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 64px;
+            font-weight: 900;
+            opacity: 0.08;
+            color: var(--accent-red);
+        }
+
+        .trouble-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .trouble-title-tag {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .trouble-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* 破局方案区域 */
+        .solution-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            position: relative;
+        }
+
+        .solution-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .solution-section .section-tag {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(168, 85, 247, 0.15));
+            border-color: rgba(0, 212, 255, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        /* 核心概念图 */
+        .concept-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 80px;
+            flex-wrap: wrap;
+        }
+
+        .concept-box {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            min-width: 280px;
+            position: relative;
+        }
+
+        .concept-box.data-box {
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .concept-box.ontology-box {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .concept-box.ai-box {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .concept-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .concept-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .concept-arrow {
+            font-size: 40px;
+            color: var(--accent-cyan);
+            animation: arrowSlide 1.5s ease-in-out infinite;
+        }
+
+        @keyframes arrowSlide {
+            0%, 100% { transform: translateX(0); opacity: 0.6; }
+            50% { transform: translateX(10px); opacity: 1; }
+        }
+
+        /* 案例卡片 */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .case-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .case-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .case-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at top right, rgba(0, 212, 255, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .case-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .case-icon-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .case-card:nth-child(1) .case-icon-wrap {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .case-card:nth-child(2) .case-icon-wrap {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .case-card:nth-child(3) .case-icon-wrap {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .case-card:nth-child(4) .case-icon-wrap {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .case-title-wrap {
+            flex: 1;
+        }
+
+        .case-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+        }
+
+        .case-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .case-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        /* 成果数据 */
+        .results-bar {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 24px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-item:last-child {
+            border-right: none;
+        }
+
+        .result-arrow {
+            color: var(--accent-green);
+            font-size: 18px;
+        }
+
+        .result-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .result-highlight {
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* 核心理念区域 */
+        .core-philosophy {
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .philosophy-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 32px;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-cyan));
+            border-radius: 32px;
+            z-index: -1;
+            animation: borderGlow 4s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .philosophy-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .philosophy-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .philosophy-point {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .philosophy-point-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .philosophy-point-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-gold);
+        }
+
+        .philosophy-point-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* 成果展示区域 */
+        .achievements-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .achievement-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .achievement-before {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .achievement-change {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .achievement-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .achievement-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* 未来规划区域 */
+        .future-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .timeline {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            border: 4px solid var(--bg-primary);
+            box-shadow: var(--glow-cyan);
+            z-index: 2;
+        }
+
+        .timeline-period {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+        }
+
+        .timeline-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .timeline-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* 结语区域 */
+        .ending {
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .ending-icon-wrap {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .ending-quote {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        .ending-author {
+            margin-top: 32px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* 滚动动画触发 */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .hero { min-height: auto; padding: 100px 0 60px; }
+            .island-visual { height: auto; display: flex; flex-direction: column; gap: 20px; }
+            .island { position: relative; left: auto !important; top: auto !important; transform: none !important; width: 100%; }
+            .disconnected-lines, .connection-arrow { display: none; }
+            .ai-core { position: relative; left: auto; top: auto; transform: none; margin: 0 auto; }
+            .concept-diagram { flex-direction: column; }
+            .concept-arrow { transform: rotate(90deg); }
+            .timeline::before { left: 20px; }
+            .timeline-item, .timeline-item:nth-child(odd) { flex-direction: column; align-items: flex-start; padding-left: 50px; }
+            .timeline-content { width: 100%; }
+            .timeline-dot { left: 20px; }
+            .result-item { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-right: 0; padding-bottom: 12px; }
+            .result-item:last-child { border-bottom: none; }
+            .philosophy-card { padding: 32px 24px; }
+            .philosophy-title { font-size: 24px; }
+        }
+
+        /* 进度条动画 */
+        .progress-rings {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            margin-top: 60px;
+        }
+
+        .progress-ring-item {
+            text-align: center;
+        }
+
+        .progress-ring-circle {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .progress-ring-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 8;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 377;
+            stroke-dashoffset: 377;
+            transition: stroke-dashoffset 2s ease-out;
+        }
+
+        .progress-ring-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .progress-ring-label {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-particles"></div>
+
+    <!-- 头部区域 -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span></span>
+                运营商数字化转型实践分享
+            </div>
+            <h1>从"数据孤岛"<br>到"认知大脑"</h1>
+            <p class="hero-subtitle">
+                我们用 AI + 本体知识工程，重构政企产数业务的实践之路
+            </p>
+
+            <!-- 数据孤岛可视化 -->
+            <div class="island-visual">
+                <div class="island island-crm">
+                    <div class="island-icon-wrap"><i class="fas fa-chart-bar"></i></div>
+                    <span class="island-label">CRM系统</span>
+                </div>
+                <div class="island island-finance">
+                    <div class="island-icon-wrap"><i class="fas fa-dollar-sign"></i></div>
+                    <span class="island-label">财务系统</span>
+                </div>
+                <div class="island island-dispatch">
+                    <div class="island-icon-wrap"><i class="fas fa-list-check"></i></div>
+                    <span class="island-label">派单系统</span>
+                </div>
+                <div class="island island-project">
+                    <div class="island-icon-wrap"><i class="fas fa-folder-open"></i></div>
+                    <span class="island-label">项目系统</span>
+                </div>
+
+                <div class="disconnected-lines">
+                    <div class="disconnected-line line-1"></div>
+                    <div class="disconnected-line line-2"></div>
+                    <div class="disconnected-line line-3"></div>
+                </div>
+
+                <div class="ai-core">
+                    <div class="ai-core-icon-wrap"><i class="fas fa-brain"></i></div>
+                    <span class="ai-core-text">AI + 本体</span>
+                </div>
+
+                <div class="connection-arrow">
+                    <div class="arrow-circle"><i class="fas fa-arrow-right"></i></div>
+                    <span class="arrow-label">认知大脑</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 困局区域 -->
+    <section class="troubles-section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <span class="section-tag"><i class="fas fa-triangle-exclamation"></i> 曾经的困局</span>
+                <h2 class="section-title">产数业务里的"隐形墙"</h2>
+                <p class="section-desc">这些问题困扰了我们很久，相信很多做产数的同行都有共鸣</p>
+            </div>
+
+            <div class="troubles-grid">
+                <div class="trouble-card scroll-reveal">
+                    <span class="trouble-num">01</span>
+                    <div class="trouble-icon-wrap" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-cubes"></i></div>
+                    <h3 class="trouble-title">
+                        语义割裂
+                        <span class="trouble-title-tag">同名不同义</span>
+                    </h3>
+                    <p class="trouble-desc">
+                        同一个"客户"，CRM里是签约主体，财务里是结算账户，派单里是交付对接方。
+                        某地市季度统计，CRM说新增102家，财务说只有73个——原来29家企业开了多个账户。
+                    </p>
+                </div>
+
+                <div class="trouble-card scroll-reveal">
+                    <span class="trouble-num">02</span>
+                    <div class="trouble-icon-wrap" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fas fa-lock"></i></div>
+                    <h3 class="trouble-title">
+                        规则固化
+                        <span class="trouble-title-tag">牵一发而动全身</span>
+                    </h3>
+                    <p class="trouble-desc">
+                        业务规则硬编码在系统里，调整收入确认规则需要走"开发-测试-发布"全流程。
+                        财务部门调整规则，会计准则变了，排期却要半个月，业务等得急死。
+                    </p>
+                </div>
+
+                <div class="trouble-card scroll-reveal">
+                    <span class="trouble-num">03</span>
+                    <div class="trouble-icon-wrap" style="background: linear-gradient(135deg, #ef4444, #b91c1c);"><i class="fas fa-fire"></i></div>
+                    <h3 class="trouble-title">
+                        风险滞后
+                        <span class="trouble-title-tag">事后救火</span>
+                    </h3>
+                    <p class="trouble-desc">
+                        风险管控都是事后的：项目收付倒挂，钱付出去了才发现；供应商做完就注销，尾款追不回来。
+                        风险识别只有40%能事前发现，每年损失不小。
+                    </p>
+                </div>
+
+                <div class="trouble-card scroll-reveal">
+                    <span class="trouble-num">04</span>
+                    <div class="trouble-icon-wrap" style="background: linear-gradient(135deg, #6366f1, #4f46e5);"><i class="fas fa-box-open"></i></div>
+                    <h3 class="trouble-title">
+                        决策黑箱
+                        <span class="trouble-title-tag">AI说不清逻辑</span>
+                    </h3>
+                    <p class="trouble-desc">
+                        大模型经常"幻觉"——问项目毛利率能瞎编数据；就算对了也说不清为什么。
+                        AI说"有风险"，问"为什么"却答不出来，业务人员不敢信。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 破局方案区域 -->
+    <section class="solution-section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <span class="section-tag"><i class="fas fa-lightbulb"></i> 破局之道</span>
+                <h2 class="section-title">AI + 本体，让机器真正"懂业务"</h2>
+                <p class="section-desc">本体把业务知识结构化，AI叠加能力，形成真正的"业务专家"</p>
+            </div>
+
+            <!-- 核心概念图 -->
+            <div class="concept-diagram scroll-reveal">
+                <div class="concept-box data-box">
+                    <div class="concept-icon-wrap" style="background: linear-gradient(135deg, #a855f7, #7c3aed);"><i class="fas fa-database"></i></div>
+                    <h4 class="concept-title">海量数据</h4>
+                    <p class="concept-subtitle">分散在各系统中的业务数据</p>
+                </div>
+
+                <div class="concept-arrow">+</div>
+
+                <div class="concept-box ontology-box">
+                    <div class="concept-icon-wrap" style="background: linear-gradient(135deg, #00d4ff, #0891b2);"><i class="fas fa-brain"></i></div>
+                    <h4 class="concept-title">本体知识模型</h4>
+                    <p class="concept-subtitle">统一的业务语义层 + 规则逻辑</p>
+                </div>
+
+                <div class="concept-arrow">+</div>
+
+                <div class="concept-box ai-box">
+                    <div class="concept-icon-wrap" style="background: linear-gradient(135deg, #22c55e, #16a34a);"><i class="fas fa-robot"></i></div>
+                    <h4 class="concept-title">AI 智能能力</h4>
+                    <p class="concept-subtitle">自然语言理解 + 推理引擎</p>
+                </div>
+
+                <div class="concept-arrow">=</div>
+
+                <div class="concept-box" style="border-color: var(--accent-gold); box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);">
+                    <div class="concept-icon-wrap" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);"><i class="fas fa-crosshairs"></i></div>
+                    <h4 class="concept-title">认知大脑</h4>
+                    <p class="concept-subtitle">真正理解业务的智能系统</p>
+                </div>
+            </div>
+
+            <!-- 四大案例 -->
+            <div class="cases-grid">
+                <div class="case-card scroll-reveal">
+                    <div class="case-header">
+                        <div class="case-icon-flat" style="background: linear-gradient(135deg, #00d4ff, #0891b2);"><i class="fas fa-globe"></i></div>
+                        <div class="case-title-wrap">
+                            <div class="case-num">案例 01</div>
+                            <h4 class="case-title">统一业务语言</h4>
+                        </div>
+                    </div>
+                    <p class="case-desc">
+                        给所有系统做个"翻译官"，把不同系统的"方言"翻译成统一的"普通话"。
+                        统一了客户、商机、合同、项目的定义和字段映射。
+                    </p>
+                    <div class="results-bar">
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">数据一致率</span>
+                            <span class="result-highlight">60% → 98%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">口径调整</span>
+                            <span class="result-highlight">2周 → 当天</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-down"></i></span>
+                            <span class="result-text">沟通成本</span>
+                            <span class="result-highlight">-70%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="case-card scroll-reveal">
+                    <div class="case-header">
+                        <div class="case-icon-flat" style="background: linear-gradient(135deg, #a855f7, #7c3aed);"><i class="fas fa-comments"></i></div>
+                        <div class="case-title-wrap">
+                            <div class="case-num">案例 02</div>
+                            <h4 class="case-title">智能问数引擎</h4>
+                        </div>
+                    </div>
+                    <p class="case-desc">
+                        业务人员直接用自然语言提问，系统自动解析成本体查询语句，5分钟出结果。
+                        还能做深度归因分析：为什么转化率低？是信用问题还是跟进不及时？
+                    </p>
+                    <div class="results-bar">
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">取数自主率</span>
+                            <span class="result-highlight">30% → 90%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="case-card scroll-reveal">
+                    <div class="case-header">
+                        <div class="case-icon-flat" style="background: linear-gradient(135deg, #22c55e, #16a34a);"><i class="fas fa-robot"></i></div>
+                        <div class="case-title-wrap">
+                            <div class="case-num">案例 03</div>
+                            <h4 class="case-title">数字员工</h4>
+                        </div>
+                    </div>
+                    <p class="case-desc">
+                        商机绑定、派单、甩单、收款绑定等重复操作全部自动化。
+                        集团商情自动关联，收款自动匹配项目合同，项目验收自动生成甩单受理。
+                    </p>
+                    <div class="results-bar">
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">自动化覆盖率</span>
+                            <span class="result-highlight">20% → 80%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">处理效率</span>
+                            <span class="result-highlight">×10倍</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="case-card scroll-reveal">
+                    <div class="case-header">
+                        <div class="case-icon-flat" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);"><i class="fas fa-shield-halved"></i></div>
+                        <div class="case-title-wrap">
+                            <div class="case-num">案例 04</div>
+                            <h4 class="case-title">全流程风险预警</h4>
+                        </div>
+                    </div>
+                    <p class="case-desc">
+                        覆盖商机、合同、交付、收支全流程的风险网，提前7-15天预警。
+                        商机阶段查资质，签约阶段查关联关系，交付阶段监控供应商动态。
+                    </p>
+                    <div class="results-bar">
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-up"></i></span>
+                            <span class="result-text">风险识别覆盖率</span>
+                            <span class="result-highlight">40% → 95%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-arrow"><i class="fas fa-arrow-down"></i></span>
+                            <span class="result-text">风险损失</span>
+                            <span class="result-highlight">-60%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心理念区域 -->
+    <section class="core-philosophy">
+        <div class="container">
+            <div class="philosophy-card scroll-reveal">
+                <div class="philosophy-icon-wrap"><i class="fas fa-gem"></i></div>
+                <h3 class="philosophy-title">AI + 本体，最核心的是解决了"可信"的问题</h3>
+
+                <div class="philosophy-points">
+                    <div class="philosophy-point">
+                        <div class="philosophy-point-icon-wrap" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-crosshairs"></i></div>
+                        <h4 class="philosophy-point-title">第一：约束幻觉</h4>
+                        <p class="philosophy-point-desc">
+                            本体给AI加了"紧箍咒"——大模型输出必须符合本体业务规则，
+                            问项目收入必须按收入确认规则来算，不会瞎编。
+                        </p>
+                    </div>
+
+                    <div class="philosophy-point">
+                        <div class="philosophy-point-icon-wrap" style="background: linear-gradient(135deg, #00d4ff, #0891b2);"><i class="fas fa-magnifying-glass-chart"></i></div>
+                        <h4 class="philosophy-point-title">第二：可解释决策</h4>
+                        <p class="philosophy-point-desc">
+                            AI说项目有风险，能告诉你为什么：因为供应商新注册+和客户有关联关系+收付进度差30%，
+                            每一步推理过程都能溯源，业务人员一看就明白。
+                        </p>
+                    </div>
+
+                    <div class="philosophy-point">
+                        <div class="philosophy-point-icon-wrap" style="background: linear-gradient(135deg, #22c55e, #16a34a);"><i class="fas fa-check-to-slot"></i></div>
+                        <h4 class="philosophy-point-title">第三：业务敢用</h4>
+                        <p class="philosophy-point-desc">
+                            试点时业务人员一开始不信AI预警，后来几次预警都准了且能说清原因，
+                            现在大家主动看系统预警，主动找AI帮忙。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 成果展示区域 -->
+    <section class="achievements-section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <span class="section-tag"><i class="fas fa-chart-line"></i> 成果数据</span>
+                <h2 class="section-title">用数字说话</h2>
+            </div>
+
+            <div class="progress-rings scroll-reveal">
+                <div class="progress-ring-item">
+                    <div class="progress-ring-circle">
+                        <svg width="140" height="140">
+                            <circle class="progress-ring-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="progress-ring-fill" cx="70" cy="70" r="60" stroke="var(--accent-cyan)" stroke-dashoffset="0"></circle>
+                        </svg>
+                        <span class="progress-ring-value">98%</span>
+                    </div>
+                    <p class="progress-ring-label">数据一致率</p>
+                </div>
+
+                <div class="progress-ring-item">
+                    <div class="progress-ring-circle">
+                        <svg width="140" height="140">
+                            <circle class="progress-ring-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="progress-ring-fill" cx="70" cy="70" r="60" stroke="var(--accent-purple)" stroke-dashoffset="75"></circle>
+                        </svg>
+                        <span class="progress-ring-value">90%</span>
+                    </div>
+                    <p class="progress-ring-label">取数自主率</p>
+                </div>
+
+                <div class="progress-ring-item">
+                    <div class="progress-ring-circle">
+                        <svg width="140" height="140">
+                            <circle class="progress-ring-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="progress-ring-fill" cx="70" cy="70" r="60" stroke="var(--accent-green)" stroke-dashoffset="38"></circle>
+                        </svg>
+                        <span class="progress-ring-value">80%</span>
+                    </div>
+                    <p class="progress-ring-label">自动化覆盖率</p>
+                </div>
+
+                <div class="progress-ring-item">
+                    <div class="progress-ring-circle">
+                        <svg width="140" height="140">
+                            <circle class="progress-ring-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="progress-ring-fill" cx="70" cy="70" r="60" stroke="var(--accent-gold)" stroke-dashoffset="19"></circle>
+                        </svg>
+                        <span class="progress-ring-value">95%</span>
+                    </div>
+                    <p class="progress-ring-label">风险识别覆盖率</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 未来规划区域 -->
+    <section class="future-section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <span class="section-tag"><i class="fas fa-rocket"></i> 未来规划</span>
+                <h2 class="section-title">从数据驱动到认知驱动</h2>
+                <p class="section-desc">分阶段推进，打造产数业务的"数字大脑"</p>
+            </div>
+
+            <div class="timeline scroll-reveal">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-period">未来 6 个月</div>
+                        <h4 class="timeline-title">智能问数全面落地</h4>
+                        <p class="timeline-desc">
+                            智能问数、自助取数、风险稽核等场景覆盖全流程，
+                            实现业务人员自主取数，不用再等IT排期。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-period">未来 1 年</div>
+                        <h4 class="timeline-title">高级智能应用上线</h4>
+                        <p class="timeline-desc">
+                            智能商机管家、智能合同管理、智能财务参谋等场景全部完成，
+                            形成完整的产数业务智能运营体系。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-period">愿景目标</div>
+                        <h4 class="timeline-title">产数业务"数字大脑"</h4>
+                        <p class="timeline-desc">
+                            让业务运营从"数据驱动"升级到"认知驱动"——
+                            机器不仅能处理数据，还能理解业务，主动发现问题、解决问题。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结语区域 -->
+    <section class="ending">
+        <div class="container">
+            <div class="ending-icon-wrap scroll-reveal"><i class="fas fa-star"></i></div>
+            <p class="ending-quote scroll-reveal">
+                "这才是数字化转型真正的样子：<br>
+                不是把线下的工作搬到线上，<br>
+                而是用技术，真正把人从重复劳动里解放出来，<br>
+                让业务跑得更快、更稳、更安全。"
+            </p>
+            <p class="ending-author scroll-reveal">—— 一名在运营商IT条线摸爬滚打快十年的老兵</p>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>从"数据孤岛"到"认知大脑"——AI+本体重构政企产数业务实践</p>
+    </footer>
+
+    <script>
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 进度环动画
+        document.querySelectorAll('.progress-ring-fill').forEach(circle => {
+            const offset = circle.getAttribute('stroke-dashoffset');
+            circle.style.strokeDashoffset = '377';
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+            }, 500);
+        });
+
+        // 岛屿悬浮效果
+        document.querySelectorAll('.island').forEach(island => {
+            island.addEventListener('mouseenter', () => {
+                island.style.transform = island.style.transform + ' scale(1.1)';
+                island.style.zIndex = '10';
+            });
+            island.addEventListener('mouseleave', () => {
+                island.style.transform = island.style.transform.replace(' scale(1.1)', '');
+                island.style.zIndex = '1';
+            });
+        });
+    </script>
+</body>
+</html>

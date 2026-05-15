@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import { TabNav } from "./ui/TabNav";
 import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 
 // 专家调用清单 mock 数据
@@ -257,28 +258,15 @@ export function ExpertReportPage({ activeTab: initialTab = "expert-call-list" }:
 
       {/* Tab 切换 */}
       <div className="px-6 flex-shrink-0">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-          <button
-            onClick={() => setActiveTab("expert-call-list")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "expert-call-list"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            专家调用清单
-          </button>
-          <button
-            onClick={() => setActiveTab("expert-call-stats")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "expert-call-stats"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            专家调用统计
-          </button>
-        </div>
+        <TabNav
+          tabs={[
+            { id: "expert-call-list", label: "专家调用清单" },
+            { id: "expert-call-stats", label: "专家调用统计" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          style="pill"
+        />
       </div>
 
       {/* 内容区 */}
@@ -397,8 +385,8 @@ export function ExpertReportPage({ activeTab: initialTab = "expert-call-list" }:
                   {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button variant="default" size="sm" onClick={handleCallQuery}>查询</Button>
-                  <Button variant="outline" size="sm" onClick={handleCallReset}>
+                  <Button className="btn btn-primary" onClick={handleCallQuery}>查询</Button>
+                  <Button className="btn btn-outline" onClick={handleCallReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>
@@ -537,8 +525,8 @@ export function ExpertReportPage({ activeTab: initialTab = "expert-call-list" }:
               </div>
               <div className="flex items-center justify-end mt-4">
                 <div className="flex gap-2">
-                  <Button variant="default" size="sm" onClick={handleStatsQuery}>查询</Button>
-                  <Button variant="outline" size="sm" onClick={handleStatsReset}>
+                  <Button className="btn btn-primary" onClick={handleStatsQuery}>查询</Button>
+                  <Button className="btn btn-outline" onClick={handleStatsReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>

@@ -6,6 +6,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from ".
 import { Badge } from "./ui/badge";
 import { Download, RotateCcw, Search, Eye, ChevronDown, ChevronRight, X, Upload } from "lucide-react";
 import { SixPositioningDetail } from "./SixPositioningDetail";
+import { TabNav } from "./ui/TabNav";
+import { StatusBadge } from "./ui/StatusBadge";
+import { Pagination } from "./ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -206,13 +209,13 @@ export function SixPositioning() {
     serialNo: 60,
     city: 80,
     district: 80,
-    opportunityName: 160,
-    opportunityCode: 120,
-    opportunityCreateDate: 120,
-    contractName: 160,
-    contractAmount: 120,
-    contractDate: 120,
-    nodeCount: 100,
+    opportunityName: 200,
+    opportunityCode: 128,
+    opportunityCreateDate: 128,
+    contractName: 200,
+    contractAmount: 128,
+    contractDate: 128,
+    nodeCount: 128,
   });
 
   const [resizing, setResizing] = useState<string | null>(null);
@@ -307,28 +310,15 @@ export function SixPositioning() {
       </div>
 
       <div className="px-6 flex-shrink-0">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-          <button
-            onClick={() => setActiveTab("list")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "list"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            列表视图
-          </button>
-          <button
-            onClick={() => setActiveTab("statistics")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "statistics"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            统计视图
-          </button>
-        </div>
+        <TabNav
+          tabs={[
+            { id: "list", label: "列表视图" },
+            { id: "statistics", label: "统计视图" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as "list" | "statistics")}
+          style="pill"
+        />
       </div>
 
       <div className="flex-1 overflow-auto px-6 pb-6">
@@ -474,16 +464,16 @@ export function SixPositioning() {
                     {showAllConditions ? '收起更多条件' : '展开更多条件'}
                   </Button>
                   <div className="flex gap-2">
-                    <Button variant="default" size="sm">
+                    <Button className="btn btn-primary">
                       <Search className="w-4 h-4 mr-1" />查询
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleReset}>
+                    <Button className="btn btn-outline">
                       <RotateCcw className="w-4 h-4 mr-1" />重置
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setDownloadModalOpen(true)}>
+                    <Button className="btn btn-outline">
                       <Download className="w-4 h-4 mr-1" />下载清单
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setTaskDownloadModalOpen(true)}>
+                    <Button className="btn btn-outline">
                       <Download className="w-4 h-4 mr-1" />任务下载列表
                     </Button>
                   </div>
@@ -688,16 +678,16 @@ export function SixPositioning() {
                 </div>
               </div>
               <div className="flex items-center justify-end mt-4 gap-2">
-                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                <Button className="btn btn-primary">
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button className="btn btn-outline">
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
-                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                <Button className="btn btn-primary">
                   <Download className="w-4 h-4 mr-1" />导出
                 </Button>
-                <Button variant="default" size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                <Button className="btn btn-primary">
                   <Download className="w-4 h-4 mr-1" />任务下载列表
                 </Button>
               </div>
@@ -767,21 +757,14 @@ export function SixPositioning() {
             </div>
 
             {/* 分页 */}
-            <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
-              <span className="text-sm text-gray-600">共 12 条</span>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">10条/页</span>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>&lt;</Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]">1</Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">&gt;</Button>
-                </div>
-                <div className="flex items-center gap-1 ml-2">
-                  <span className="text-sm text-gray-500">前往</span>
-                  <Input className="w-12 h-8 text-sm text-center" defaultValue="1" />
-                  <span className="text-sm text-gray-500">页</span>
-                </div>
-              </div>
+            <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-end">
+              <Pagination
+                current={1}
+                total={12}
+                pageSize={10}
+                onChange={() => {}}
+                showQuickJumper={false}
+              />
             </div>
           </div>
         )}

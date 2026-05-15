@@ -279,7 +279,7 @@ export function InvoiceApplication() {
                   </Select>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
+                  <Button className="btn btn-outline" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
                     重置
                   </Button>
                 </div>
@@ -289,7 +289,7 @@ export function InvoiceApplication() {
             {/* 操作按钮区 */}
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
-                <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white" onClick={handleNewInvoiceApplication}>
+                <Button className="btn btn-primary" onClick={handleNewInvoiceApplication}>
                   <Plus className="w-4 h-4 mr-1" />
                   新增开票申请
                 </Button>
@@ -405,7 +405,7 @@ export function InvoiceApplication() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled>上一页</Button>
-                <Button variant="outline" size="sm" className="bg-[#1890ff] text-white border-[#1890ff]">1</Button>
+                <Button variant="outline" size="sm" className="bg-[var(--color-primary)] text-white border-[var(--color-primary)]">1</Button>
                 <Button variant="outline" size="sm">2</Button>
                 <Button variant="outline" size="sm">下一页</Button>
               </div>
@@ -526,7 +526,7 @@ export function InvoiceApplication() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled>上一页</Button>
-                <Button variant="outline" size="sm" className="bg-[#1890ff] text-white border-[#1890ff]">1</Button>
+                <Button variant="outline" size="sm" className="bg-[var(--color-primary)] text-white border-[var(--color-primary)]">1</Button>
                 <Button variant="outline" size="sm">下一页</Button>
               </div>
             </div>
@@ -679,7 +679,7 @@ export function InvoiceApplication() {
             <Button variant="outline" size="sm" onClick={handleSaveDraft}>
               保存草稿
             </Button>
-            <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white" size="sm" onClick={handleSubmitForm}>
+            <Button className="bg-[var(--color-primary)] hover:bg-[#0d7dea] text-white" size="sm" onClick={handleSubmitForm}>
               提交申请
             </Button>
           </div>
@@ -1002,7 +1002,7 @@ export function InvoiceApplication() {
                 <Edit className="w-4 h-4 mr-1" />
                 编辑申请
               </Button>
-              <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+              <Button className="bg-[var(--color-primary)] hover:bg-[#0d7dea] text-white">
                 提交审批
               </Button>
             </div>

@@ -3,7 +3,8 @@ import { Search, RefreshCw, ChevronDown, ChevronUp, Star, FileText } from "lucid
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Badge } from "./ui/badge";
+import { TabNav } from "./ui/TabNav";
+import { StatusBadge } from "./ui/StatusBadge";
 import { BusinessInfoModal } from "./BusinessInfoModal";
 import { LinkOpportunityDialog } from "./LinkOpportunityDialog";
 
@@ -17,32 +18,34 @@ const defaultColumnWidths = {
   groupDispatchTime: 96,
   city: 64,
   district: 64,
-  businessInfoCode: 112,
-  projectCode: 112,
-  projectName: 192,
-  businessInfoStatus: 80,
-  currentOperationStep: 96,
-  currentOperationRole: 96,
-  currentOperator: 112,
+  businessInfoCode: 128,
+  projectCode: 128,
+  projectName: 256,
+  businessInfoStatus: 96,
+  currentOperationStep: 112,
+  currentOperationRole: 112,
+  currentOperator: 128,
   accountManager: 96,
-  groupBusinessCode: 112,
+  groupBusinessCode: 128,
   businessName: 160,
-  groupBusinessTime: 112,
+  groupBusinessTime: 144,
   dataType: 80,
-  biddingAmount: 96,
+  biddingAmount: 112,
   biddingPublishTime: 112,
   openingTime: 112,
   biddingDeadline: 112,
   winningTime: 112,
-  biddingUnit: 160,
-  companyDispatchName: 160,
-  winningUnit: 160,
-  operatorLabel: 80,
-  projectType: 80,
-  controlDepartment: 128,
-  biddingUnitArea: 160,
+  biddingUnit: 200,
+  companyDispatchName: 200,
+  winningUnit: 200,
+  operatorLabel: 96,
+  projectType: 96,
+  controlDepartment: 160,
+  biddingUnitArea: 200,
   attachment: 80,
-  actions: 80,
+  enterpriseName: 200,
+  areaGroup: 96,
+  actions: 100,
 };
 
 export function BusinessInfoManagement() {
@@ -378,10 +381,10 @@ export function BusinessInfoManagement() {
     setIsLinkOppModalOpen(false);
   };
 
-  const statusBadgeClass = (status: string) => {
-    if (status === "未处理") return "bg-orange-100 text-orange-700 border-orange-200";
-    if (status === "转商机") return "bg-blue-100 text-blue-700 border-blue-200";
-    return "bg-green-100 text-green-700 border-green-200";
+  const getStatusVariant = (status: string): "success" | "warning" | "neutral" => {
+    if (status === "未处理") return "warning";
+    if (status === "转商机") return "primary";
+    return "success";
   };
 
   const setField = (key: string, value: string) => {
@@ -402,21 +405,12 @@ export function BusinessInfoManagement() {
 
       {/* Tab 切换 */}
       <div className="px-6 flex-shrink-0">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-          {firstLevelFilters.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => handleFirstLevelChange(filter.value)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                firstLevelFilter === filter.value
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {filter.label} ({filter.count})
-            </button>
-          ))}
-        </div>
+        <TabNav
+          tabs={firstLevelFilters.map(f => ({ id: f.value, label: `${f.label} (${f.count})` }))}
+          activeTab={firstLevelFilter}
+          onTabChange={handleFirstLevelChange}
+          style="pill"
+        />
       </div>
 
       {/* 内容区 */}
@@ -425,21 +419,12 @@ export function BusinessInfoManagement() {
           {/* 子Tab标签页 */}
           {currentSecondFilters.length > 0 && (
             <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-              <div className="flex items-center gap-1">
-                {currentSecondFilters.map((subFilter) => (
-                  <button
-                    key={subFilter.value}
-                    onClick={() => setSecondLevelFilter(subFilter.value)}
-                    className={`px-4 py-1.5 text-sm rounded transition-colors ${
-                      secondLevelFilter === subFilter.value
-                        ? "bg-[#1890ff] text-white"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {subFilter.label} ({subFilter.count})
-                  </button>
-                ))}
-              </div>
+              <TabNav
+                tabs={currentSecondFilters.map(f => ({ id: f.value, label: `${f.label} (${f.count})` }))}
+                activeTab={secondLevelFilter}
+                onTabChange={setSecondLevelFilter}
+                style="pill"
+              />
             </div>
           )}
 
@@ -623,10 +608,10 @@ export function BusinessInfoManagement() {
                 )}
               </Button>
               <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={handleQuery} className="bg-[#1890ff] hover:bg-[#0d7dea]">
+                <Button className="btn btn-primary" onClick={handleQuery}>
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleReset}>
+                <Button className="btn btn-outline" onClick={handleReset}>
                   <RefreshCw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>
@@ -639,78 +624,78 @@ export function BusinessInfoManagement() {
               <table className="divide-y divide-gray-200" style={{ tableLayout: "fixed", minWidth: "2800px" }}>
                 <thead className="bg-gray-50">
                   <tr className="divide-x divide-gray-300">
-                    <th colSpan={6} className="px-3 py-3 text-center text-gray-700 font-medium bg-blue-50 sticky left-0 z-30" style={{ width: 640, minWidth: 640 }}>
+                    <th colSpan={6} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-blue-50 sticky left-0 z-30" style={{ width: 640, minWidth: 640 }}>
                       商情基本信息
                     </th>
-                    <th colSpan={8} className="px-3 py-3 text-center text-gray-700 font-medium bg-green-50">
+                    <th colSpan={8} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-green-50">
                       商情处理信息
                     </th>
-                    <th colSpan={15} className="px-3 py-3 text-center text-gray-700 font-medium bg-yellow-50">
+                    <th colSpan={15} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-yellow-50">
                       商情信息
                     </th>
-                    <th rowSpan={2} className="px-3 py-3 text-center text-gray-700 font-medium bg-gray-50 sticky right-0 z-30" style={{ width: columnWidths.actions, minWidth: columnWidths.actions }}>
+                    <th rowSpan={2} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-gray-50 sticky right-0 z-30" style={{ width: columnWidths.actions, minWidth: columnWidths.actions }}>
                       操作
                     </th>
                   </tr>
 
                   <tr className="divide-x divide-gray-300">
-                    <th style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-0 bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-0 bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">集团派发时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupDispatchTime', columnWidths.groupDispatchTime)} />
                     </th>
-                    <th style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[96px] bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-[96px] bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">地市</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'city', columnWidths.city)} />
                     </th>
-                    <th style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[160px] bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-[160px] bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">区县</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'district', columnWidths.district)} />
                     </th>
-                    <th style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[224px] bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-[224px] bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">商情编号</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoCode', columnWidths.businessInfoCode)} />
                     </th>
-                    <th style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[336px] bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-[336px] bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">项目编码</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectCode', columnWidths.projectCode)} />
                     </th>
-                    <th style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap sticky left-[448px] bg-blue-50 z-30 relative select-none">
+                    <th style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap sticky left-[448px] bg-blue-50 z-30 relative select-none">
                       <div className="pr-3">项目名称</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectName', columnWidths.projectName)} />
                     </th>
-                    <th style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">商情状态</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessInfoStatus', columnWidths.businessInfoStatus)} />
                     </th>
-                    <th style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">当前操作步骤</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationStep', columnWidths.currentOperationStep)} />
                     </th>
-                    <th style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">当前操作角色</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperationRole', columnWidths.currentOperationRole)} />
                     </th>
-                    <th style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">当前操作人</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'currentOperator', columnWidths.currentOperator)} />
                     </th>
-                    <th style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">客户经理</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'accountManager', columnWidths.accountManager)} />
                     </th>
-                    <th style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">集团商机编码</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessCode', columnWidths.groupBusinessCode)} />
                     </th>
-                    <th style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">商机名称</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'businessName', columnWidths.businessName)} />
                     </th>
-                    <th style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                    <th style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">集团商机编码时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessTime', columnWidths.groupBusinessTime)} />
                     </th>
-                    <th style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">数据类型</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'dataType', columnWidths.dataType)} />
                     </th>
@@ -718,59 +703,59 @@ export function BusinessInfoManagement() {
                       <div className="pr-3">招标/中标金额(万)</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingAmount', columnWidths.biddingAmount)} />
                     </th>
-                    <th style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">招标发布时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingPublishTime', columnWidths.biddingPublishTime)} />
                     </th>
-                    <th style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">开标时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'openingTime', columnWidths.openingTime)} />
                     </th>
-                    <th style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">招标截至时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingDeadline', columnWidths.biddingDeadline)} />
                     </th>
-                    <th style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">中标时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningTime', columnWidths.winningTime)} />
                     </th>
-                    <th style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">招标单位</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnit', columnWidths.biddingUnit)} />
                     </th>
-                    <th style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">企业派发名称</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'companyDispatchName', columnWidths.companyDispatchName)} />
                     </th>
-                    <th style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">中标单位</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'winningUnit', columnWidths.winningUnit)} />
                     </th>
-                    <th style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">运营商标签</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'operatorLabel', columnWidths.operatorLabel)} />
                     </th>
-                    <th style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">项目类型</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'projectType', columnWidths.projectType)} />
                     </th>
-                    <th style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">管控部门</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'controlDepartment', columnWidths.controlDepartment)} />
                     </th>
-                    <th style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">招标单位所属区域</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'biddingUnitArea', columnWidths.biddingUnitArea)} />
                     </th>
-                    <th style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">附件</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'attachment', columnWidths.attachment)} />
                     </th>
-                    <th style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">企业派发名称</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'enterpriseName', columnWidths.enterpriseName)} />
                     </th>
-                    <th style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-left text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
+                    <th style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">区域分组</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'areaGroup', columnWidths.areaGroup)} />
                     </th>
@@ -779,57 +764,57 @@ export function BusinessInfoManagement() {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {mockData.map((row) => (
                     <tr key={row.id} className="divide-x divide-gray-100 hover:bg-gray-50">
-                      <td style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-0 bg-white z-10">
+                      <td style={{ width: columnWidths.groupDispatchTime, minWidth: columnWidths.groupDispatchTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-0 bg-white z-10">
                         {row.groupDispatchTime}
                       </td>
-                      <td style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[96px] bg-white z-10">{row.city}</td>
-                      <td style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[160px] bg-white z-10">{row.district}</td>
+                      <td style={{ width: columnWidths.city, minWidth: columnWidths.city }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-[96px] bg-white z-10">{row.city}</td>
+                      <td style={{ width: columnWidths.district, minWidth: columnWidths.district }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-[160px] bg-white z-10">{row.district}</td>
                       <td style={{ width: columnWidths.businessInfoCode, minWidth: columnWidths.businessInfoCode }} className="px-3 py-3 text-blue-600 text-sm whitespace-nowrap sticky left-[224px] bg-white z-10">
                         {row.businessInfoCode}
                       </td>
-                      <td style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[336px] bg-white z-10">
+                      <td style={{ width: columnWidths.projectCode, minWidth: columnWidths.projectCode }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-[336px] bg-white z-10">
                         {row.projectCode}
                       </td>
-                      <td style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-gray-700 text-sm whitespace-nowrap sticky left-[448px] bg-white z-10" title={row.projectName}>
+                      <td style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-[448px] bg-white z-10" title={row.projectName}>
                         <div className="w-48 truncate">{row.projectName}</div>
                       </td>
                       <td style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 whitespace-nowrap">
-                        <Badge className={statusBadgeClass(row.businessInfoStatus)}>{row.businessInfoStatus}</Badge>
+                        <StatusBadge label={row.businessInfoStatus} variant={getStatusVariant(row.businessInfoStatus)} />
                       </td>
                       <td style={{ width: columnWidths.currentOperationStep, minWidth: columnWidths.currentOperationStep }} className="px-3 py-3 whitespace-nowrap">
                         <button onClick={() => handleViewFlow(row)} className="text-blue-600 hover:underline">
                           {row.currentOperationStep}
                         </button>
                       </td>
-                      <td style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.currentOperationRole}</td>
-                      <td style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-gray-700 whitespace-nowrap" title={row.currentOperator}>
+                      <td style={{ width: columnWidths.currentOperationRole, minWidth: columnWidths.currentOperationRole }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.currentOperationRole}</td>
+                      <td style={{ width: columnWidths.currentOperator, minWidth: columnWidths.currentOperator }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap" title={row.currentOperator}>
                         {row.currentOperator.length > 10 ? `${row.currentOperator.substring(0, 10)}...` : row.currentOperator}
                       </td>
-                      <td style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.accountManager}</td>
-                      <td style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessCode}</td>
-                      <td style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.businessName}</td>
-                      <td style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.groupBusinessTime}</td>
-                      <td style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.dataType}</td>
-                      <td style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-right text-gray-700 whitespace-nowrap">{row.biddingAmount}</td>
-                      <td style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingPublishTime}</td>
-                      <td style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.openingTime}</td>
-                      <td style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingDeadline}</td>
-                      <td style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningTime || "-"}</td>
-                      <td style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnit}</td>
-                      <td style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.companyDispatchName}</td>
-                      <td style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.winningUnit || "-"}</td>
-                      <td style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.operatorLabel}</td>
-                      <td style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.projectType}</td>
-                      <td style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.controlDepartment}</td>
-                      <td style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.biddingUnitArea}</td>
+                      <td style={{ width: columnWidths.accountManager, minWidth: columnWidths.accountManager }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.accountManager}</td>
+                      <td style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.groupBusinessCode}</td>
+                      <td style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.businessName}</td>
+                      <td style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.groupBusinessTime}</td>
+                      <td style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.dataType}</td>
+                      <td style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-sm text-right text-gray-700 whitespace-nowrap">{row.biddingAmount}</td>
+                      <td style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.biddingPublishTime}</td>
+                      <td style={{ width: columnWidths.openingTime, minWidth: columnWidths.openingTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.openingTime}</td>
+                      <td style={{ width: columnWidths.biddingDeadline, minWidth: columnWidths.biddingDeadline }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.biddingDeadline}</td>
+                      <td style={{ width: columnWidths.winningTime, minWidth: columnWidths.winningTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.winningTime || "-"}</td>
+                      <td style={{ width: columnWidths.biddingUnit, minWidth: columnWidths.biddingUnit }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.biddingUnit}</td>
+                      <td style={{ width: columnWidths.companyDispatchName, minWidth: columnWidths.companyDispatchName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.companyDispatchName}</td>
+                      <td style={{ width: columnWidths.winningUnit, minWidth: columnWidths.winningUnit }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.winningUnit || "-"}</td>
+                      <td style={{ width: columnWidths.operatorLabel, minWidth: columnWidths.operatorLabel }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.operatorLabel}</td>
+                      <td style={{ width: columnWidths.projectType, minWidth: columnWidths.projectType }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.projectType}</td>
+                      <td style={{ width: columnWidths.controlDepartment, minWidth: columnWidths.controlDepartment }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.controlDepartment}</td>
+                      <td style={{ width: columnWidths.biddingUnitArea, minWidth: columnWidths.biddingUnitArea }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.biddingUnitArea}</td>
                       <td style={{ width: columnWidths.attachment, minWidth: columnWidths.attachment }} className="px-3 py-3 text-blue-600 whitespace-nowrap">
                         <a href="#" className="hover:underline flex items-center gap-1">
                           <FileText className="w-3.5 h-3.5" />
                           {row.attachment || (row.attachmentCount ? `${row.attachmentCount}个附件` : '-')}
                         </a>
                       </td>
-                      <td style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.enterpriseName || row.companyDispatchName}</td>
-                      <td style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.areaGroup || '-'}</td>
+                      <td style={{ width: columnWidths.enterpriseName, minWidth: columnWidths.enterpriseName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.enterpriseName || row.companyDispatchName}</td>
+                      <td style={{ width: columnWidths.areaGroup, minWidth: columnWidths.areaGroup }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.areaGroup || '-'}</td>
                       <td style={{ width: columnWidths.actions, minWidth: columnWidths.actions }} className="px-3 py-3 whitespace-nowrap sticky right-0 bg-white z-10">
                         <div className="flex gap-1">
                           <button onClick={() => handleFollow(row)} className={`px-2 py-1 text-xs flex items-center gap-0.5 ${row.isFavorite ? 'text-orange-500' : 'text-blue-600'} hover:opacity-80`}>
@@ -863,7 +848,7 @@ export function BusinessInfoManagement() {
               <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>
                 <span className="text-xs">‹</span>
               </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[#1890ff] text-white border-[#1890ff]">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-[var(--color-primary)] text-white border-[var(--color-primary)]">
                 <span className="text-xs">1</span>
               </Button>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0">

@@ -47,7 +47,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
       case 'completed':
         return 'bg-[#52c41a]';
       case 'active':
-        return 'bg-[#1890ff]';
+        return 'bg-[var(--color-primary)]';
       case 'pending':
         return 'bg-[#d9d9d9]';
     }
@@ -87,7 +87,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             onClick={() => setActiveFilter("all")}
             className={`px-4 py-1.5 rounded text-sm transition-colors ${
               activeFilter === "all"
-                ? "bg-[#1890ff] text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "bg-[#f5f5f5] text-gray-600 hover:bg-[#E6F4FF]"
             }`}
           >
@@ -97,7 +97,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             onClick={() => setActiveFilter("presale")}
             className={`px-4 py-1.5 rounded text-sm transition-colors ${
               activeFilter === "presale"
-                ? "bg-[#1890ff] text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "bg-[#f5f5f5] text-gray-600 hover:bg-[#E6F4FF]"
             }`}
           >
@@ -107,7 +107,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             onClick={() => setActiveFilter("sale")}
             className={`px-4 py-1.5 rounded text-sm transition-colors ${
               activeFilter === "sale"
-                ? "bg-[#1890ff] text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "bg-[#f5f5f5] text-gray-600 hover:bg-[#E6F4FF]"
             }`}
           >
@@ -117,7 +117,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             onClick={() => setActiveFilter("aftersale")}
             className={`px-4 py-1.5 rounded text-sm transition-colors ${
               activeFilter === "aftersale"
-                ? "bg-[#1890ff] text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "bg-[#f5f5f5] text-gray-600 hover:bg-[#E6F4FF]"
             }`}
           >
@@ -127,7 +127,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             onClick={() => setActiveFilter("finance")}
             className={`px-4 py-1.5 rounded text-sm transition-colors ${
               activeFilter === "finance"
-                ? "bg-[#1890ff] text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "bg-[#f5f5f5] text-gray-600 hover:bg-[#E6F4FF]"
             }`}
           >
@@ -178,7 +178,7 @@ export function ProcessFlowBar({ isCollapsed, onToggle, activeNode, onNodeChange
             <span>已完成</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#1890ff]" />
+            <div className="w-3 h-3 rounded-full bg-[var(--color-primary)]" />
             <span>进行中</span>
           </div>
           <div className="flex items-center gap-1.5">

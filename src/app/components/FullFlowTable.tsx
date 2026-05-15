@@ -889,9 +889,9 @@ export function FullFlowTable(_props: FullFlowTableProps) {
               {showAllConditions ? "收起更多条件" : "展开更多条件"}
             </Button>
             <div className="flex gap-2">
-              <Button variant="default" size="sm">查询</Button>
-              <Button variant="outline" size="sm"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
-              <Button variant="outline" size="sm">导出</Button>
+              <Button className="btn btn-primary">查询</Button>
+              <Button className="btn btn-outline"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+              <Button className="btn btn-outline">导出</Button>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { StatusBadge } from "./ui/StatusBadge";
 
 interface PoolLead {
   id: string;
@@ -99,21 +100,21 @@ export function LeadDistribution() {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
 
   const getStatusBadge = (status: PoolLead["status"]) => {
-    const variants: Record<PoolLead["status"], string> = {
-      "待分配": "bg-orange-50 text-orange-600 border-orange-300",
-      "已分配": "bg-blue-50 text-blue-600 border-blue-300",
-      "已回收": "bg-gray-100 text-gray-600 border-gray-300"
+    const variants: Record<PoolLead["status"], "warning" | "info" | "neutral"> = {
+      "待分配": "warning",
+      "已分配": "info",
+      "已回收": "neutral"
     };
-    return <Badge className={variants[status]}>{status}</Badge>;
+    return <StatusBadge label={status} variant={variants[status]} />;
   };
 
   const getLevelBadge = (level: PoolLead["leadLevel"]) => {
-    const variants: Record<PoolLead["leadLevel"], string> = {
-      "A级": "bg-red-50 text-red-600 border-red-300",
-      "B级": "bg-orange-50 text-orange-600 border-orange-300",
-      "C级": "bg-yellow-50 text-yellow-600 border-yellow-300"
+    const variants: Record<PoolLead["leadLevel"], "danger" | "warning" | "neutral"> = {
+      "A级": "danger",
+      "B级": "warning",
+      "C级": "neutral"
     };
-    return <Badge className={variants[level]}>{level}</Badge>;
+    return <StatusBadge label={level} variant={variants[level]} />;
   };
 
   const filteredLeads = leads.filter(lead => {
@@ -258,7 +259,7 @@ export function LeadDistribution() {
                     <TableCell>{getStatusBadge(lead.status)}</TableCell>
                     <TableCell className="text-sm text-gray-600">{lead.assignee || "-"}</TableCell>
                     <TableCell>
-                      <Button size="sm" className="bg-[#1890ff] hover:bg-[#0d7dea] text-white h-7">
+                      <Button size="sm" className="btn btn-primary">
                         领取
                       </Button>
                     </TableCell>
@@ -274,7 +275,7 @@ export function LeadDistribution() {
               <span className="text-sm text-gray-700">
                 已选择 <span className="font-medium text-blue-600">{selectedLeads.length}</span> 条线索
               </span>
-              <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+              <Button className="btn btn-primary">
                 批量领取
               </Button>
             </div>
@@ -314,7 +315,7 @@ export function LeadDistribution() {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-medium text-gray-900">待分配线索</h3>
-              <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+              <Button className="btn btn-primary">
                 <UserPlus className="w-4 h-4 mr-1" />
                 批量分配
               </Button>
@@ -350,9 +351,7 @@ export function LeadDistribution() {
                       </TableCell>
                       <TableCell className="text-sm text-gray-500">{lead.createTime}</TableCell>
                       <TableCell>
-                        <Badge className={hours > 48 ? "bg-red-50 text-red-600 border-red-300" : "bg-gray-100 text-gray-600"}>
-                          {hours}小时
-                        </Badge>
+                        <StatusBadge label={`${hours}小时`} variant={hours > 48 ? "danger" : "neutral"} />
                       </TableCell>
                       <TableCell>
                         <Button size="sm" variant="outline" className="h-7">
@@ -427,7 +426,7 @@ export function LeadDistribution() {
                     <TableCell className="text-sm text-gray-600">李四 / 销售一部</TableCell>
                     <TableCell className="text-sm text-gray-500">2024-03-05</TableCell>
                     <TableCell>
-                      <Badge className="bg-red-50 text-red-600 border-red-300">8天</Badge>
+                      <StatusBadge label="8天" variant="danger" />
                     </TableCell>
                     <TableCell className="text-sm text-gray-500">2024-03-05 15:20</TableCell>
                     <TableCell>
@@ -501,15 +500,13 @@ export function LeadDistribution() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className="bg-green-50 text-green-600 border-green-300">
-                          {member.conversionRate}%
-                        </Badge>
+                        <StatusBadge label={`${member.conversionRate}%`} variant="success" />
                       </TableCell>
                       <TableCell>
                         {isOverload ? (
-                          <Badge className="bg-red-50 text-red-600 border-red-300">满载</Badge>
+                          <StatusBadge label="满载" variant="danger" />
                         ) : (
-                          <Badge className="bg-green-50 text-green-600 border-green-300">可分配</Badge>
+                          <StatusBadge label="可分配" variant="success" />
                         )}
                       </TableCell>
                     </TableRow>

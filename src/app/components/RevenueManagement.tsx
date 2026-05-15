@@ -230,7 +230,7 @@ export function RevenueManagement() {
 
 
       {/* 查询条件区域 */}
-      <div className="px-6 flex-shrink-0">
+      <div className="px-6 mt-6 flex-shrink-0">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="grid grid-cols-4 gap-x-6 gap-y-4">
             <div>
@@ -270,11 +270,11 @@ export function RevenueManagement() {
               </Select>
             </div>
             <div className="flex items-end gap-2">
-              <Button variant="default" size="sm" className="gap-1">
+              <Button className="btn btn-primary gap-1">
                 <Search className="w-4 h-4" />
                 查询
               </Button>
-              <Button variant="outline" size="sm" className="gap-1">
+              <Button className="btn btn-outline gap-1">
                 <RefreshCw className="w-4 h-4" />
                 重置
               </Button>
@@ -292,7 +292,7 @@ export function RevenueManagement() {
         <div className="text-sm text-gray-500">
           共 <span className="font-medium text-gray-900">{filteredData.length}</span> 条记录
         </div>
-        <Button variant="default" size="sm" className="gap-1" onClick={() => setApplyDialogOpen(true)}>
+        <Button className="btn btn-primary gap-1" onClick={() => setApplyDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           申请录收
         </Button>
@@ -332,7 +332,7 @@ export function RevenueManagement() {
                 {expandedAmountCols.has("totalAmount") && amountSubItems.map((item) => (
                   <th key={`totalAmount_${item}`} className="px-3 py-3 text-center text-xs font-medium text-gray-500 bg-blue-50 w-24">
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-400">{item}</span>
+                      <span className="text-xs text-gray-400">{item}</span>
                     </div>
                   </th>
                 ))}
@@ -354,7 +354,7 @@ export function RevenueManagement() {
                 {expandedAmountCols.has("confirmedAmount") && amountSubItems.map((item) => (
                   <th key={`confirmedAmount_${item}`} className="px-3 py-3 text-center text-xs font-medium text-gray-500 bg-blue-50 w-24">
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-400">{item}</span>
+                      <span className="text-xs text-gray-400">{item}</span>
                     </div>
                   </th>
                 ))}
@@ -376,7 +376,7 @@ export function RevenueManagement() {
                 {expandedAmountCols.has("unconfirmedAmount") && amountSubItems.map((item) => (
                   <th key={`unconfirmedAmount_${item}`} className="px-3 py-3 text-center text-xs font-medium text-gray-500 bg-blue-50 w-24">
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-400">{item}</span>
+                      <span className="text-xs text-gray-400">{item}</span>
                     </div>
                   </th>
                 ))}
@@ -425,7 +425,7 @@ export function RevenueManagement() {
                     {/* 项目总金额数据 */}
                     <td className="px-3 py-3 text-right font-medium">{row.totalAmount.total}</td>
                     {expandedAmountCols.has("totalAmount") && amountSubItems.map((item) => (
-                      <td key={`totalAmount_${item}`} className="px-3 py-3 text-right text-[10px] text-gray-400 bg-blue-50/50">
+                      <td key={`totalAmount_${item}`} className="px-3 py-3 text-right text-xs text-gray-400 bg-blue-50/50">
                         {getAmountValue(row, "totalAmount", item)}
                       </td>
                     ))}
@@ -433,7 +433,7 @@ export function RevenueManagement() {
                     {/* 确认录收金额数据 */}
                     <td className="px-3 py-3 text-right font-medium text-green-600">{row.confirmedAmount.total}</td>
                     {expandedAmountCols.has("confirmedAmount") && amountSubItems.map((item) => (
-                      <td key={`confirmedAmount_${item}`} className="px-3 py-3 text-right text-[10px] text-gray-400 bg-blue-50/50">
+                      <td key={`confirmedAmount_${item}`} className="px-3 py-3 text-right text-xs text-gray-400 bg-blue-50/50">
                         {getAmountValue(row, "confirmedAmount", item)}
                       </td>
                     ))}
@@ -441,7 +441,7 @@ export function RevenueManagement() {
                     {/* 未确认录收金额数据 */}
                     <td className="px-3 py-3 text-right font-medium text-orange-600">{row.unconfirmedAmount.total}</td>
                     {expandedAmountCols.has("unconfirmedAmount") && amountSubItems.map((item) => (
-                      <td key={`unconfirmedAmount_${item}`} className="px-3 py-3 text-right text-[10px] text-gray-400 bg-blue-50/50">
+                      <td key={`unconfirmedAmount_${item}`} className="px-3 py-3 text-right text-xs text-gray-400 bg-blue-50/50">
                         {getAmountValue(row, "unconfirmedAmount", item)}
                       </td>
                     ))}

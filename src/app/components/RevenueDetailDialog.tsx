@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, ChevronUp, Paperclip, FileText, Edit, RotateCcw, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 
 interface RevenueDetailDialogProps {
   open: boolean;
@@ -58,6 +59,12 @@ const mockSixPositionData: SixPositionItem[] = [
   { id: "maintenance", name: "运维自主", description: "数字平台、第一服务界面、售后其他资料", isActive: false, attachments: [{ id: "m1", name: "运维服务方案.docx", size: "420KB", uploadTime: "2026-04-22 11:30" }] }
 ];
 
+// 已选收入计划mock数据
+const mockSelectedIncomePlans = [
+  { id: "p1", index: 1, productRevenue: "ICT服务费", businessType: "产数服务", invoiceType: "增值税专用发票", taxRate: "6%", planConfirmTotalWithTax: "10,000.00", planConfirmTotalWithoutTax: "9,433.96", estimatedConfirmDate: "2026-05-15", revenueTriggerSystem: "BOSS系统", planStatus: "已确认", summary: "5月ICT服务费确认", type: "周期性" },
+  { id: "np1", index: 2, productRevenue: "设备销售-服务器", businessType: "设备销售", invoiceType: "增值税专用发票", taxRate: "13%", unitPrice: "50,000.00", quantity: "2", confirmAmountWithTax: "113,000.00", confirmAmountWithoutTax: "100,000.00", frequency: "1", startDate: "2026-06-01", endDate: "2026-06-30", planStatus: "待确认", summary: "服务器销售确认", type: "非周期性" },
+];
+
 export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDialogProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showContractInfo, setShowContractInfo] = useState(true);
@@ -85,9 +92,6 @@ export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDial
 
   const mismatch = parseFloat(calculateMismatch());
   const hasMismatch = mismatch > 10;
-
-  const activeCount = mockSixPositionData.filter(item => item.isActive).length;
-  const totalCount = mockSixPositionData.length;
 
   if (!open) return null;
 
@@ -139,49 +143,6 @@ export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDial
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {/* 六到位纵览 */}
-          <div className="px-6 pt-4 pb-2">
-            <div className="bg-gradient-to-r from-blue-50 to-white rounded-lg border border-blue-100 p-4">
-              <div className="text-sm font-medium text-gray-800 mb-3 flex items-center gap-2">
-                <Paperclip className="w-4 h-4 text-blue-500" />
-                六到位纵览
-                <span className={`ml-2 px-2 py-0.5 rounded text-xs font-bold ${
-                  activeCount === totalCount ? "bg-green-100 text-green-700" :
-                  activeCount > 0 ? "bg-yellow-100 text-yellow-700" :
-                  "bg-gray-100 text-gray-500"
-                }`}>
-                  {activeCount}/{totalCount} 已点亮
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {mockSixPositionData.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`rounded-lg border p-2 text-center ${
-                      item.isActive
-                        ? "bg-green-50 border-green-200"
-                        : "bg-gray-50 border-gray-200 opacity-60"
-                    }`}
-                  >
-                    <div className={`w-3 h-3 rounded-full mx-auto mb-1 ${item.isActive ? "bg-green-500" : "bg-gray-300"}`}></div>
-                    <div className={`text-xs font-medium truncate ${item.isActive ? "text-green-700" : "text-gray-500"}`}>
-                      {item.name}
-                    </div>
-                    <div className={`text-xs mt-0.5 ${item.isActive ? "text-green-600" : "text-gray-400"}`}>
-                      {item.isActive ? "已点亮" : "未点亮"}
-                    </div>
-                    {item.attachments.length > 0 && (
-                      <div className="text-xs text-gray-400 mt-0.5 flex items-center justify-center gap-1">
-                        <Paperclip className="w-2.5 h-2.5" />
-                        {item.attachments.length}个附件
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {/* 合同/项目信息 */}
           <div className="px-6 pb-4 border-b">
             <div
@@ -271,6 +232,89 @@ export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDial
                     <div className={`text-2xl font-bold ${hasMismatch ? 'text-red-600' : 'text-green-600'}`}>
                       {calculateMismatch()}%
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 已选收入计划 */}
+          <div className="px-6 py-4 border-b">
+            <div
+              className="flex justify-between items-center mb-3 cursor-pointer"
+              onClick={() => setShowIncomePlan(!showIncomePlan)}
+            >
+              <div className="text-sm font-medium text-gray-800 flex items-center gap-2">
+                <span className="w-1 h-4 bg-blue-500 rounded"></span>
+                已选收入计划
+                <span className="ml-2 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">{mockSelectedIncomePlans.length}条</span>
+              </div>
+              <button className="p-1 hover:bg-gray-100 rounded">
+                <ChevronUp className={`w-4 h-4 text-gray-500 transition-transform ${showIncomePlan ? '' : 'rotate-180'}`} />
+              </button>
+            </div>
+
+            {showIncomePlan && (
+              <div className="bg-gradient-to-r from-blue-50 to-white rounded-lg border border-blue-100 p-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-blue-50 border-b border-blue-100">
+                      <tr>
+                        <th className="px-2 py-2 text-left w-8"></th>
+                        <th className="px-2 py-2 text-left w-8">序号</th>
+                        <th className="px-2 py-2 text-left w-28">产品收入项</th>
+                        <th className="px-2 py-2 text-left w-20">业务类型</th>
+                        <th className="px-2 py-2 text-left w-20">发票种类</th>
+                        <th className="px-2 py-2 text-left w-12">税率</th>
+                        <th className="px-2 py-2 text-right w-24">计划确认总金额(含税)</th>
+                        <th className="px-2 py-2 text-right w-24">计划确认总金额(不含税)</th>
+                        <th className="px-2 py-2 text-left w-20">预计确认日期</th>
+                        <th className="px-2 py-2 text-left w-20">收入触发系统</th>
+                        <th className="px-2 py-2 text-left w-16">计划状态</th>
+                        <th className="px-2 py-2 text-left w-32">摘要</th>
+                        <th className="px-2 py-2 text-left w-16">类型</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {mockSelectedIncomePlans.map((plan) => (
+                        <tr key={plan.id} className="hover:bg-blue-50">
+                          <td className="px-2 py-2">
+                            <Checkbox checked={true} disabled />
+                          </td>
+                          <td className="px-2 py-2">{plan.index}</td>
+                          <td className="px-2 py-2 max-w-28 truncate">{plan.productRevenue}</td>
+                          <td className="px-2 py-2">{plan.businessType}</td>
+                          <td className="px-2 py-2">{plan.invoiceType}</td>
+                          <td className="px-2 py-2">{plan.taxRate}</td>
+                          <td className="px-2 py-2 text-right font-medium">{plan.planConfirmTotalWithTax || plan.confirmAmountWithTax}</td>
+                          <td className="px-2 py-2 text-right">{plan.planConfirmTotalWithoutTax || plan.confirmAmountWithoutTax}</td>
+                          <td className="px-2 py-2">{plan.estimatedConfirmDate || `${plan.startDate}~${plan.endDate}`}</td>
+                          <td className="px-2 py-2">{plan.revenueTriggerSystem}</td>
+                          <td className="px-2 py-2">
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${
+                              plan.planStatus === "已确认" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                            }`}>
+                              {plan.planStatus}
+                            </span>
+                          </td>
+                          <td className="px-2 py-2 max-w-32 truncate">{plan.summary}</td>
+                          <td className="px-2 py-2">{plan.type}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* 合计行 */}
+                <div className="mt-3 pt-3 border-t border-blue-100 flex justify-end">
+                  <div className="text-sm">
+                    <span className="text-gray-500">已选收入计划合计：</span>
+                    <span className="font-bold text-blue-600 ml-2">
+                      含税 {mockSelectedIncomePlans.reduce((sum, p) => sum + parseFloat((p.planConfirmTotalWithTax || p.confirmAmountWithTax).replace(/,/g, '')), 0).toLocaleString()} 元
+                    </span>
+                    <span className="text-gray-400 mx-2">|</span>
+                    <span className="font-medium text-gray-600">
+                      不含税 {mockSelectedIncomePlans.reduce((sum, p) => sum + parseFloat((p.planConfirmTotalWithoutTax || p.confirmAmountWithoutTax).replace(/,/g, '')), 0).toLocaleString()} 元
+                    </span>
                   </div>
                 </div>
               </div>
@@ -432,11 +476,11 @@ export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDial
             <RotateCcw className="w-4 h-4" />
             撤回
           </Button>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button className="btn btn-outline gap-1">
             <Edit className="w-4 h-4" />
             编辑
           </Button>
-          <Button variant="default" size="sm" onClick={onClose}>
+          <Button className="btn btn-primary" onClick={onClose}>
             关闭
           </Button>
         </div>

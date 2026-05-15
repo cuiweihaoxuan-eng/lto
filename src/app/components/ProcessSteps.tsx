@@ -72,7 +72,7 @@ export function ProcessSteps({ isCollapsed, onToggle }: ProcessStepsProps) {
       );
     } else if (status === "current") {
       return (
-        <div className="w-6 h-6 rounded-full bg-[#2e7cff] flex items-center justify-center flex-shrink-0">
+        <div className="w-6 h-6 rounded-full bg-[var(--color-tab-active)] flex items-center justify-center flex-shrink-0">
           <div className="w-2 h-2 bg-white rounded-full"></div>
         </div>
       );
@@ -134,7 +134,7 @@ export function ProcessSteps({ isCollapsed, onToggle }: ProcessStepsProps) {
                 key={view}
                 className={`px-3 py-2 text-sm rounded transition-colors text-left ${
                   currentView === view
-                    ? "bg-[#e6f2ff] text-[#2e7cff] font-medium"
+                    ? "bg-[var(--color-info-light)] text-[#2e7cff] font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
                 onClick={() => setCurrentView(view)}
@@ -155,7 +155,7 @@ export function ProcessSteps({ isCollapsed, onToggle }: ProcessStepsProps) {
               <div 
                 className={`flex items-center gap-3 py-2 px-3 rounded cursor-pointer transition-colors ${
                   step.status === "current" 
-                    ? "bg-[#e6f2ff]" 
+                    ? "bg-[var(--color-info-light)]" 
                     : "hover:bg-gray-50"
                 }`}
                 onClick={() => handleItemClick(step.id, !!step.children)}
@@ -202,7 +202,7 @@ export function ProcessSteps({ isCollapsed, onToggle }: ProcessStepsProps) {
             <span className="text-gray-600 whitespace-nowrap">已完成</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#2e7cff] flex-shrink-0"></div>
+            <div className="w-3 h-3 rounded-full bg-[var(--color-tab-active)] flex-shrink-0"></div>
             <span className="text-gray-600 whitespace-nowrap">进行中</span>
           </div>
           <div className="flex items-center gap-2">

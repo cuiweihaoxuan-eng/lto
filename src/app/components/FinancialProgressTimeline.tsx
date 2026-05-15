@@ -651,7 +651,7 @@ export function FinancialProgressTimeline() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#2e7cff] rounded flex items-center justify-center text-white font-bold">财</div>
+          <div className="w-8 h-8 bg-[var(--color-tab-active)] rounded flex items-center justify-center text-white font-bold">财</div>
           <h2 className="text-lg font-medium">形象进度表</h2>
         </div>
         <div className="flex items-center gap-6">

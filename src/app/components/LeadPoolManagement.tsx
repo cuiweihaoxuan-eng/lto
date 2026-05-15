@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { StatusBadge } from "./ui/StatusBadge";
 
 interface LeadPool {
   id: string;
@@ -65,9 +66,9 @@ export function LeadPoolManagement() {
   const [pools] = useState<LeadPool[]>(mockPools);
 
   const getStatusBadge = (status: LeadPool["status"]) => {
-    return status === "启用" 
-      ? <Badge className="bg-green-50 text-green-600 border border-green-300">启用</Badge>
-      : <Badge className="bg-gray-100 text-gray-600 border border-gray-300">停用</Badge>;
+    return status === "启用"
+      ? <StatusBadge label="启用" variant="success" />
+      : <StatusBadge label="停用" variant="neutral" />;
   };
 
   const filteredPools = pools.filter(pool => {
@@ -152,7 +153,7 @@ export function LeadPoolManagement() {
           {/* 操作按钮 */}
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
-              <Button className="bg-[#1890ff] hover:bg-[#0d7dea] text-white">
+              <Button className="btn btn-primary">
                 <Plus className="w-4 h-4 mr-1" />
                 新建线索池
               </Button>
@@ -192,7 +193,7 @@ export function LeadPoolManagement() {
                     <TableCell className="font-medium">{pool.poolCode}</TableCell>
                     <TableCell className="font-medium">{pool.poolName}</TableCell>
                     <TableCell>
-                      <Badge className="bg-blue-50 text-blue-600 border-blue-200">{pool.type}</Badge>
+                      <StatusBadge label={pool.type} variant="info" />
                     </TableCell>
                     <TableCell className="text-gray-600">{pool.dimension}</TableCell>
                     <TableCell className="text-center font-medium">{pool.totalCount}</TableCell>

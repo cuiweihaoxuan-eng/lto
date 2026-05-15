@@ -587,8 +587,8 @@ export function SixPositioningDetail({ isOpen, onClose, opportunityName, opportu
                 className="col-span-6 cursor-pointer transition-all hover:opacity-80"
                 onClick={() => setActivePositionTab("overview")}
               >
-                <div className={`px-3 py-1.5 flex flex-row items-center justify-center gap-2 border-b ${activePositionTab === "overview" ? 'border-[#1890ff]' : 'border-gray-200 hover:bg-gray-100'}`}>
-                  <div className={`w-3 h-3 rounded-full flex-shrink-0 ${activePositionTab === "overview" ? 'bg-[#1890ff]' : 'bg-gray-300'}`} />
+                <div className={`px-3 py-1.5 flex flex-row items-center justify-center gap-2 border-b ${activePositionTab === "overview" ? 'border-[var(--color-primary)]' : 'border-gray-200 hover:bg-gray-100'}`}>
+                  <div className={`w-3 h-3 rounded-full flex-shrink-0 ${activePositionTab === "overview" ? 'bg-[var(--color-primary)]' : 'bg-gray-300'}`} />
                   <span className={`font-medium text-sm ${activePositionTab === "overview" ? 'text-[#1890ff]' : 'text-gray-900'}`}>
                     总览
                   </span>
@@ -701,7 +701,7 @@ function OverviewContent({ expandedSeconds, toggleSecondLevel }: OverviewContent
                     {second.thirdLevel.map(third => (
                       <Tooltip key={third.id}>
                         <TooltipTrigger asChild>
-                          <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] cursor-help ${third.includedInSixPosition ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs cursor-help ${third.includedInSixPosition ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                             <div className={`w-1 h-1 rounded-full flex-shrink-0 ${third.includedInSixPosition ? 'bg-green-500' : 'bg-red-500'}`} />
                             <span className="truncate">{third.name}</span>
                           </div>
@@ -906,14 +906,14 @@ function DetailContent({ position }: { position: PositionDetail }) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-gray-50">
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">序号</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">拜访客户单位</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">拜访对象</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">拜访事由</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">拜访时间</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">拜访地点</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">我方拜访者</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">现场照片</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">序号</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">拜访客户单位</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">拜访对象</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">拜访事由</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">拜访时间</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">拜访地点</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">我方拜访者</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">现场照片</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -986,12 +986,12 @@ function DetailContent({ position }: { position: PositionDetail }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">序号</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">合同名称</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">合同编号</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">签约时间</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">合同金额</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">实施厂家</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">序号</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同名称</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同编号</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约时间</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同金额</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">实施厂家</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -1176,13 +1176,13 @@ function DetailContent({ position }: { position: PositionDetail }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">角色类型</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">用户名</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">角色</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">部门</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">进入时间</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">联系电话</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">邀请人</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">角色类型</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">用户名</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">角色</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">部门</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">进入时间</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">联系电话</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">邀请人</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -1307,16 +1307,16 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">序号</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">商情编号</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">项目名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">项目编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">客户名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">类型</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">项目金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">发布时间</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">招标截止时间</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">原文链接</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">序号</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">商情编号</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">客户名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">类型</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">发布时间</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">招标截止时间</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">原文链接</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1527,14 +1527,14 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">签约时间</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">签约主体</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">客户名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">客户编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同状态</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约时间</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约主体</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">客户名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">客户编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同状态</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1627,13 +1627,13 @@ function DetailContent({ position }: { position: PositionDetail }) {
                   <table className="w-full text-xs mb-4">
                     <thead>
                       <tr className="bg-gray-50">
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">合作伙伴名称</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">后向类型</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">后向名称</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">后向编码</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">金额</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">签约时间</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">签约主体</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合作伙伴名称</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">后向类型</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">后向名称</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">后向编码</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">金额</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约时间</th>
+                        <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约主体</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -1734,13 +1734,13 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">序号</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合作伙伴</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同编号</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">签约时间</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">合同金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">签约主体</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">序号</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合作伙伴</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同编号</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约时间</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">合同金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">签约主体</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1776,12 +1776,12 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">需求名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">需求编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">状态</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">日期</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">供应商</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">需求名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">需求编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">状态</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">日期</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">供应商</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1814,12 +1814,12 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">方案名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">方案编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">状态</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">日期</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">供应商</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">方案名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">方案编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">状态</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">日期</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">供应商</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1844,12 +1844,12 @@ function DetailContent({ position }: { position: PositionDetail }) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">结果名称</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">结果编码</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">金额</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">状态</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">日期</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-600">供应商</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">结果名称</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">结果编码</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">金额</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">状态</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">日期</th>
+                          <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">供应商</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -3029,11 +3029,11 @@ function DetailContent({ position }: { position: PositionDetail }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-3 py-2 text-left font-medium text-gray-600 w-8">状态</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">三级节点</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">规则说明</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">录入入口</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">同步类型</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600 w-8">状态</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">三级节点</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">规则说明</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">录入入口</th>
+                      <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">同步类型</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -3634,16 +3634,16 @@ function BusinessInfoModal({ open, onOpenChange, businessInfoList, selectedIds, 
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-gray-50">
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-10">选择</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">序号</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">商情编号</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">项目名称</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">项目编码</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">客户名称</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">类型</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">项目金额</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">发布时间</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">招标截止时间</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600 w-10">选择</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">序号</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">商情编号</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目名称</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目编码</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">客户名称</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">类型</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">项目金额</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">发布时间</th>
+                <th className="px-3 py-2 text-sm text-left font-medium text-gray-600">招标截止时间</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

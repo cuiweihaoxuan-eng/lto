@@ -322,7 +322,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">合同编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">合同名称</th>
@@ -354,7 +354,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.contractCode}</td>
                   <td className="px-2 py-2 border">{row.contractName}</td>
                   <td className="px-2 py-2 border">{row.contractDept}</td>
@@ -392,7 +392,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -416,7 +416,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.forwardContract}</td>
@@ -446,7 +446,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -484,7 +484,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.forwardContractCode}</td>
@@ -528,7 +528,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -560,7 +560,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.engineeringCode}</td>
@@ -598,7 +598,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -616,7 +616,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.forwardContractCode}</td>
@@ -640,7 +640,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -659,7 +659,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.forwardContractCode}</td>
@@ -684,7 +684,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -702,7 +702,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.backwardContractCode}</td>
@@ -726,7 +726,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
       return (
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-[#f5f6f7] sticky top-0 z-10">
+            <thead className="bg-[var(--color-table-header)] sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目编码</th>
                 <th className="px-2 py-2 text-left border whitespace-nowrap">项目名称</th>
@@ -749,7 +749,7 @@ export function FinancialProgressDetailDialog({ open, onClose, event, lineType }
             </thead>
             <tbody>
               {mockData.map((row: any, idx: number) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafafa]'}>
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-table-stripe)]'}>
                   <td className="px-2 py-2 border">{row.projectCode}</td>
                   <td className="px-2 py-2 border">{row.projectName}</td>
                   <td className="px-2 py-2 border">{row.contractCode}</td>
