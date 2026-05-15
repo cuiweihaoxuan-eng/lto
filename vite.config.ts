@@ -100,7 +100,7 @@ function prdPlugin() {
       }
       base = base.replace(/\/$/, '');
       if (!html.includes('__PRD_PORT__')) {
-        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};window.__PRD_BASE__='/lto/';</script>\n<script src="/lto/prd-inject.js"></script>\n</body>`);
+        return html.replace('</body>', `<script>window.__PRD_PORT__=${PRD_PORT};window.__PRD_BASE__='./';</script>\n<script src="./prd-inject.js"></script>\n</body>`);
       }
       return html;
     },
@@ -129,7 +129,7 @@ export default defineConfig({
       },
     },
   },
-  base: '/lto/',
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
