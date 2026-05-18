@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { Search, RefreshCw, ChevronDown, ChevronRight, ChevronUp, Upload, Download, Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { Search, RefreshCw, ChevronDown, ChevronRight, ChevronUp, Upload, Download, Plus, Eye, Edit, Trash2, CheckCircle, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
+import { TabNav } from "./ui/tab-nav";
 import { SelfDeliveryApplyDialog } from "./SelfDeliveryApplyDialog";
 
 // ============ 类型定义 ============
 type SettlementType = "项目型" | "小微标品" | "三联单";
 type SettlementStatus = "未发" | "已申请" | "审核中" | "审核通过" | "发放完成";
-type InnerStatus = "已申请" | "审核驳回" | "审核通过" | "已发放";
+type InnerStatus = "已申请" | "审核中" | "审核驳回" | "审核通过" | "已发放";
 type SettlementMethod = "451定额" | "350元人天";
 type RecordType = "自动生成" | "手动生成";
 
@@ -357,6 +358,13 @@ export function SelfDeliverySettlement() {
   // 弹窗状态
   const [applyDialogOpen, setApplyDialogOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState<SettlementRecord | null>(null);
+  const [auditDialogOpen, setAuditDialogOpen] = useState(false);
+  const [auditRecord, setAuditRecord] = useState<InnerRecord | null>(null);
+  const [auditResult, setAuditResult] = useState<"通过" | "驳回" | null>(null);
+  const [auditOpinion, setAuditOpinion] = useState("");
+  const [activeTab, setActiveTab] = useState<"全部" | "待我审核" | "历史审核">("全部");
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importType, setImportType] = useState<"三联单" | "小微标品" | "凭证">("三联单");
 
   // 切换行展开
   const toggleRowExpand = (id: string) => {
@@ -383,6 +391,7 @@ export function SelfDeliverySettlement() {
   const getInnerStatusBadge = (status: InnerStatus) => {
     const styles: Record<InnerStatus, string> = {
       "已申请": "bg-yellow-100 text-yellow-700",
+      "审核中": "bg-blue-100 text-blue-700",
       "审核驳回": "bg-red-100 text-red-700",
       "审核通过": "bg-green-100 text-green-700",
       "已发放": "bg-emerald-100 text-emerald-700"
@@ -445,6 +454,20 @@ export function SelfDeliverySettlement() {
       <div className="px-6 pt-6 pb-0 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">自交付结算管理</h2>
         <p className="text-sm text-gray-500 mt-1">自交付结算情况统计与管理</p>
+      </div>
+
+      {/* Tab页签 */}
+      <div className="px-6 mt-4 flex-shrink-0">
+        <TabNav
+          style="pill"
+          tabs={[
+            { id: "全部", label: "全部", count: filteredData.length },
+            { id: "待我审核", label: "待我审核", count: filteredData.filter(d => d.innerList.some(i => i.status === "已申请" || i.status === "审核中")).length },
+            { id: "历史审核", label: "历史审核", count: filteredData.filter(d => d.innerList.some(i => i.status === "审核通过" || i.status === "审核驳回")).length }
+          ]}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as "全部" | "待我审核" | "历史审核")}
+        />
       </div>
 
       {/* 统计卡片区域 - 15个统计卡片分3组，每组5个 */}
@@ -571,15 +594,15 @@ export function SelfDeliverySettlement() {
           共 <span className="font-medium text-gray-900">{filteredData.length}</span> 条记录
         </div>
         <div className="flex gap-2">
-          <Button className="btn btn-outline gap-1">
+          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("三联单"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
             导入三联单
           </Button>
-          <Button className="btn btn-outline gap-1">
+          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("小微标品"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
-            导入小微标品订单
+            导入小微标品工单
           </Button>
-          <Button className="btn btn-outline gap-1">
+          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("凭证"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
             导入已发放凭证
           </Button>
@@ -600,7 +623,7 @@ export function SelfDeliverySettlement() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10">展开</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">展开</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">支局</th>
@@ -633,7 +656,7 @@ export function SelfDeliverySettlement() {
               {filteredData.map(row => (
                 <React.Fragment key={row.id}>
                   <tr className="hover:bg-gray-50">
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3 bg-white sticky left-0 z-10">
                       {row.innerList.length > 0 ? (
                         <button onClick={() => toggleRowExpand(row.id)} className="p-1 hover:bg-gray-100 rounded">
                           {expandedRows.has(row.id) ? (
@@ -734,7 +757,7 @@ export function SelfDeliverySettlement() {
                                       <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
                                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-28">发放凭证</th>
                                       <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">类型</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">操作</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32 bg-gray-100 sticky right-0 z-10">操作</th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
@@ -766,12 +789,18 @@ export function SelfDeliverySettlement() {
                                         <td className="px-3 py-2 text-center">
                                           <Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge>
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-3 py-2 bg-gray-50 sticky right-0 z-10">
                                           <div className="flex gap-2">
                                             <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}>
                                               <Eye className="w-3 h-3 mr-1" />
                                               查看
                                             </Button>
+                                            {(item.status === "已申请" || item.status === "审核中") && (
+                                              <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}>
+                                                <CheckCircle className="w-3 h-3 mr-1" />
+                                                审核
+                                              </Button>
+                                            )}
                                             {item.status === "已申请" && (
                                               <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}>
                                                 <Edit className="w-3 h-3 mr-1" />
@@ -819,6 +848,147 @@ export function SelfDeliverySettlement() {
         onClose={() => { setApplyDialogOpen(false); setSelectedRowData(null); }}
         rowData={selectedRowData}
       />
+
+      {/* 审核弹窗 */}
+      {auditDialogOpen && auditRecord && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">审核结算单</h3>
+              <button onClick={() => { setAuditDialogOpen(false); setAuditRecord(null); setAuditResult(null); setAuditOpinion(""); }} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">结算单名称</span>
+                  <span className="text-sm font-medium">{auditRecord.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">结算单号</span>
+                  <span className="text-sm font-medium">{auditRecord.code}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">申请金额</span>
+                  <span className="text-sm font-medium text-green-600">¥{auditRecord.applyAmount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">结算方式</span>
+                  <span className="text-sm font-medium">{auditRecord.settlementMethod}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">申请人</span>
+                  <span className="text-sm font-medium">{auditRecord.applicant}</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">审核结果</label>
+                <div className="flex gap-4">
+                  <label className={`flex-1 px-4 py-2 rounded-lg border-2 cursor-pointer text-center transition-colors ${auditResult === "通过" ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200 hover:border-green-300"}`}>
+                    <input type="radio" name="auditResult" value="通过" checked={auditResult === "通过"} onChange={() => setAuditResult("通过")} className="sr-only" />
+                    通过
+                  </label>
+                  <label className={`flex-1 px-4 py-2 rounded-lg border-2 cursor-pointer text-center transition-colors ${auditResult === "驳回" ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 hover:border-red-300"}`}>
+                    <input type="radio" name="auditResult" value="驳回" checked={auditResult === "驳回"} onChange={() => setAuditResult("驳回")} className="sr-only" />
+                    驳回
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">审批意见</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="请输入审批意见..."
+                  value={auditOpinion}
+                  onChange={e => setAuditOpinion(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => { setAuditDialogOpen(false); setAuditRecord(null); setAuditResult(null); setAuditOpinion(""); }}>
+                取消
+              </Button>
+              <Button className="bg-blue-500 hover:bg-blue-600" disabled={!auditResult} onClick={() => { alert(`提交审核结果：${auditResult}，意见：${auditOpinion}`); setAuditDialogOpen(false); setAuditRecord(null); setAuditResult(null); setAuditOpinion(""); }}>
+                提交审核
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 导入弹窗 */}
+      {importDialogOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">导入{importType === "三联单" ? "三联单" : importType === "小微标品" ? "小微标品工单" : "已发放凭证"}</h3>
+              <button onClick={() => setImportDialogOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">请上传 {importType === "三联单" ? "三联单" : importType === "小微标品" ? "小微标品工单" : "已发放凭证"} Excel 文件</span>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => alert('下载模版')}>
+                  <Download className="w-4 h-4" />
+                  下载模版
+                </Button>
+              </div>
+              {/* 拖拽上传区域 */}
+              <div
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50'); }}
+                onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); }}
+                onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); alert('文件上传中...'); }}
+                onClick={() => alert('请选择文件上传')}
+              >
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                <p className="text-sm text-gray-500">将文件拖拽到此处，或<span className="text-blue-600">点击选择文件</span></p>
+                <p className="text-xs text-gray-400 mt-2">支持 .xlsx, .xls 格式</p>
+              </div>
+              {/* 模版说明 */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">模版字段说明：</p>
+                {importType === "三联单" && (
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>工单编号、经营单元、区域、主定单编码、备件库标签</p>
+                    <p>标准小微标签、业务类型、收单人/岗、环节名称、订单编码</p>
+                    <p>结束日期、工单状态、客户名称、id、创建时间</p>
+                    <p>历时、收单人/岗</p>
+                  </div>
+                )}
+                {importType === "小微标品" && (
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>统计日期、资产唯一编码、订单编码、受理的业务号码、优惠编码</p>
+                    <p>优惠名称、受理金额、受理归属分局、受理归属支局</p>
+                    <p>ICT协议编号、受理时间、竣工时间、VIP卡号、受理人工号</p>
+                    <p>受理人名称、营销人工号、营销人姓名、营销人员归属分局</p>
+                    <p>营销人员归属支局、订单来源是否翼装大师、优惠开始时间</p>
+                    <p>优惠结束时间、订单状态、vip客户名称、是否三联单（剔除MSS）</p>
+                    <p>统计合同额、月份、日期、季度、经营单元</p>
+                  </div>
+                )}
+                {importType === "凭证" && (
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>结算单名称、结算单号、申请金额、结算类型</p>
+                    <p>人员列表（姓名、人力编码、金额）、发放日期</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
+                取消
+              </Button>
+              <Button className="bg-blue-500 hover:bg-blue-600">
+                开始导入
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
