@@ -952,33 +952,33 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           <div className="grid grid-cols-3 gap-4">
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会自交付前向金额</label>
-                              <div className="text-sm">{selectedProject.selfDeliveryForwardAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.selfDeliveryForwardAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会自交付成本金额</label>
-                              <div className="text-sm">{selectedProject.selfDeliveryCostAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.selfDeliveryCostAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会毛利</label>
-                              <div className="text-sm text-green-600">15%</div>
+                              <div className="text-sm font-medium text-green-600">15%</div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-3 gap-4 mt-3">
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">前向合同自交付金额</label>
-                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.forwardContractAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">最多可申请金额/已申请金额</label>
                               <div className="text-sm">
-                                <span className="font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
+                                <span className="font-medium font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
                                 <span className="text-gray-400 mx-1">/</span>
-                                <span className="text-gray-900">{selectedProject.appliedAmount}</span>
+                                <span className="font-medium text-gray-900">{selectedProject.appliedAmount}</span>
                               </div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">申请实际毛利</label>
-                              <div className="text-sm text-red-600">{selectedProject.appliedProfit}%</div>
+                              <div className="text-sm font-medium text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
                           {selectedProject.appliedProfit === "5%" && (
@@ -1176,33 +1176,33 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           <div className="grid grid-cols-3 gap-4">
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会自交付前向金额</label>
-                              <div className="text-sm">{selectedProject.selfDeliveryForwardAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.selfDeliveryForwardAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会自交付成本金额</label>
-                              <div className="text-sm">{selectedProject.selfDeliveryCostAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.selfDeliveryCostAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">模式会毛利</label>
-                              <div className="text-sm text-green-600">15%</div>
+                              <div className="text-sm font-medium text-green-600">15%</div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-3 gap-4 mt-3">
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">前向合同自交付金额</label>
-                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
+                              <div className="text-sm font-medium">{selectedProject.forwardContractAmount}</div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">最多可申请金额/已申请金额</label>
                               <div className="text-sm">
-                                <span className="font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
+                                <span className="font-medium font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
                                 <span className="text-gray-400 mx-1">/</span>
-                                <span className="text-gray-900">{selectedProject.appliedAmount}</span>
+                                <span className="font-medium text-gray-900">{selectedProject.appliedAmount}</span>
                               </div>
                             </div>
                             <div>
                               <label className="block text-xs text-gray-500 mb-1">申请实际毛利</label>
-                              <div className="text-sm text-red-600">{selectedProject.appliedProfit}%</div>
+                              <div className="text-sm font-medium text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
                           {selectedProject.appliedProfit === "5%" && (
