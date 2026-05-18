@@ -55,6 +55,7 @@ interface SettlementRecord {
   approvedAmount: string;
   actualPaidAmount: string;
   status: SettlementStatus;
+  appliedProfitPercent: string;
   innerList: InnerRecord[];
 }
 
@@ -87,6 +88,7 @@ const mockSettlementData: SettlementRecord[] = [
     approvedAmount: "5,000.00",
     actualPaidAmount: "0.00",
     status: "审核中",
+    appliedProfitPercent: "5%",
     innerList: [
       {
         id: "i1",
@@ -145,6 +147,7 @@ const mockSettlementData: SettlementRecord[] = [
     approvedAmount: "6,000.00",
     actualPaidAmount: "6,000.00",
     status: "发放完成",
+    appliedProfitPercent: "10%",
     innerList: [
       {
         id: "i3",
@@ -189,6 +192,7 @@ const mockSettlementData: SettlementRecord[] = [
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
     status: "未发",
+    appliedProfitPercent: "0%",
     innerList: []
   },
   {
@@ -218,10 +222,11 @@ const mockSettlementData: SettlementRecord[] = [
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
     status: "未发",
+    appliedProfitPercent: "0%",
     innerList: []
   },
   {
-    id: "5",
+    id: "4",
     index: 5,
     businessUnit: "台州分公司",
     branch: "椒江支局",
@@ -247,6 +252,7 @@ const mockSettlementData: SettlementRecord[] = [
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
     status: "已申请",
+    appliedProfitPercent: "8%",
     innerList: [
       {
         id: "i4",
@@ -403,22 +409,29 @@ export function SelfDeliverySettlement() {
   const calculateStats = (type: SettlementType | null) => {
     const data = type ? filteredData.filter(d => d.type === type) : filteredData;
 
-    const payable = data.filter(d => d.status === "审核通过" || d.status === "发放完成");
-    const unpaid = data.filter(d => d.status === "未发" || d.status === "已申请" || d.status === "审核中");
+    // 全部：所有记录
+    const all = data;
+    // 可申请：canApplyAmount > 0 的记录
+    const canApply = data.filter(d => parseFloat(d.canApplyAmount.replace(/,/g, '')) > 0);
+    // 审核通过：status === "审核通过" 的记录
     const approved = data.filter(d => d.status === "审核通过");
-    const actualPaid = data.filter(d => d.status === "发放完成");
+    // 审核通过可发放：status === "审核通过" 的记录（金额用 canApplyAmount）
+    const approvedPayable = data.filter(d => d.status === "审核通过");
+    // 审核通过实际发放：status === "发放完成" 的记录（金额用 actualPaidAmount）
+    const approvedPaid = data.filter(d => d.status === "发放完成");
 
-    const sumAmount = (records: SettlementRecord[]) =>
-      records.reduce((sum, r) => sum + parseFloat(r.canApplyAmount.replace(/,/g, '')), 0);
-
-    const sumActualPaid = (records: SettlementRecord[]) =>
-      records.reduce((sum, r) => sum + parseFloat(r.actualPaidAmount.replace(/,/g, '')), 0);
+    const sumAmount = (records: SettlementRecord[], field: keyof SettlementRecord = "canApplyAmount") =>
+      records.reduce((sum, r) => {
+        const value = r[field] as string;
+        return sum + parseFloat(value.replace(/,/g, ''));
+      }, 0);
 
     return {
-      payable: { count: payable.length, amount: sumAmount(payable).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
-      unpaid: { count: unpaid.length, amount: sumAmount(unpaid).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
+      all: { count: all.length, amount: sumAmount(all).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
+      canApply: { count: canApply.length, amount: sumAmount(canApply).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
       approved: { count: approved.length, amount: sumAmount(approved).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
-      actualPaid: { count: actualPaid.length, amount: sumActualPaid(actualPaid).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }
+      approvedPayable: { count: approvedPayable.length, amount: sumAmount(approvedPayable).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) },
+      approvedPaid: { count: approvedPaid.length, amount: sumAmount(approvedPaid, "actualPaidAmount").toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }
     };
   };
 
@@ -434,37 +447,40 @@ export function SelfDeliverySettlement() {
         <p className="text-sm text-gray-500 mt-1">自交付结算情况统计与管理</p>
       </div>
 
-      {/* 统计卡片区域 - 12个统计卡片分3组 */}
+      {/* 统计卡片区域 - 15个统计卡片分3组，每组5个 */}
       <div className="px-6 mt-4 flex-shrink-0">
         <div className="grid grid-cols-3 gap-3">
           {/* 项目型自交付 */}
           <div className="bg-blue-50 rounded-lg p-3">
             <div className="text-sm font-medium text-blue-700 mb-2">项目型自交付</div>
-            <div className="grid grid-cols-4 gap-2">
-              <StatItem label="可发放" count={projectStats.payable.count.toString()} amount={projectStats.payable.amount} color="text-blue-600" />
-              <StatItem label="未发放" count={projectStats.unpaid.count.toString()} amount={projectStats.unpaid.amount} color="text-blue-600" />
-              <StatItem label="审核通过可发放" count={projectStats.approved.count.toString()} amount={projectStats.approved.amount} color="text-blue-600" />
-              <StatItem label="实际发放" count={projectStats.actualPaid.count.toString()} amount={projectStats.actualPaid.amount} color="text-blue-600" />
+            <div className="grid grid-cols-5 gap-2">
+              <StatItem label="全部" count={projectStats.all.count.toString()} amount={projectStats.all.amount} color="text-blue-600" />
+              <StatItem label="可申请" count={projectStats.canApply.count.toString()} amount={projectStats.canApply.amount} color="text-blue-600" />
+              <StatItem label="审核通过" count={projectStats.approved.count.toString()} amount={projectStats.approved.amount} color="text-blue-600" />
+              <StatItem label="审核通过可发放" count={projectStats.approvedPayable.count.toString()} amount={projectStats.approvedPayable.amount} color="text-blue-600" />
+              <StatItem label="审核通过实际发放" count={projectStats.approvedPaid.count.toString()} amount={projectStats.approvedPaid.amount} color="text-blue-600" />
             </div>
           </div>
           {/* 小微标品 */}
           <div className="bg-green-50 rounded-lg p-3">
             <div className="text-sm font-medium text-green-700 mb-2">小微标品</div>
-            <div className="grid grid-cols-4 gap-2">
-              <StatItem label="可发放" count={standardStats.payable.count.toString()} amount={standardStats.payable.amount} color="text-green-600" />
-              <StatItem label="未发放" count={standardStats.unpaid.count.toString()} amount={standardStats.unpaid.amount} color="text-green-600" />
-              <StatItem label="审核通过可发放" count={standardStats.approved.count.toString()} amount={standardStats.approved.amount} color="text-green-600" />
-              <StatItem label="实际发放" count={standardStats.actualPaid.count.toString()} amount={standardStats.actualPaid.amount} color="text-green-600" />
+            <div className="grid grid-cols-5 gap-2">
+              <StatItem label="全部" count={standardStats.all.count.toString()} amount={standardStats.all.amount} color="text-green-600" />
+              <StatItem label="可申请" count={standardStats.canApply.count.toString()} amount={standardStats.canApply.amount} color="text-green-600" />
+              <StatItem label="审核通过" count={standardStats.approved.count.toString()} amount={standardStats.approved.amount} color="text-green-600" />
+              <StatItem label="审核通过可发放" count={standardStats.approvedPayable.count.toString()} amount={standardStats.approvedPayable.amount} color="text-green-600" />
+              <StatItem label="审核通过实际发放" count={standardStats.approvedPaid.count.toString()} amount={standardStats.approvedPaid.amount} color="text-green-600" />
             </div>
           </div>
           {/* 三联单 */}
           <div className="bg-purple-50 rounded-lg p-3">
             <div className="text-sm font-medium text-purple-700 mb-2">三联单</div>
-            <div className="grid grid-cols-4 gap-2">
-              <StatItem label="可发放" count={tripleStats.payable.count.toString()} amount={tripleStats.payable.amount} color="text-purple-600" />
-              <StatItem label="未发放" count={tripleStats.unpaid.count.toString()} amount={tripleStats.unpaid.amount} color="text-purple-600" />
-              <StatItem label="审核通过可发放" count={tripleStats.approved.count.toString()} amount={tripleStats.approved.amount} color="text-purple-600" />
-              <StatItem label="实际发放" count={tripleStats.actualPaid.count.toString()} amount={tripleStats.actualPaid.amount} color="text-purple-600" />
+            <div className="grid grid-cols-5 gap-2">
+              <StatItem label="全部" count={tripleStats.all.count.toString()} amount={tripleStats.all.amount} color="text-purple-600" />
+              <StatItem label="可申请" count={tripleStats.canApply.count.toString()} amount={tripleStats.canApply.amount} color="text-purple-600" />
+              <StatItem label="审核通过" count={tripleStats.approved.count.toString()} amount={tripleStats.approved.amount} color="text-purple-600" />
+              <StatItem label="审核通过可发放" count={tripleStats.approvedPayable.count.toString()} amount={tripleStats.approvedPayable.amount} color="text-purple-600" />
+              <StatItem label="审核通过实际发放" count={tripleStats.approvedPaid.count.toString()} amount={tripleStats.approvedPaid.amount} color="text-purple-600" />
             </div>
           </div>
         </div>
@@ -527,7 +543,7 @@ export function SelfDeliverySettlement() {
 
             {/* 查询条件 - 始终展开显示所有字段 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">订单号</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">小微标品工单编号</label>
               <Input placeholder="请输入" value={searchOrderNo} onChange={e => setSearchOrderNo(e.target.value)} />
             </div>
             <div>
@@ -672,7 +688,16 @@ export function SelfDeliverySettlement() {
                         variant="link"
                         size="sm"
                         className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap"
-                        onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}
+                        onClick={() => {
+                          // 传入一个只有基本信息的对象，清空innerList以确保是新增模式
+                          const newRowData = {
+                            ...row,
+                            innerList: [],
+                            isEditMode: false
+                          };
+                          setSelectedRowData(newRowData);
+                          setApplyDialogOpen(true);
+                        }}
                       >
                         <Plus className="w-3 h-3" />
                         申请自交付结算

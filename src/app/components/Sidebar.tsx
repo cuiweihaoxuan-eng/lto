@@ -12,7 +12,8 @@ import {
   Menu,
   Target,
   ChevronLeft,
-  DollarSign
+  DollarSign,
+  Wallet
 } from "lucide-react";
 
 interface MenuItem {
@@ -91,6 +92,19 @@ const menuItems: MenuItem[] = [
     icon: <DollarSign className="w-4 h-4" />
   },
   {
+    id: "task-wallet",
+    label: "宁波产数钱包",
+    icon: <Wallet className="w-4 h-4" />,
+    children: [
+      { id: "task-wallet-list", label: "宁波钱包" },
+      { id: "commission-reward-list", label: "项目提成奖清单" },
+      { id: "opp-award-page", label: "商机奖奖励清单" },
+      { id: "large-business-opportunit", label: "大额商机奖发放统计报表" },
+      { id: "effective-business-opportunity", label: "有效商机统计报表" },
+      { id: "commission-distribution-report", label: "项目提成奖发放统计报表" },
+    ]
+  },
+  {
     id: "report",
     label: "报表",
     icon: <BarChart3 className="w-4 h-4" />,
@@ -128,7 +142,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem, onItemChange }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk", "task-wallet"]);
   const [activeItem, setActiveItem] = useState("dashboard");
   const [cascadeParent, setCascadeParent] = useState<string | null>(null);
   const [cascadePos, setCascadePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
