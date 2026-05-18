@@ -670,6 +670,9 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
   const [countersignPersonSelectOpen, setCountersignPersonSelectOpen] = useState(false);
   const [ccPersonSelectOpen, setCcPersonSelectOpen] = useState(false);
 
+  // 审批流程类型
+  const [approvalFlowType, setApprovalFlowType] = useState<"local" | "city">("local");
+
   // 选中数据 - 如果有 rowData 则自动填充
   const [selectedProject, setSelectedProject] = useState<ProjectOption | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderOption | null>(null);
@@ -729,6 +732,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 结算信息状态
   const [settlementMethod, setSettlementMethod] = useState<SettlementMethod>("451定额");
+  const [totalLaborCost, setTotalLaborCost] = useState("");
   const [smallProductSubType, setSmallProductSubType] = useState<SmallProductSubType>("视联网");
   const [personList, setPersonList] = useState<PersonItem[]>([
     { id: "1", name: "张三", code: "EMP001", amount: "5,000" }
@@ -936,46 +940,66 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           </div>
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">项目类型</label>
-                            <Badge className="bg-blue-100 text-blue-700">{selectedProject.projectType}</Badge>
+                            <div className="text-sm">{selectedProject.projectType}</div>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">项目类别</label>
+                            <div className="text-sm">{selectedProject.projectCategory}</div>
                           </div>
                         </div>
 
                         <div className="border-t border-gray-200 pt-3 mt-3">
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">前向金额</label>
+                              <label className="block text-xs text-gray-500 mb-1">模式会自交付前向金额</label>
                               <div className="text-sm">{selectedProject.selfDeliveryForwardAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">成本金额</label>
+                              <label className="block text-xs text-gray-500 mb-1">模式会自交付成本金额</label>
                               <div className="text-sm">{selectedProject.selfDeliveryCostAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">毛利</label>
-                              <div className="text-sm text-green-600">{selectedProject.profit}</div>
-                            </div>
-                            <div>
-                              <label className="block text-xs text-gray-500 mb-1">自交付金额</label>
-                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">模式会毛利</label>
+                              <div className="text-sm text-green-600">15%</div>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="border-t border-gray-200 pt-3 mt-3 bg-yellow-50 p-3 rounded">
                           <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">最多可申请金额</label>
-                              <div className="text-lg font-bold text-blue-600">{selectedProject.maxApplyAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">前向合同自交付金额</label>
+                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">已申请金额</label>
-                              <div className="text-lg font-medium text-gray-900">{selectedProject.appliedAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">最多可申请金额/已申请金额</label>
+                              <div className="text-sm">
+                                <span className="font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
+                                <span className="text-gray-400 mx-1">/</span>
+                                <span className="text-gray-900">{selectedProject.appliedAmount}</span>
+                              </div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">已申请金额毛利</label>
-                              <div className="text-lg font-medium text-red-600">{selectedProject.appliedProfit}</div>
+                              <label className="block text-xs text-gray-500 mb-1">申请实际毛利</label>
+                              <div className="text-sm text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
+                          {selectedProject.appliedProfit === "5%" && (
+                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span>模式会毛利15%，申请金额毛利为5%，严重低于模式会阶段毛利</span>
+                              </div>
+                              <div className="mb-3">
+                                <label className="block text-xs text-gray-500 mb-1">原因说明</label>
+                                <textarea className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500" rows={2} placeholder="请说明毛利率低于模式会的原因..." />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">附件</label>
+                                <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
+                                  <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                                  <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1097,7 +1121,11 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           </div>
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">项目类型</label>
-                            <Badge className="bg-blue-100 text-blue-700">{selectedProject.projectType}</Badge>
+                            <div className="text-sm">{selectedProject.projectType}</div>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">项目类别</label>
+                            <div className="text-sm">{selectedProject.projectCategory}</div>
                           </div>
                         </div>
 
@@ -1145,45 +1173,55 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         </div>
 
                         <div className="border-t border-gray-200 pt-3 mt-3">
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">前向金额</label>
+                              <label className="block text-xs text-gray-500 mb-1">模式会自交付前向金额</label>
                               <div className="text-sm">{selectedProject.selfDeliveryForwardAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">成本金额</label>
+                              <label className="block text-xs text-gray-500 mb-1">模式会自交付成本金额</label>
                               <div className="text-sm">{selectedProject.selfDeliveryCostAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">毛利</label>
-                              <div className="text-sm text-green-600">{selectedProject.profit}</div>
-                            </div>
-                            <div>
-                              <label className="block text-xs text-gray-500 mb-1">自交付金额</label>
-                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">模式会毛利</label>
+                              <div className="text-sm text-green-600">15%</div>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="border-t border-gray-200 pt-3 mt-3 bg-yellow-50 p-3 rounded">
                           <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">最多可申请金额</label>
-                              <div className="text-lg font-bold text-blue-600">{selectedProject.maxApplyAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">前向合同自交付金额</label>
+                              <div className="text-sm">{selectedProject.forwardContractAmount}</div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">已申请金额</label>
-                              <div className="text-lg font-medium text-gray-900">{selectedProject.appliedAmount}</div>
+                              <label className="block text-xs text-gray-500 mb-1">最多可申请金额/已申请金额</label>
+                              <div className="text-sm">
+                                <span className="font-bold text-blue-600">{selectedProject.maxApplyAmount}</span>
+                                <span className="text-gray-400 mx-1">/</span>
+                                <span className="text-gray-900">{selectedProject.appliedAmount}</span>
+                              </div>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">已申请金额毛利</label>
-                              <div className="text-lg font-medium text-red-600">{selectedProject.appliedProfit}</div>
+                              <label className="block text-xs text-gray-500 mb-1">申请实际毛利</label>
+                              <div className="text-sm text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
                           {selectedProject.appliedProfit === "5%" && (
-                            <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
-                              <AlertTriangle className="w-4 h-4" />
-                              <span>已申请金额毛利为5%，严重低于模式会阶段毛利</span>
+                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span>模式会毛利15%，申请金额毛利为5%，严重低于模式会阶段毛利</span>
+                              </div>
+                              <div className="mb-3">
+                                <label className="block text-xs text-gray-500 mb-1">原因说明</label>
+                                <textarea className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500" rows={2} placeholder="请说明毛利率低于模式会的原因..." />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">附件</label>
+                                <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
+                                  <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                                  <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1336,6 +1374,24 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           <Input type="date" value={visionForm.endDate} onChange={e => setVisionForm({...visionForm, endDate: e.target.value})} />
                         </div>
                       </div>
+                      {/* 视联网计算结果 */}
+                      <div className="mt-3 p-3 bg-white rounded border border-gray-200">
+                        <div className="text-xs text-gray-500 mb-2">计算说明：交付总人工费 = NVR数量×100元 + 摄像头数量×100元；后期维护费 = 摄像头数量×3元/月；结算金额 = 总人工费×0.4</div>
+                        <div className="flex items-center gap-6">
+                          <div>
+                            <span className="text-xs text-gray-500">交付总人工费：</span>
+                            <span className="ml-1 font-bold text-blue-600">¥{(parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100).toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-gray-500">后期维护费/月：</span>
+                            <span className="ml-1 font-bold text-green-600">¥{(parseInt(visionForm.cameraCount || "0") * 3).toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-gray-500">结算金额（451定额）：</span>
+                            <span className="ml-1 font-bold text-red-600">¥{((parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100) * 0.4).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -1362,6 +1418,22 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">信息点集成（个）</label>
                           <Input type="number" value={roomForm.infoPoints} onChange={e => setRoomForm({...roomForm, infoPoints: e.target.value})} />
+                        </div>
+                      </div>
+                      {/* 机房整治计算结果 */}
+                      <div className="mt-3 p-3 bg-white rounded border border-gray-200">
+                        <div className="text-xs text-gray-500 mb-2">计算说明：交付总人工费 = 9U机柜×200元 + 22U机柜×400元 + 42U机柜×800元 + 1U整治×80元 + 信息点×25元；22U、42U轻量版按50%执行</div>
+                        <div className="flex items-center gap-6">
+                          <div>
+                            <span className="text-xs text-gray-500">交付总人工费：</span>
+                            <span className="ml-1 font-bold text-blue-600">¥{(
+                              parseInt(roomForm.cabinet9u || "0") * 200 +
+                              parseInt(roomForm.cabinet22u || "0") * 200 + // 轻量版按50%
+                              parseInt(roomForm.cabinet42u || "0") * 400 + // 轻量版按50%
+                              parseInt(roomForm.cabinet1u || "0") * 80 +
+                              parseInt(roomForm.infoPoints || "0") * 25
+                            ).toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1409,11 +1481,21 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">总人工费</label>
-                            <Input placeholder="请输入" />
+                            <Input
+                              placeholder="请输入"
+                              value={totalLaborCost}
+                              onChange={e => setTotalLaborCost(e.target.value)}
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">结算金额</label>
-                            <div className="text-lg font-medium text-green-600">总人工费 × 0.4</div>
+                            <div className="text-lg font-bold text-green-600">
+                              {totalLaborCost ? (
+                                <>¥{(parseFloat(totalLaborCost) * 0.4).toLocaleString()}（总人工费×0.4）</>
+                              ) : (
+                                <span className="text-sm text-gray-400">（总人工费 × 0.4）</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="border-t border-gray-200 pt-4">
@@ -1767,76 +1849,279 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
               {isViewMode ? (
                 <div className="space-y-4">
+                  {/* 审批流程类型 */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600">审批流程：</span>
+                    <Badge className="bg-blue-100 text-blue-700 px-3 py-1">{approvalFlowType === "local" ? "属地自交付" : "调用市公司能力"}</Badge>
+                  </div>
+
+                  {/* 审批流程图 - 标签样式 */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h5 className="text-sm font-medium text-gray-700 mb-3">审批流程</h5>
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-4 p-3 bg-white rounded border border-gray-200">
-                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">1</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-800">西湖支局</span>
-                            <Badge className="bg-green-100 text-green-700">审批通过</Badge>
-                          </div>
-                          <div className="text-xs text-gray-500">审批人：张明 | 审批时间：2026-05-10 14:30</div>
-                          <div className="text-xs text-gray-600 mt-1">审批意见：同意，材料齐全，符合结算条件。</div>
-                        </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-green-500 text-white rounded text-xs font-medium">1. 发起（{approvalFlowType === "local" ? "属地" : "地市"}）</span>
+                        <span className="text-gray-400">→</span>
                       </div>
-                      <div className="flex items-start gap-4 p-3 bg-white rounded border border-gray-200">
-                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">2</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-800">人力部</span>
-                            <Badge className="bg-green-100 text-green-700">审批通过</Badge>
-                          </div>
-                          <div className="text-xs text-gray-500">审批人：李华 | 审批时间：2026-05-11 09:15</div>
-                          <div className="text-xs text-gray-600 mt-1">审批意见：人员信息核对无误，结算金额合理。</div>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-blue-500 text-white rounded text-xs font-medium">2. 需求部门</span>
+                        <span className="text-gray-400">→</span>
                       </div>
-                      <div className="flex items-start gap-4 p-3 bg-white rounded border border-gray-200">
-                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">3</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-800">财务部</span>
-                            <Badge className="bg-blue-100 text-blue-700">审核中</Badge>
-                          </div>
-                          <div className="text-xs text-gray-500">审批人：待分配 | 审批时间：-</div>
-                          <div className="text-xs text-gray-400 mt-1">审批意见：-</div>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-orange-500 text-white rounded text-xs font-medium">3. {approvalFlowType === "local" ? "属地" : "市"}人力</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-green-600 text-white rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}财务</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-amber-500 text-white rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}云中台</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-purple-600 text-white rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}网运部</span>
+                        <Badge variant="outline" className="text-xs">并行审批</Badge>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-yellow-50 rounded-lg p-3 text-xs text-gray-600">
-                    <div className="font-medium text-yellow-700 mb-1">审批人范围：</div>
-                    <div>1. ICT前端业务需求部门先同意（如<strong>支局</strong>）</div>
-                    <div>2. 经营单元（属地自交付）或市公司（调用市公司能力）的人力、财务、云中台、网运部审批</div>
+
+                  {/* 发起记录 */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">发起</h5>
+                    <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm">
+                          <span className="text-gray-500">发起人：</span>
+                          <span className="font-medium">张明（西湖支局）</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-500">发起时间：</span>
+                          <span className="font-medium">2026-05-10 14:30</span>
+                        </div>
+                      </div>
+                      <div className="text-sm mt-2">
+                        <span className="text-gray-500">发起人部门：</span>
+                        <span className="font-medium">西湖支局</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 需求部门审批 */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">需求部门审批</h5>
+                    <div className="p-3 bg-green-50 rounded border border-green-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-100 text-green-700">已通过</Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm">
+                          <span className="text-gray-500">审批人：</span>
+                          <span className="font-medium">李华（需求部门）</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-500">审批时间：</span>
+                          <span className="font-medium">2026-05-11 09:15</span>
+                        </div>
+                      </div>
+                      <div className="text-sm mt-2">
+                        <span className="text-gray-500">审批意见：</span>
+                        <span className="text-gray-700">人员信息核对无误，结算金额合理。</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 人力/财务/云中台/网运部并行审批 */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">{approvalFlowType === "local" ? "属地部门" : "市部门"}审批</h5>
+                    <div className="space-y-3">
+                      {/* 人力 */}
+                      <div className="p-3 bg-green-50 rounded border border-green-200 flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批人：</span>
+                              <span className="font-medium">王五（{approvalFlowType === "local" ? "属地人力部" : "市人力部"}）</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批时间：</span>
+                              <span className="font-medium">2026-05-12 10:00</span>
+                            </div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-500">审批意见：</span>
+                            <span className="text-gray-700">人力配置核实无误。</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-500 text-white px-2 py-1 text-xs font-bold">{approvalFlowType === "local" ? "属地人力" : "市人力"} · 已通过</Badge>
+                      </div>
+                      {/* 财务 */}
+                      <div className="p-3 bg-green-50 rounded border border-green-200 flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批人：</span>
+                              <span className="font-medium">赵六（{approvalFlowType === "local" ? "属地财务部" : "市财务部"}）</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批时间：</span>
+                              <span className="font-medium">2026-05-12 14:30</span>
+                            </div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-500">审批意见：</span>
+                            <span className="text-gray-700">财务核算通过。</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-500 text-white px-2 py-1 text-xs font-bold">{approvalFlowType === "local" ? "属地财务" : "市财务"} · 已通过</Badge>
+                      </div>
+                      {/* 云中台 */}
+                      <div className="p-3 bg-orange-50 rounded border border-orange-200 flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批人：</span>
+                              <span className="font-medium text-gray-400">待分配</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批时间：</span>
+                              <span className="font-medium text-gray-400">-</span>
+                            </div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-500">审批意见：</span>
+                            <span className="text-gray-400">-</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-orange-500 text-white px-2 py-1 text-xs font-bold">{approvalFlowType === "local" ? "属地云中台" : "市云中台"} · 审核中</Badge>
+                      </div>
+                      {/* 网运部 */}
+                      <div className="p-3 bg-gray-100 rounded border border-gray-300 flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批人：</span>
+                              <span className="font-medium text-gray-400">-</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-gray-500">审批时间：</span>
+                              <span className="font-medium text-gray-400">-</span>
+                            </div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-500">审批意见：</span>
+                            <span className="text-gray-400">-</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-gray-400 text-white px-2 py-1 text-xs font-bold">{approvalFlowType === "local" ? "属地网运部" : "市网运部"} · 待审批</Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* 审批流程类型选择 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">主送单位会签人员信息</label>
-                    <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                      <Button variant="outline" size="sm" className="mb-2" onClick={() => setMainPersonSelectOpen(true)}>
-                        <Plus className="w-4 h-4 mr-1" />
-                        添加人员
-                      </Button>
-                      {mainRecipients.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {mainRecipients.map(person => (
-                            <span key={person.id} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                              {person.name}
-                              <button onClick={() => setMainRecipients(mainRecipients.filter(p => p.id !== person.id))} className="hover:text-blue-900">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {mainRecipients.length === 0 && (
-                        <div className="text-xs text-gray-400 mt-1">暂未添加人员</div>
-                      )}
+                    <label className="block text-sm font-medium text-gray-700 mb-2">审批流程类型</label>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setApprovalFlowType("local")}
+                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${approvalFlowType === "local" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 hover:border-gray-300"}`}
+                      >
+                        属地自交付
+                      </button>
+                      <button
+                        onClick={() => setApprovalFlowType("city")}
+                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${approvalFlowType === "city" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 hover:border-gray-300"}`}
+                      >
+                        调用市公司能力
+                      </button>
                     </div>
                   </div>
+
+                  {/* 审批流程图 - 标签样式 */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-3">审批流程</h5>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">1. 发起（{approvalFlowType === "local" ? "属地" : "地市"}）</span>
+                        <span className="text-gray-400">→</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">2. 需求部门</span>
+                        <span className="text-gray-400">→</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">3. {approvalFlowType === "local" ? "属地" : "市"}人力</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}财务</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}云中台</span>
+                        <span className="px-1 py-0.5 bg-gray-200 text-gray-600 rounded text-xs">|</span>
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">{approvalFlowType === "local" ? "属地" : "市"}网运部</span>
+                        <Badge variant="outline" className="text-xs">并行审批</Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 按流程节点分组选择人员 */}
+                  <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                    {/* 节点2 - 需求部门 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs mr-2">2</span>
+                        需求部门（支局）会签人员
+                      </label>
+                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <Button variant="outline" size="sm" className="mb-2" onClick={() => setMainPersonSelectOpen(true)}>
+                          <Plus className="w-4 h-4 mr-1" />
+                          添加人员
+                        </Button>
+                        {mainRecipients.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {mainRecipients.map(person => (
+                              <span key={person.id} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                                {person.name}
+                                <button onClick={() => setMainRecipients(mainRecipients.filter(p => p.id !== person.id))} className="hover:text-blue-900">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {mainRecipients.length === 0 && (
+                          <div className="text-xs text-gray-400 mt-1">暂未添加人员</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 节点3 - 属地/市部门 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs mr-2">3</span>
+                        {approvalFlowType === "local" ? "属地部门" : "市部门"}会签人员
+                        <span className="text-xs text-gray-400 ml-2">（人力/财务/云中台/网运部）</span>
+                      </label>
+                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <Button variant="outline" size="sm" className="mb-2" onClick={() => setCountersignPersonSelectOpen(true)}>
+                          <Plus className="w-4 h-4 mr-1" />
+                          添加人员
+                        </Button>
+                        {countersignUsers.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {countersignUsers.map(person => (
+                              <span key={person.id} className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
+                                {person.name}
+                                <button onClick={() => setCountersignUsers(countersignUsers.filter(p => p.id !== person.id))} className="hover:text-orange-900">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {countersignUsers.length === 0 && (
+                          <div className="text-xs text-gray-400 mt-1">暂未添加人员</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="bg-yellow-50 rounded-lg p-3 text-xs text-gray-600">
                     <div className="font-medium text-yellow-700 mb-1">审批人范围：</div>
                     <div>1. ICT前端业务需求部门先同意（如<strong>支局</strong>）</div>
