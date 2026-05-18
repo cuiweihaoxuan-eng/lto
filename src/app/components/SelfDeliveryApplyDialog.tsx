@@ -1386,10 +1386,6 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                             <span className="text-xs text-gray-500">后期维护费/月：</span>
                             <span className="ml-1 font-bold text-green-600">¥{(parseInt(visionForm.cameraCount || "0") * 3).toLocaleString()}</span>
                           </div>
-                          <div>
-                            <span className="text-xs text-gray-500">结算金额（451定额）：</span>
-                            <span className="ml-1 font-bold text-red-600">¥{((parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100) * 0.4).toLocaleString()}</span>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1428,8 +1424,8 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                             <span className="text-xs text-gray-500">交付总人工费：</span>
                             <span className="ml-1 font-bold text-blue-600">¥{(
                               parseInt(roomForm.cabinet9u || "0") * 200 +
-                              parseInt(roomForm.cabinet22u || "0") * 200 + // 轻量版按50%
-                              parseInt(roomForm.cabinet42u || "0") * 400 + // 轻量版按50%
+                              parseInt(roomForm.cabinet22u || "0") * 200 +
+                              parseInt(roomForm.cabinet42u || "0") * 400 +
                               parseInt(roomForm.cabinet1u || "0") * 80 +
                               parseInt(roomForm.infoPoints || "0") * 25
                             ).toLocaleString()}</span>
@@ -1481,21 +1477,47 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">总人工费</label>
-                            <Input
-                              placeholder="请输入"
-                              value={totalLaborCost}
-                              onChange={e => setTotalLaborCost(e.target.value)}
-                            />
+                            {projectType === "小微标品" && smallProductSubType === "视联网" ? (
+                              <div className="text-lg font-bold text-blue-600">
+                                ¥{(parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100).toLocaleString()}
+                              </div>
+                            ) : projectType === "小微标品" && smallProductSubType === "机房整治" ? (
+                              <div className="text-lg font-bold text-blue-600">
+                                ¥{(
+                                  parseInt(roomForm.cabinet9u || "0") * 200 +
+                                  parseInt(roomForm.cabinet22u || "0") * 200 +
+                                  parseInt(roomForm.cabinet42u || "0") * 400 +
+                                  parseInt(roomForm.cabinet1u || "0") * 80 +
+                                  parseInt(roomForm.infoPoints || "0") * 25
+                                ).toLocaleString()}
+                              </div>
+                            ) : (
+                              <div className="text-lg font-bold text-blue-600">
+                                ¥{totalLaborCost ? parseFloat(totalLaborCost).toLocaleString() : "0"}
+                              </div>
+                            )}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">结算金额</label>
-                            <div className="text-lg font-bold text-green-600">
-                              {totalLaborCost ? (
-                                <>¥{(parseFloat(totalLaborCost) * 0.4).toLocaleString()}（总人工费×0.4）</>
-                              ) : (
-                                <span className="text-sm text-gray-400">（总人工费 × 0.4）</span>
-                              )}
-                            </div>
+                            {projectType === "小微标品" && smallProductSubType === "视联网" ? (
+                              <div className="text-lg font-bold text-green-600">
+                                ¥{((parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100) * 0.4).toLocaleString()}
+                              </div>
+                            ) : projectType === "小微标品" && smallProductSubType === "机房整治" ? (
+                              <div className="text-lg font-bold text-green-600">
+                                ¥{(
+                                  (parseInt(roomForm.cabinet9u || "0") * 200 +
+                                  parseInt(roomForm.cabinet22u || "0") * 200 +
+                                  parseInt(roomForm.cabinet42u || "0") * 400 +
+                                  parseInt(roomForm.cabinet1u || "0") * 80 +
+                                  parseInt(roomForm.infoPoints || "0") * 25) * 0.4
+                                ).toLocaleString()}
+                              </div>
+                            ) : (
+                              <div className="text-lg font-bold text-green-600">
+                                ¥{totalLaborCost ? (parseFloat(totalLaborCost) * 0.4).toLocaleString() : "0"}（总人工费×0.4）
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="border-t border-gray-200 pt-4">
