@@ -34,6 +34,12 @@ const ContractPaymentConfirmation = lazy(() => import("./components/ContractPaym
 const RiskManagement = lazy(() => import("./components/RiskManagement").then(m => ({ default: m.default })));
 const RevenueManagement = lazy(() => import("./components/RevenueManagement").then(m => ({ default: m.RevenueManagement })));
 const SelfDeliverySettlement = lazy(() => import("./components/SelfDeliverySettlement").then(m => ({ default: m.SelfDeliverySettlement })));
+const TaskWalletList = lazy(() => import("./components/TaskWalletList").then(m => ({ default: m.TaskWalletList })));
+const OppAwardPageList = lazy(() => import("./components/OppAwardPageList").then(m => ({ default: m.OppAwardPageList })));
+const CommissionRewardList = lazy(() => import("./components/CommissionRewardList").then(m => ({ default: m.CommissionRewardList })));
+const LargeBusinessOpportunit = lazy(() => import("./components/LargeBusinessOpportunit").then(m => ({ default: m.LargeBusinessOpportunit })));
+const EffectiveBusinessOpportunity = lazy(() => import("./components/EffectiveBusinessOpportunity").then(m => ({ default: m.EffectiveBusinessOpportunity })));
+const CommissionDistributionReport = lazy(() => import("./components/CommissionDistributionReport").then(m => ({ default: m.CommissionDistributionReport })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -84,6 +90,26 @@ useEffect(() => {
     // 自交付结算管理
     if (activeSidebarItem === "self-delivery-settlement") {
       return <Suspense fallback={<LoadingSpinner />}><SelfDeliverySettlement /></Suspense>;
+    }
+
+    // 钱包列表（宁波产数钱包）
+    if (activeSidebarItem === "task-wallet-list") {
+      return <Suspense fallback={<LoadingSpinner />}><TaskWalletList /></Suspense>;
+    }
+    if (activeSidebarItem === "opp-award-page") {
+      return <Suspense fallback={<LoadingSpinner />}><OppAwardPageList /></Suspense>;
+    }
+    if (activeSidebarItem === "commission-reward-list") {
+      return <Suspense fallback={<LoadingSpinner />}><CommissionRewardList /></Suspense>;
+    }
+    if (activeSidebarItem === "large-business-opportunit") {
+      return <Suspense fallback={<LoadingSpinner />}><LargeBusinessOpportunit /></Suspense>;
+    }
+    if (activeSidebarItem === "effective-business-opportunity") {
+      return <Suspense fallback={<LoadingSpinner />}><EffectiveBusinessOpportunity /></Suspense>;
+    }
+    if (activeSidebarItem === "commission-distribution-report") {
+      return <Suspense fallback={<LoadingSpinner />}><CommissionDistributionReport /></Suspense>;
     }
 
     // 专家任务报表
