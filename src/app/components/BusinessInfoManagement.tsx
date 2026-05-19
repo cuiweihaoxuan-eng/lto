@@ -29,6 +29,8 @@ const defaultColumnWidths = {
   groupBusinessCode: 128,
   businessName: 160,
   groupBusinessTime: 144,
+  dataOperationStatus: 80,
+  remarks: 160,
   dataType: 80,
   biddingAmount: 112,
   biddingPublishTime: 112,
@@ -165,6 +167,8 @@ export function BusinessInfoManagement() {
       groupBusinessCode: "GBC20250115001",
       businessName: "高速智能化商机",
       groupBusinessTime: "2025-01-15 10:30:00",
+      dataOperationStatus: 1,
+      remarks: "",
       dataType: "招标",
       biddingAmount: "1500",
       biddingPublishTime: "2025-01-10",
@@ -201,6 +205,8 @@ export function BusinessInfoManagement() {
       groupBusinessCode: "GBC20250116002",
       businessName: "智慧城市商机",
       groupBusinessTime: "2025-01-16 14:20:00",
+      dataOperationStatus: 1,
+      remarks: "",
       dataType: "中标",
       biddingAmount: "2800",
       biddingPublishTime: "2024-12-20",
@@ -237,6 +243,8 @@ export function BusinessInfoManagement() {
       groupBusinessCode: "",
       businessName: "",
       groupBusinessTime: "",
+      dataOperationStatus: 2,
+      remarks: "回退原因描述不清晰",
       dataType: "招标",
       biddingAmount: "4200",
       biddingPublishTime: "2025-01-12",
@@ -273,6 +281,8 @@ export function BusinessInfoManagement() {
       groupBusinessCode: "GBC20250118004",
       businessName: "数字化政务商机",
       groupBusinessTime: "2025-01-18 16:00:00",
+      dataOperationStatus: 2,
+      remarks: "项目信息需要补充",
       dataType: "中标",
       biddingAmount: "1800",
       biddingPublishTime: "2024-12-25",
@@ -309,6 +319,8 @@ export function BusinessInfoManagement() {
       groupBusinessCode: "",
       businessName: "",
       groupBusinessTime: "",
+      dataOperationStatus: 1,
+      remarks: "",
       dataType: "招标",
       biddingAmount: "950",
       biddingPublishTime: "2025-01-15",
@@ -627,10 +639,10 @@ export function BusinessInfoManagement() {
                     <th colSpan={6} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-blue-50 sticky left-0 z-30" style={{ width: 640, minWidth: 640 }}>
                       商情基本信息
                     </th>
-                    <th colSpan={8} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-green-50">
+                    <th colSpan={10} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-green-50">
                       商情处理信息
                     </th>
-                    <th colSpan={15} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-yellow-50">
+                    <th colSpan={13} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-yellow-50">
                       商情信息
                     </th>
                     <th rowSpan={2} className="px-3 py-3 text-center text-sm text-gray-700 font-medium bg-gray-50 sticky right-0 z-30" style={{ width: columnWidths.actions, minWidth: columnWidths.actions }}>
@@ -694,6 +706,14 @@ export function BusinessInfoManagement() {
                     <th style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
                       <div className="pr-3">集团商机编码时间</div>
                       <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'groupBusinessTime', columnWidths.groupBusinessTime)} />
+                    </th>
+                    <th style={{ width: columnWidths.dataOperationStatus, minWidth: columnWidths.dataOperationStatus }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">下发类型</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'dataOperationStatus', columnWidths.dataOperationStatus)} />
+                    </th>
+                    <th style={{ width: columnWidths.remarks, minWidth: columnWidths.remarks }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-green-50 relative select-none">
+                      <div className="pr-3">描述</div>
+                      <div className="absolute inset-y-0 right-0 cursor-col-resize hover:bg-blue-300 active:bg-blue-400 transition-colors" style={{ width: '6px' }} onMouseDown={(e) => handleResizeStart(e, 'remarks', columnWidths.remarks)} />
                     </th>
                     <th style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-left text-sm text-gray-700 font-medium whitespace-nowrap bg-yellow-50 relative select-none">
                       <div className="pr-3">数据类型</div>
@@ -776,7 +796,12 @@ export function BusinessInfoManagement() {
                         {row.projectCode}
                       </td>
                       <td style={{ width: columnWidths.projectName, minWidth: columnWidths.projectName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap sticky left-[448px] bg-white z-10" title={row.projectName}>
-                        <div className="w-48 truncate">{row.projectName}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-48 truncate">{row.projectName}</span>
+                          {row.dataOperationStatus === 2 && (
+                            <span className="px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded shrink-0">集团打回</span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ width: columnWidths.businessInfoStatus, minWidth: columnWidths.businessInfoStatus }} className="px-3 py-3 whitespace-nowrap">
                         <StatusBadge label={row.businessInfoStatus} variant={getStatusVariant(row.businessInfoStatus)} />
@@ -794,6 +819,12 @@ export function BusinessInfoManagement() {
                       <td style={{ width: columnWidths.groupBusinessCode, minWidth: columnWidths.groupBusinessCode }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.groupBusinessCode}</td>
                       <td style={{ width: columnWidths.businessName, minWidth: columnWidths.businessName }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.businessName}</td>
                       <td style={{ width: columnWidths.groupBusinessTime, minWidth: columnWidths.groupBusinessTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.groupBusinessTime}</td>
+                      <td style={{ width: columnWidths.dataOperationStatus, minWidth: columnWidths.dataOperationStatus }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
+                        {row.dataOperationStatus === 1 ? "新增下发" : "修改下发"}
+                      </td>
+                      <td style={{ width: columnWidths.remarks, minWidth: columnWidths.remarks }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap" title={row.remarks}>
+                        {row.remarks || "-"}
+                      </td>
                       <td style={{ width: columnWidths.dataType, minWidth: columnWidths.dataType }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.dataType}</td>
                       <td style={{ width: columnWidths.biddingAmount, minWidth: columnWidths.biddingAmount }} className="px-3 py-3 text-sm text-right text-gray-700 whitespace-nowrap">{row.biddingAmount}</td>
                       <td style={{ width: columnWidths.biddingPublishTime, minWidth: columnWidths.biddingPublishTime }} className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">{row.biddingPublishTime}</td>

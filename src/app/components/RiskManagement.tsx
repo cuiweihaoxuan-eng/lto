@@ -305,10 +305,10 @@ export default function RiskManagement() {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
   const tabs = [
-    { key: "all" as TabType, label: "全部风险派单" },
-    { key: "todo" as TabType, label: "待办风险派单" },
-    { key: "done" as TabType, label: "已办风险派单" },
-    { key: "riskProject" as TabType, label: "疑似风险项目清单" },
+    { id: "all", label: "全部风险派单" },
+    { id: "todo", label: "待办风险派单" },
+    { id: "done", label: "已办风险派单" },
+    { id: "riskProject", label: "疑似风险项目清单" },
   ];
 
   const handleQuery = () => {
@@ -339,9 +339,8 @@ export default function RiskManagement() {
   };
 
   const handleSelectAll = (checked: boolean) => {
-    const data = activeTab === "riskProject" ? mockRiskProjectData : mockDispatchData;
     if (checked) {
-      setSelectedRows(data.map(d => d.id));
+      setSelectedRows(currentData.map(d => d.id));
     } else {
       setSelectedRows([]);
     }
@@ -386,6 +385,22 @@ export default function RiskManagement() {
   // 计算表格总宽度
   const totalTableWidth = tableColumns.reduce((sum, col) => sum + col.width, 0) + 200; // 200 = 复选框 + 序号 + 操作列
 
+  // 根据Tab过滤数据
+  const getFilteredData = () => {
+    switch (activeTab) {
+      case "todo":
+        return mockDispatchData.filter(item => item.isDispatched === "否");
+      case "done":
+        return mockDispatchData.filter(item => item.isDispatched === "是");
+      case "riskProject":
+        return mockRiskProjectData;
+      default:
+        return mockDispatchData;
+    }
+  };
+
+  const currentData = getFilteredData();
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* 标题区 */}
@@ -395,7 +410,7 @@ export default function RiskManagement() {
       </div>
 
       {/* Tab 切换 */}
-      <div className="px-6 flex-shrink-0">
+      <div className="px-6 flex-shrink-0 relative z-10">
         <TabNav
           tabs={tabs}
           activeTab={activeTab}
@@ -575,7 +590,7 @@ export default function RiskManagement() {
                     <tr>
                       {/* 复选框 */}
                       <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-0 bg-gray-50 z-20" style={{ width: 50, minWidth: 50 }}>
-                        <Checkbox checked={selectedRows.length === mockDispatchData.length} onCheckedChange={handleSelectAll} />
+                        <Checkbox checked={selectedRows.length === currentData.length} onCheckedChange={handleSelectAll} />
                       </th>
                       {/* 序号 */}
                       <th className="px-3 py-3 text-center text-sm font-medium text-gray-700 sticky left-[50px] bg-gray-50 z-20" style={{ width: 60, minWidth: 60 }}>
@@ -598,7 +613,7 @@ export default function RiskManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockDispatchData.map((row, index) => (
+                    {currentData.map((row, index) => (
                       <tr key={row.id} className="hover:bg-gray-50">
                         {/* 复选框 */}
                         <td className="px-3 py-3 text-center sticky left-0 bg-white z-10" style={{ width: 50, minWidth: 50 }}>
@@ -662,7 +677,7 @@ export default function RiskManagement() {
               <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end">
                 <Pagination
                   current={currentPage}
-                  total={mockDispatchData.length}
+                  total={currentData.length}
                   pageSize={pageSize}
                   onChange={(page, size) => { setCurrentPage(page); setPageSize(size); }}
                   showQuickJumper={false}
@@ -769,7 +784,13 @@ export default function RiskManagement() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-3 text-center text-sm font-medium text-gray-700" style={{ width: 50, minWidth: 50 }}>
-                        <Checkbox checked={selectedRows.length === mockRiskProjectData.length} onCheckedChange={handleSelectAll} />
+                        <Checkbox checked={activeTab === "riskProject" && selectedRows.length === mockRiskProjectData.length} onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedRows(mockRiskProjectData.map(d => d.id));
+                      } else {
+                        setSelectedRows([]);
+                      }
+                    }} />
                       </th>
                       <th className="px-3 py-3 text-center text-sm font-medium text-gray-700" style={{ width: 60, minWidth: 60 }}>序号</th>
                       <th className="px-3 py-3 text-left text-sm font-medium text-gray-700" style={{ width: 80, minWidth: 80 }}>地市</th>
@@ -791,7 +812,7 @@ export default function RiskManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockRiskProjectData.map((row, index) => (
+                    {currentData.map((row, index) => (
                       <tr key={row.id} className="hover:bg-gray-50">
                         <td className="px-3 py-3 text-center">
                           <Checkbox checked={selectedRows.includes(row.id)} onCheckedChange={(checked) => handleSelectRow(row.id, checked as boolean)} />
@@ -836,7 +857,7 @@ export default function RiskManagement() {
               <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end">
                 <Pagination
                   current={currentPage}
-                  total={mockRiskProjectData.length}
+                  total={currentData.length}
                   pageSize={pageSize}
                   onChange={(page, size) => { setCurrentPage(page); setPageSize(size); }}
                   showQuickJumper={false}
