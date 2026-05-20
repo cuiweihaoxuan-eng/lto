@@ -175,6 +175,8 @@ const queryFields = [
       { key: "equipDiffRate", label: "设备销售/租赁差异率", type: "text" as const, placeholder: "如: -8.0", showPercent: true },
       { key: "otherDiffAmount", label: "代收代付差异额", type: "number-range" as const },
       { key: "otherDiffRate", label: "代收代付差异率", type: "text" as const, placeholder: "如: 0", showPercent: true },
+      { key: "planTotal", label: "累计到期收入计划", type: "number-range" as const },
+      { key: "actualTotal", label: "项目实际入收总金额（不含税）", type: "number-range" as const },
     ]
   },
 ];

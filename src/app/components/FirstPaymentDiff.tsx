@@ -93,6 +93,9 @@ const queryFields = [
         { label: "政企客户部", value: "zhengqi" }, { label: "教育行业部", value: "jiaoyu" },
         { label: "医疗行业部", value: "yiliao" }
       ]},
+      { key: "period", label: "账期", type: "select" as const, options: [
+        { label: "2026-03", value: "2026-03" }, { label: "2026-02", value: "2026-02" }
+      ]},
     ]
   },
   // 项目信息 - 需展开
