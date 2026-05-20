@@ -92,21 +92,6 @@ const monthMockData: Record<string, string | number>[] = [
     monthIncomeProgress: "7.8%", monthReductionProgress: "84.0%",
     auditResult: "当月DICT收入金额小于DICT减收金额",
   },
-  {
-    period: "2026-03", province: "浙江省", city: "宁波", district: "鄞州区",
-    projectCode: "JHTB-2026-002", projectName: "智慧校园建设项目",
-    projectTypeName: "成本型", projectStartTime: "2026-02-01", projectStatus: "实施中",
-    projectManager: "李华", projectCategory: "自拓",
-    forwardContractCode: "HT-2026-002", forwardContractName: "教育信息化合同",
-    forwardContractType: "框架合同", forwardSignType: "合同",
-    planIncomeTotal: 800, signDate: "2026-02-15",
-    shareContractCode: "FC-2026-002", shareContractName: "分成合作合同",
-    shareContractType: "分成合同", shareSignType: "合同",
-    reductionPlanTotal: 80, shareSignDate: "2026-02-18",
-    monthDICTIncome: 0, monthDICTReduction: 0, monthReductionPlan: 6,
-    monthIncomeProgress: "0%", monthReductionProgress: "0%",
-    auditResult: "当月有减收计划，但实际未减收",
-  },
 ];
 
 // 年报Mock数据
@@ -127,18 +112,53 @@ const yearMockData: Record<string, string | number>[] = [
     totalIncomeProgress: "23.3%", totalReductionProgress: "252.0%",
     yearIncomeProgress: "7.8%", yearReductionProgress: "84.0%",
     totalAuditResult: "该项目累计DICT收入小于累计DICT减收",
-    yearAuditResult: "当月DICT收入金额小于DICT减收金额",
+    yearAuditResult: "该项目的本年收入进度和减收进度不一致",
   },
+];
+
+// 合同类型选项
+const contractTypeOptions = [
+  { label: "项目合同", value: "project" },
+  { label: "框架合同", value: "framework" },
+  { label: "补充协议", value: "supplementary" },
+];
+
+// 签约类型选项
+const signTypeOptions = [
+  { label: "合同", value: "contract" },
+  { label: "订单", value: "order" },
+];
+
+// 稽核结果选项
+const auditResultOptions = [
+  { label: "正常", value: "normal" },
+  { label: "当月有减收计划，但实际未减收", value: "no_reduction" },
+  { label: "当月有DICT收入，当月未减收", value: "income_no_reduction" },
+  { label: "当月DICT收入金额小于DICT减收金额", value: "income_less_than_reduction" },
+  { label: "当月收入进度和减收进度不一致", value: "progress_inconsistent" },
+];
+
+// 年报稽核结果选项
+const yearAuditResultOptions = [
+  { label: "正常", value: "normal" },
+  { label: "该项目有累计DICT收入，无减收", value: "total_no_reduction" },
+  { label: "该项目累计DICT收入小于累计DICT减收", value: "total_income_less" },
+  { label: "该项目的累计收入进度和减收进度不一致", value: "total_progress_inconsistent" },
+  { label: "该项目本年有减收计划，但实际未减收", value: "year_no_reduction" },
+  { label: "该项目本年有收入，无减收", value: "year_income_no_reduction" },
+  { label: "该项目本年DICT收入金额小于本年DICT减收金额", value: "year_income_less" },
+  { label: "该项目的本年收入进度和减收进度不一致", value: "year_progress_inconsistent" },
 ];
 
 export function IctShareAbnormalReport() {
   const [activeTab, setActiveTab] = useState<"month" | "year">("month");
-  const [showAllConditions, setShowAllConditions] = useState(false);
   const [queryParams, setQueryParams] = useState<Record<string, unknown>>({});
+  const [showAllConditions, setShowAllConditions] = useState(false);
 
   const isYear = activeTab === "year";
   const columns = isYear ? yearColumns : monthColumns;
   const data = isYear ? yearMockData : monthMockData;
+  const pageTitle = isYear ? "ICT项目分成异常报表-年度" : "ICT项目分成异常报表-月报";
 
   const topGroups: ReportHeaderGroup[] = isYear
     ? [
@@ -158,72 +178,174 @@ export function IctShareAbnormalReport() {
       ];
 
   const config: ReportConfig = {
-    title: "ICT项目分成异常报表",
+    title: pageTitle,
     description: "ICT项目分成异常情况分析",
     columns,
     headerGroups: topGroups,
     hasThreeLevelHeader: false,
   };
 
+  // 基础条件字段
   const basicFields = [
     { key: "city", label: "地市", type: "select" as const, options: [
-      { label: "杭州", value: "hangzhou" }, { label: "宁波", value: "ningbo" }, { label: "温州", value: "wenzhou" }
+      { label: "杭州", value: "hangzhou" }, { label: "宁波", value: "ningbo" }, { label: "温州", value: "wenzhou" }, { label: "嘉兴", value: "jiaxing" }, { label: "湖州", value: "huzhou" }, { label: "绍兴", value: "shaoxing" }, { label: "金华", value: "jinhua" }, { label: "衢州", value: "quzhou" }, { label: "舟山", value: "zhoushan" }, { label: "台州", value: "taizhou" }, { label: "丽水", value: "lishui" }
     ]},
     { key: "district", label: "区县", type: "select" as const, options: [
-      { label: "西湖区", value: "xihu" }, { label: "鄞州区", value: "yinzhou" }, { label: "鹿城区", value: "lucheng" }
+      { label: "西湖区", value: "xihu" }, { label: "鄞州区", value: "yinzhou" }, { label: "鹿城区", value: "lucheng" }, { label: "海曙区", value: "haishu" }, { label: "江北区", value: "jiangbei" }
     ]},
-    { key: "accountBook", label: "帐套", type: "select" as const, options: [
-      { label: "股份公司", value: "gufen" }, { label: "信产公司", value: "xinchan" }
-    ]},
-    { key: "oppCode", label: "商机编码", type: "text" as const, placeholder: "请输入" },
-    { key: "customerDept", label: "客户管控部门名称", type: "select" as const, options: [
-      { label: "政企客户部", value: "zhengqi" }, { label: "教育行业部", value: "jiaoyu" }
+    { key: "period", label: "账期", type: "select" as const, options: [
+      { label: "2026-01", value: "2026-01" }, { label: "2026-02", value: "2026-02" }, { label: "2026-03", value: "2026-03" }, { label: "2026-04", value: "2026-04" }
     ]},
   ];
 
+  // 项目信息字段
   const projectFields = [
     { key: "projectCode", label: "项目编码", type: "text" as const, placeholder: "请输入" },
     { key: "projectName", label: "项目名称", type: "text" as const, placeholder: "请输入" },
     { key: "projectType", label: "项目类型", type: "select" as const, options: [
-      { label: "成本型", value: "cost" }, { label: "分成型", value: "share" }
+      { label: "成本型", value: "cost" }, { label: "分成型", value: "share" }, { label: "混合型", value: "mixed" }
     ]},
-    { key: "projectTime", label: "立项时间", type: "date-range" as const },
+    { key: "projectTime", label: isYear ? "立项时间范围" : "立项时间", type: "date-range" as const },
     { key: "projectAmount", label: "项目总金额", type: "number-range" as const },
     { key: "projectStatus", label: "项目状态", type: "select" as const, options: [
-      { label: "实施中", value: "shishi" }, { label: "已完成", value: "wancheng" }
+      { label: "实施中", value: "implementing" }, { label: "已完成", value: "completed" }, { label: "已终止", value: "terminated" }
     ]},
     { key: "projectManager", label: "项目经理", type: "text" as const, placeholder: "请输入" },
-    { key: "projectCategory", label: "项目分类", type: "select" as const, options: [
-      { label: "自拓", value: "self" }, { label: "非自拓", value: "non-self" }
-    ]},
   ];
 
-  const extraFields = [
-    { key: "forwardContractCode", label: "前向合同编号", type: "text" as const, placeholder: "请输入" },
+  // 前向合同信息字段（月报）
+  const forwardContractFieldsMonth = [
+    { key: "forwardContractCode", label: "前向合同编码", type: "text" as const, placeholder: "请输入" },
     { key: "forwardContractName", label: "前向合同名称", type: "text" as const, placeholder: "请输入" },
-    { key: "shareContractCode", label: "分成合同编号", type: "text" as const, placeholder: "请输入" },
-    { key: "shareContractName", label: "分成合同名称", type: "text" as const, placeholder: "请输入" },
-    { key: "projectModel", label: "项目模式", type: "select" as const, options: [
-      { label: "DICT", value: "dict" }, { label: "ICT", value: "ict" }, { label: "集成", value: "jicheng" }
-    ]},
-    { key: "projectMode", label: "签约模式", type: "select" as const, options: [
-      { label: "合同", value: "contract" }, { label: "订单", value: "order" }
-    ]},
-    { key: "auditResult", label: "稽核结果", type: "text" as const, placeholder: "请输入" },
-    { key: "monthIncomeProgress", label: "本月收入进度(%)", type: "text" as const, placeholder: "如: 7.8" },
-    { key: "monthReductionProgress", label: "本月减收进度(%)", type: "text" as const, placeholder: "如: 84.0" },
-    { key: "totalIncomeProgress", label: "累计收入进度(%)", type: "text" as const, placeholder: "如: 23.3" },
-    { key: "totalReductionProgress", label: "累计减收进度(%)", type: "text" as const, placeholder: "如: 252.0" },
-    { key: "yearIncomeProgress", label: "本年收入进度(%)", type: "text" as const, placeholder: "如: 7.8" },
-    { key: "yearReductionProgress", label: "本年减收进度(%)", type: "text" as const, placeholder: "如: 84.0" },
+    { key: "forwardContractType", label: "前向合同类型", type: "select" as const, options: contractTypeOptions },
+    { key: "forwardSignDate", label: "前向合同签约日期", type: "date-range" as const },
+    { key: "planIncomeTotal", label: "计划收入总金额", type: "number-range" as const },
+    { key: "forwardSignType", label: "前向签约类型", type: "select" as const, options: signTypeOptions },
+    { key: "monthDICTIncome", label: "本月DICT收入金额", type: "number-range" as const },
+    { key: "monthIncomeProgress", label: "本月收入进度(%)", type: "number-range" as const, isPercent: true },
   ];
+
+  // 前向合同信息字段（年报）
+  const forwardContractFieldsYear = [
+    { key: "forwardContractCode", label: "前向合同编码", type: "text" as const, placeholder: "请输入" },
+    { key: "forwardContractName", label: "前向合同名称", type: "text" as const, placeholder: "请输入" },
+    { key: "forwardContractType", label: "前向合同类型", type: "select" as const, options: contractTypeOptions },
+    { key: "forwardSignDate", label: "前向合同签约日期", type: "date-range" as const },
+    { key: "planIncomeTotal", label: "计划收入总金额", type: "number-range" as const },
+    { key: "forwardSignType", label: "前向签约类型", type: "select" as const, options: signTypeOptions },
+    { key: "monthDICTIncome", label: "本月DICT收入金额", type: "number-range" as const },
+    { key: "monthIncomeProgress", label: "本月收入进度(%)", type: "number-range" as const, isPercent: true },
+    { key: "totalDICTIncome", label: "累计DICT收入金额", type: "number-range" as const },
+    { key: "totalIncomeProgress", label: "累计收入进度(%)", type: "number-range" as const, isPercent: true },
+    { key: "yearDICTIncome", label: "本年DICT收入金额", type: "number-range" as const },
+    { key: "yearIncomeProgress", label: "本年收入进度(%)", type: "number-range" as const, isPercent: true },
+  ];
+
+  // 分成合同信息字段（月报）
+  const shareContractFieldsMonth = [
+    { key: "shareContractCode", label: "分成合同编码", type: "text" as const, placeholder: "请输入" },
+    { key: "shareContractName", label: "分成合同名称", type: "text" as const, placeholder: "请输入" },
+    { key: "shareContractType", label: "分成合同类型", type: "select" as const, options: contractTypeOptions },
+    { key: "shareSignDate", label: "分成合同签约日期", type: "date-range" as const },
+    { key: "reductionPlanTotal", label: "减收计划总金额", type: "number-range" as const },
+    { key: "shareSignType", label: "分成签约类型", type: "select" as const, options: signTypeOptions },
+    { key: "monthDICTReduction", label: "本月DICT减收金额", type: "number-range" as const },
+    { key: "monthReductionProgress", label: "本月减收进度(%)", type: "number-range" as const, isPercent: true },
+  ];
+
+  // 分成合同信息字段（年报）
+  const shareContractFieldsYear = [
+    { key: "shareContractCode", label: "分成合同编码", type: "text" as const, placeholder: "请输入" },
+    { key: "shareContractName", label: "分成合同名称", type: "text" as const, placeholder: "请输入" },
+    { key: "shareContractType", label: "分成合同类型", type: "select" as const, options: contractTypeOptions },
+    { key: "shareSignDate", label: "分成合同签约日期", type: "date-range" as const },
+    { key: "reductionPlanTotal", label: "减收计划总金额", type: "number-range" as const },
+    { key: "shareSignType", label: "分成签约类型", type: "select" as const, options: signTypeOptions },
+    { key: "monthDICTReduction", label: "本月DICT减收金额", type: "number-range" as const },
+    { key: "monthReductionProgress", label: "本月减收进度(%)", type: "number-range" as const, isPercent: true },
+    { key: "totalDICTReduction", label: "累计DICT减收金额", type: "number-range" as const },
+    { key: "totalReductionProgress", label: "累计减收进度(%)", type: "number-range" as const, isPercent: true },
+    { key: "yearDICTReduction", label: "本年DICT减收金额", type: "number-range" as const },
+    { key: "yearReductionProgress", label: "本年减收进度(%)", type: "number-range" as const, isPercent: true },
+  ];
+
+  // 稽核字段（月报）
+  const auditFieldsMonth = [
+    { key: "auditResult", label: "稽核结果", type: "select" as const, options: auditResultOptions },
+  ];
+
+  // 稽核字段（年报）
+  const auditFieldsYear = [
+    { key: "totalAuditResult", label: "累计数据稽核结果", type: "select" as const, options: yearAuditResultOptions },
+    { key: "yearAuditResult", label: "本年数据稽核结果", type: "select" as const, options: yearAuditResultOptions },
+  ];
+
+  // 渲染通用字段
+  const renderField = (field: typeof projectFields[0]) => {
+    const isPercent = 'isPercent' in field && field.isPercent;
+    const suffix = isPercent ? "%" : "";
+
+    if (field.type === "select") {
+      return (
+        <Select value={(queryParams[field.key] as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, [field.key]: v }))}>
+          <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
+          <SelectContent>
+            {field.options?.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (field.type === "date-range") {
+      return (
+        <div className="flex gap-2 items-center">
+          <Input type="date" value={(queryParams[`${field.key}Start`] as string) ?? ""}
+            onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Start`]: e.target.value }))} />
+          <span className="text-gray-400">-</span>
+          <Input type="date" value={(queryParams[`${field.key}End`] as string) ?? ""}
+            onChange={e => setQueryParams(p => ({ ...p, [`${field.key}End`]: e.target.value }))} />
+        </div>
+      );
+    }
+
+    if (field.type === "number-range") {
+      return (
+        <div className="flex gap-2 items-center">
+          <div className="relative flex-1">
+            <Input type="number" placeholder="起" value={(queryParams[`${field.key}Min`] as string) ?? ""}
+              onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Min`]: e.target.value }))} />
+            {suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{suffix}</span>}
+          </div>
+          <span className="text-gray-400">-</span>
+          <div className="relative flex-1">
+            <Input type="number" placeholder="止" value={(queryParams[`${field.key}Max`] as string) ?? ""}
+              onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Max`]: e.target.value }))} />
+            {suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{suffix}</span>}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative">
+        <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
+          onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
+        {suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{suffix}</span>}
+      </div>
+    );
+  };
+
+  const handleReset = () => {
+    setQueryParams({});
+  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="px-6 pt-6 pb-4 flex-shrink-0">
-        <h2 className="text-lg font-medium text-gray-900">ICT项目分成异常报表</h2>
+        <h2 className="text-lg font-medium text-gray-900">{pageTitle}</h2>
       </div>
       <div className="flex-1 overflow-auto px-6 pb-6">
+        {/* Tab切换 */}
         <div className="mb-4 flex gap-2">
           <button
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -246,27 +368,20 @@ export function IctShareAbnormalReport() {
             年度
           </button>
         </div>
+
+        {/* 查询条件 */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-          <div>
-            <div className="grid grid-cols-5 gap-x-6 gap-y-3">
-              {basicFields.map((field) => (
-                <div key={field.key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                  {field.type === "select" ? (
-                    <Select value={(queryParams[field.key] as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, [field.key]: v }))}>
-                      <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
-                      <SelectContent>
-                        {field.options?.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
-                      onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
-                  )}
-                </div>
-              ))}
-            </div>
+          {/* 基础条件 */}
+          <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+            {basicFields.map((field) => (
+              <div key={field.key}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                {renderField(field)}
+              </div>
+            ))}
           </div>
+
+          {/* 项目信息 */}
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
               <span className="w-1 h-4 bg-green-500 rounded mr-2"></span>
@@ -276,82 +391,79 @@ export function IctShareAbnormalReport() {
               {projectFields.map((field) => (
                 <div key={field.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                  {field.type === "select" ? (
-                    <Select value={(queryParams[field.key] as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, [field.key]: v }))}>
-                      <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
-                      <SelectContent>
-                        {field.options?.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  ) : field.type === "date-range" ? (
-                    <div className="flex gap-2 items-center">
-                      <Input type="date" value={(queryParams[`${field.key}Start`] as string) ?? ""}
-                        onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Start`]: e.target.value }))} />
-                      <span className="text-gray-400">-</span>
-                      <Input type="date" value={(queryParams[`${field.key}End`] as string) ?? ""}
-                        onChange={e => setQueryParams(p => ({ ...p, [`${field.key}End`]: e.target.value }))} />
-                    </div>
-                  ) : field.type === "number-range" ? (
-                    <div className="flex gap-2 items-center">
-                      <Input type="number" placeholder="起" value={(queryParams[`${field.key}Min`] as string) ?? ""}
-                        onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Min`]: e.target.value }))} />
-                      <span className="text-gray-400">-</span>
-                      <Input type="number" placeholder="止" value={(queryParams[`${field.key}Max`] as string) ?? ""}
-                        onChange={e => setQueryParams(p => ({ ...p, [`${field.key}Max`]: e.target.value }))} />
-                    </div>
-                  ) : (
-                    <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
-                      onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
-                  )}
+                  {renderField(field)}
                 </div>
               ))}
             </div>
           </div>
+
+          {/* 前向合同信息 - 展开更多条件后显示 */}
           {showAllConditions && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
-                <span className="w-1 h-4 bg-orange-500 rounded mr-2"></span>
-                更多条件
+                <span className="w-1 h-4 bg-blue-500 rounded mr-2"></span>
+                前向合同信息
               </div>
               <div className="grid grid-cols-5 gap-x-6 gap-y-3">
-                {extraFields.map((field) => (
+                {(isYear ? forwardContractFieldsYear : forwardContractFieldsMonth).map((field) => (
                   <div key={field.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                      {(field.label.includes("%") || field.key.includes("Progress") || field.key.includes("进度")) && <span className="text-gray-400 ml-0.5">%</span>}
-                    </label>
-                    {field.type === "select" ? (
-                      <Select value={(queryParams[field.key] as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, [field.key]: v }))}>
-                        <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
-                        <SelectContent>
-                          {field.options?.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="relative">
-                        <Input placeholder={field.placeholder ?? "请输入"} value={(queryParams[field.key] as string) ?? ""}
-                          onChange={e => setQueryParams(p => ({ ...p, [field.key]: e.target.value }))} />
-                        {(field.key.includes("Progress") || field.key.includes("DiffRate")) && (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
-                        )}
-                      </div>
-                    )}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                    {renderField(field)}
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* 分成合同信息 - 展开更多条件后显示 */}
+          {showAllConditions && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                <span className="w-1 h-4 bg-teal-500 rounded mr-2"></span>
+                分成合同信息
+              </div>
+              <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                {(isYear ? shareContractFieldsYear : shareContractFieldsMonth).map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                    {renderField(field)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 稽核 - 展开更多条件后显示 */}
+          {showAllConditions && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                <span className="w-1 h-4 bg-red-500 rounded mr-2"></span>
+                稽核
+              </div>
+              <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                {(isYear ? auditFieldsYear : auditFieldsMonth).map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                    {renderField(field)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 操作按钮 */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <button className="text-sm text-blue-600 hover:text-blue-700" onClick={() => setShowAllConditions(!showAllConditions)}>
               {showAllConditions ? "收起更多条件" : "展开更多条件"}
             </button>
             <div className="flex gap-2">
               <Button className="btn btn-primary">查询</Button>
-              <Button className="btn btn-outline"><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+              <Button className="btn btn-outline" onClick={handleReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
               <Button className="btn btn-outline">导出</Button>
             </div>
           </div>
         </div>
+
         <ReportTemplate config={config} queryFields={[]} data={data} hideTitle={true} hideQueryArea={true} showDetail={true} />
       </div>
     </div>

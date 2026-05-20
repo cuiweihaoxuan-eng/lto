@@ -13,7 +13,7 @@ const columns: ReportColumn[] = [
   { key: "projectManager", label: "项目经理", width: 90, groupColor: "bg-gray-50" },
   { key: "projectStartTime", label: "立项时间", width: 110, groupColor: "bg-gray-50" },
   { key: "projectStatus", label: "项目状态", width: 90, groupColor: "bg-gray-50" },
-  // 产数服务 (cols 9-15)
+  // 产数服务 (cols 9-19)
   { key: "serviceIncomePlan", label: "收入计划", width: 110, align: "right", groupColor: "bg-blue-50" },
   { key: "serviceIncomeActual", label: "实际入收", width: 110, align: "right", groupColor: "bg-blue-50" },
   { key: "serviceIncomeProgress", label: "确收进度", width: 90, align: "right", groupColor: "bg-blue-50" },
@@ -21,7 +21,11 @@ const columns: ReportColumn[] = [
   { key: "serviceCostActual", label: "实际支出", width: 110, align: "right", groupColor: "bg-blue-50" },
   { key: "serviceCostProgress", label: "支出进度", width: 90, align: "right", groupColor: "bg-blue-50" },
   { key: "serviceCostDiffRate", label: "收支差异率", width: 100, align: "right", groupColor: "bg-blue-50" },
-  // 设备销售 (cols 16-22)
+  { key: "serviceShouldAmount", label: "应入账金额", width: 110, align: "right", groupColor: "bg-blue-50" },
+  { key: "serviceEstimateAmount", label: "暂估金额", width: 110, align: "right", groupColor: "bg-blue-50" },
+  { key: "serviceUnestimatedAmount", label: "未估金额", width: 110, align: "right", groupColor: "bg-blue-50" },
+  { key: "servicePostingRate", label: "列账率", width: 90, align: "right", groupColor: "bg-blue-50" },
+  // 设备销售 (cols 20-30)
   { key: "equipIncomePlan", label: "收入计划", width: 110, align: "right", groupColor: "bg-green-50" },
   { key: "equipIncomeActual", label: "实际入收", width: 110, align: "right", groupColor: "bg-green-50" },
   { key: "equipIncomeProgress", label: "确收进度", width: 90, align: "right", groupColor: "bg-green-50" },
@@ -29,12 +33,16 @@ const columns: ReportColumn[] = [
   { key: "equipCostActual", label: "实际支出", width: 110, align: "right", groupColor: "bg-green-50" },
   { key: "equipCostProgress", label: "支出进度", width: 90, align: "right", groupColor: "bg-green-50" },
   { key: "equipCostDiffRate", label: "收支差异率", width: 100, align: "right", groupColor: "bg-green-50" },
+  { key: "equipShouldAmount", label: "应入账金额", width: 110, align: "right", groupColor: "bg-green-50" },
+  { key: "equipEstimateAmount", label: "暂估金额", width: 110, align: "right", groupColor: "bg-green-50" },
+  { key: "equipUnestimatedAmount", label: "未估金额", width: 110, align: "right", groupColor: "bg-green-50" },
+  { key: "equipPostingRate", label: "列账率", width: 90, align: "right", groupColor: "bg-green-50" },
 ];
 
 const topGroups: ReportHeaderGroup[] = [
   { label: "项目基本信息", startCol: 0, span: 9, color: "bg-gray-100" },
-  { label: "产数服务", startCol: 9, span: 7, color: "bg-blue-100" },
-  { label: "设备销售", startCol: 16, span: 7, color: "bg-green-100" },
+  { label: "产数服务", startCol: 9, span: 11, color: "bg-blue-100" },
+  { label: "设备销售", startCol: 20, span: 11, color: "bg-green-100" },
 ];
 
 const mockData: Record<string, string | number>[] = [
@@ -45,8 +53,10 @@ const mockData: Record<string, string | number>[] = [
     projectStartTime: "2026-01-15", projectStatus: "实施中",
     serviceIncomePlan: 320, serviceIncomeActual: 280, serviceIncomeProgress: "87.5%",
     serviceCostPlan: 240, serviceCostActual: 200, serviceCostProgress: "83.3%", serviceCostDiffRate: "4.2%",
+    serviceShouldAmount: 220, serviceEstimateAmount: 20, serviceUnestimatedAmount: 0, servicePostingRate: "100.0%",
     equipIncomePlan: 150, equipIncomeActual: 130, equipIncomeProgress: "86.7%",
     equipCostPlan: 100, equipCostActual: 85, equipCostProgress: "85.0%", equipCostDiffRate: "1.7%",
+    equipShouldAmount: 95, equipEstimateAmount: 10, equipUnestimatedAmount: 0, equipPostingRate: "100.0%",
   },
   {
     period: "2026-03", city: "宁波", district: "鄞州区",
@@ -55,8 +65,10 @@ const mockData: Record<string, string | number>[] = [
     projectStartTime: "2026-02-01", projectStatus: "实施中",
     serviceIncomePlan: 450, serviceIncomeActual: 400, serviceIncomeProgress: "88.9%",
     serviceCostPlan: 320, serviceCostActual: 290, serviceCostProgress: "90.6%", serviceCostDiffRate: "-1.7%",
+    serviceShouldAmount: 320, serviceEstimateAmount: 30, serviceUnestimatedAmount: 0, servicePostingRate: "100.0%",
     equipIncomePlan: 200, equipIncomeActual: 180, equipIncomeProgress: "90.0%",
     equipCostPlan: 140, equipCostActual: 125, equipCostProgress: "89.3%", equipCostDiffRate: "0.7%",
+    equipShouldAmount: 140, equipEstimateAmount: 15, equipUnestimatedAmount: 0, equipPostingRate: "100.0%",
   },
   {
     period: "2026-03", city: "温州", district: "鹿城区",
@@ -65,8 +77,10 @@ const mockData: Record<string, string | number>[] = [
     projectStartTime: "2026-02-20", projectStatus: "实施中",
     serviceIncomePlan: 280, serviceIncomeActual: 250, serviceIncomeProgress: "89.3%",
     serviceCostPlan: 200, serviceCostActual: 180, serviceCostProgress: "90.0%", serviceCostDiffRate: "-0.7%",
+    serviceShouldAmount: 200, serviceEstimateAmount: 20, serviceUnestimatedAmount: 0, servicePostingRate: "100.0%",
     equipIncomePlan: 120, equipIncomeActual: 100, equipIncomeProgress: "83.3%",
     equipCostPlan: 80, equipCostActual: 70, equipCostProgress: "87.5%", equipCostDiffRate: "-4.2%",
+    equipShouldAmount: 80, equipEstimateAmount: 10, equipUnestimatedAmount: 0, equipPostingRate: "100.0%",
   },
 ];
 

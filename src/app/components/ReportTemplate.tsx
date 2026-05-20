@@ -931,9 +931,7 @@ export function ReportTemplate({
 
                     return (
                       <tr key={ri}
-                        className={`hover:bg-blue-50 cursor-pointer ${detailPanel.row === row ? "bg-blue-50" : ""}`}
-                        onMouseEnter={() => showDetail && setDetailPanel({ row, pinned: detailPanel.pinned })}
-                        onMouseLeave={() => showDetail && !detailPanel.pinned && setDetailPanel({ row: null, pinned: false })}
+                        className={`${detailPanel.row === row ? "bg-blue-50" : ""}`}
                       >
                         {visibleColumns.map((col, ci) => {
                           const origIdx = config.columns.indexOf(col);
