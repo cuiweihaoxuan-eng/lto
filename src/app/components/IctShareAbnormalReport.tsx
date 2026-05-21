@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { RotateCcw } from "lucide-react";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import { TabNav } from "./ui/tab-nav";
 
 // 月报列定义
 const monthColumns: ReportColumn[] = [
@@ -346,27 +347,16 @@ export function IctShareAbnormalReport() {
       </div>
       <div className="flex-1 overflow-auto px-6 pb-6">
         {/* Tab切换 */}
-        <div className="mb-4 flex gap-2">
-          <button
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === "month"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("month")}
-          >
-            月报
-          </button>
-          <button
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === "year"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("year")}
-          >
-            年度
-          </button>
+        <div className="mb-4">
+          <TabNav
+            tabs={[
+              { id: "month", label: "月报" },
+              { id: "year", label: "年度" },
+            ]}
+            activeTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab as "month" | "year")}
+            style="pill"
+          />
         </div>
 
         {/* 查询条件 */}
@@ -457,9 +447,9 @@ export function IctShareAbnormalReport() {
               {showAllConditions ? "收起更多条件" : "展开更多条件"}
             </button>
             <div className="flex gap-2">
-              <Button className="btn btn-primary">查询</Button>
-              <Button className="btn btn-outline" onClick={handleReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
-              <Button className="btn btn-outline">导出</Button>
+              <Button>查询</Button>
+              <Button variant="outline" onClick={handleReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+              <Button variant="outline">导出</Button>
             </div>
           </div>
         </div>

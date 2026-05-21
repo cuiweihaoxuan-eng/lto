@@ -552,11 +552,11 @@ export default function RiskManagement() {
                   {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleQuery}>
+                  <Button onClick={handleQuery}>
                     <Search className="w-4 h-4 mr-1" />
                     查询
                   </Button>
-                  <Button className="btn btn-outline" onClick={handleReset}>
+                  <Button variant="outline" onClick={handleReset}>
                     <RefreshCw className="w-4 h-4 mr-1" />
                     重置
                   </Button>
@@ -567,7 +567,7 @@ export default function RiskManagement() {
             {/* 操作按钮 */}
             {activeTab === "all" && (
               <div className="flex items-center gap-2">
-                <Button className="btn btn-warning" disabled={selectedRows.length === 0}>
+                <Button variant="warning" disabled={selectedRows.length === 0}>
                   <Upload className="w-3.5 h-3.5 mr-1" />
                   批量派单
                 </Button>
@@ -755,11 +755,11 @@ export default function RiskManagement() {
 
               <div className="flex items-center justify-between mt-4">
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleQuery}>
+                  <Button onClick={handleQuery}>
                     <Search className="w-4 h-4 mr-1" />
                     查询
                   </Button>
-                  <Button className="btn btn-outline" onClick={handleReset}>
+                  <Button variant="outline" onClick={handleReset}>
                     <RefreshCw className="w-4 h-4 mr-1" />
                     重置
                   </Button>
@@ -769,7 +769,7 @@ export default function RiskManagement() {
                     <Download className="w-3.5 h-3.5 mr-1" />
                     导出
                   </Button>
-                  <Button className="btn btn-warning" disabled={selectedRows.length === 0}>
+                  <Button variant="warning" disabled={selectedRows.length === 0}>
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     批量生成
                   </Button>

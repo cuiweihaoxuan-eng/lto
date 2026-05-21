@@ -464,16 +464,16 @@ export function SixPositioning() {
                     {showAllConditions ? '收起更多条件' : '展开更多条件'}
                   </Button>
                   <div className="flex gap-2">
-                    <Button className="btn btn-primary">
+                    <Button>
                       <Search className="w-4 h-4 mr-1" />查询
                     </Button>
-                    <Button className="btn btn-outline">
+                    <Button variant="outline">
                       <RotateCcw className="w-4 h-4 mr-1" />重置
                     </Button>
-                    <Button className="btn btn-outline">
+                    <Button variant="outline">
                       <Download className="w-4 h-4 mr-1" />下载清单
                     </Button>
-                    <Button className="btn btn-outline">
+                    <Button variant="outline">
                       <Download className="w-4 h-4 mr-1" />任务下载列表
                     </Button>
                   </div>
@@ -678,16 +678,16 @@ export function SixPositioning() {
                 </div>
               </div>
               <div className="flex items-center justify-end mt-4 gap-2">
-                <Button className="btn btn-primary">
+                <Button>
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button className="btn btn-outline">
+                <Button variant="outline">
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
-                <Button className="btn btn-primary">
+                <Button>
                   <Download className="w-4 h-4 mr-1" />导出
                 </Button>
-                <Button className="btn btn-primary">
+                <Button>
                   <Download className="w-4 h-4 mr-1" />任务下载列表
                 </Button>
               </div>

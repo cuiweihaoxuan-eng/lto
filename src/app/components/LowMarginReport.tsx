@@ -492,9 +492,9 @@ export function LowMarginReport() {
                 >
                   {showFilters ? "隐藏查询" : "显示查询"}
                 </button>
-                <button className="btn btn-outline">重置</button>
-                <button className="btn btn-primary">查询</button>
-                <button className="btn btn-outline">导出</button>
+                <Button variant="outline">重置</Button>
+                <Button>查询</Button>
+                <Button variant="outline">导出</Button>
               </div>
             </div>
           </div>

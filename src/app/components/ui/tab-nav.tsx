@@ -24,11 +24,15 @@ interface TabNavProps {
 export function TabNav({ tabs, activeTab, onTabChange, style = "underlined", className = "" }: TabNavProps) {
   if (style === "pill") {
     return (
-      <div className={`tab-nav-pill ${className}`}>
+      <div className={`flex gap-1 bg-[#f3f4f6] p-1 rounded-lg w-fit ${className}`}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`tab-item ${activeTab === tab.id ? "active" : ""}`}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-1 ${
+              activeTab === tab.id
+                ? "text-gray-900 bg-white shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
             onClick={() => !tab.disabled && onTabChange(tab.id)}
             disabled={tab.disabled}
           >
@@ -52,11 +56,15 @@ export function TabNav({ tabs, activeTab, onTabChange, style = "underlined", cla
   }
 
   return (
-    <div className={`tab-nav-underlined ${className}`}>
+    <div className={`flex border-b border-gray-200 ${className}`}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`tab-item ${activeTab === tab.id ? "active" : ""}`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1 ${
+            activeTab === tab.id
+              ? "text-[#1890ff] border-[#1890ff]"
+              : "text-gray-500 border-transparent hover:text-gray-700"
+          }`}
           onClick={() => !tab.disabled && onTabChange(tab.id)}
           disabled={tab.disabled}
         >
@@ -67,7 +75,7 @@ export function TabNav({ tabs, activeTab, onTabChange, style = "underlined", cla
               padding: "1px 6px",
               borderRadius: 10,
               fontSize: 11,
-              background: activeTab === tab.id ? "rgba(255,255,255,0.2)" : "#e5e7eb",
+              background: activeTab === tab.id ? "rgba(0,0,0,0.1)" : "#e5e7eb",
               color: activeTab === tab.id ? "#fff" : "#6b7280"
             }}>
               {tab.count}

@@ -616,7 +616,7 @@ export function AddBidDialog({ open, onClose, onSubmit }: AddBidDialogProps) {
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3 flex-shrink-0">
           <Button variant="outline" className="h-9 text-sm" onClick={onClose}>取消</Button>
           <Button variant="outline" className="h-9 text-sm" onClick={() => {}}>暂存</Button>
-          <Button className="btn btn-primary h-9 text-sm"
+          <Button className="h-9 text-sm"
             onClick={() => {
               onSubmit?.(form);
               onClose();

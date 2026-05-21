@@ -270,11 +270,11 @@ export function RevenueManagement() {
               </Select>
             </div>
             <div className="flex items-end gap-2">
-              <Button className="btn btn-primary gap-1">
+              <Button className="gap-1">
                 <Search className="w-4 h-4" />
                 查询
               </Button>
-              <Button className="btn btn-outline gap-1">
+              <Button variant="outline" className="gap-1">
                 <RefreshCw className="w-4 h-4" />
                 重置
               </Button>
@@ -292,7 +292,7 @@ export function RevenueManagement() {
         <div className="text-sm text-gray-500">
           共 <span className="font-medium text-gray-900">{filteredData.length}</span> 条记录
         </div>
-        <Button className="btn btn-primary gap-1" onClick={() => setApplyDialogOpen(true)}>
+        <Button className="gap-1" onClick={() => setApplyDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           申请录收
         </Button>

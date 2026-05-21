@@ -21,7 +21,7 @@ export function ProjectInfo({ isCollapsed, onToggle }: ProjectInfoProps) {
         >
           <span>展开详情</span>
           <ChevronDown className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     );
   }
@@ -43,7 +43,7 @@ export function ProjectInfo({ isCollapsed, onToggle }: ProjectInfoProps) {
         >
           <span>收起详情</span>
           <ChevronUp className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
 
       {/* Project Title and Status */}
@@ -62,7 +62,7 @@ export function ProjectInfo({ isCollapsed, onToggle }: ProjectInfoProps) {
           <span className="text-gray-500 whitespace-nowrap min-w-[120px]">商机编号:</span>
           <div className="flex items-center gap-2 flex-1">
             <span className="text-gray-900">100050516352100000</span>
-            <button className="text-[#2e7cff] hover:underline whitespace-nowrap">查看原文&gt;</button>
+            <button className="text-[#2e7cff] hover:underline whitespace-nowrap">查看原文&gt;</Button>
           </div>
         </div>
 
@@ -113,13 +113,13 @@ export function ProjectInfo({ isCollapsed, onToggle }: ProjectInfoProps) {
       <div className="flex gap-3">
         <button className="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors whitespace-nowrap">
           转商机
-        </button>
+        </Button>
         <button className="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors whitespace-nowrap">
           查看工单
-        </button>
-        <button className="btn btn-primary px-4 py-1.5 text-sm whitespace-nowrap">
+        </Button>
+        <Button px-4 py-1.5 text-sm whitespace-nowrap">
           合同审批流程
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -223,7 +223,7 @@ export function AddPaymentDialog({ open, onOpenChange }: AddPaymentDialogProps) 
               />
             </div>
             <div className="col-span-2 flex items-end gap-2">
-              <Button className="btn btn-primary"
+              <Button
                 onClick={handleSearch}
               >
                 <Search className="w-4 h-4 mr-2" />

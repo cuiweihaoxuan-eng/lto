@@ -201,7 +201,7 @@ export function ForwardReceiptConfirmation() {
 
       {/* Action Button */}
       <div>
-        <Button className="btn btn-primary"
+        <Button
           onClick={() => setShowAddDialog(true)}
         >
           新增收款确认

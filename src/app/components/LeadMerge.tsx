@@ -145,7 +145,7 @@ export function LeadMerge() {
                 </div>
               </div>
               <div className="col-span-2 flex justify-between items-center">
-                <Button className="btn btn-primary">
+                <Button>
                   <Search className="w-4 h-4 mr-1" />
                   开始检测
                 </Button>

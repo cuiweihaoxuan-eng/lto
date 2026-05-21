@@ -104,7 +104,7 @@ export function ContractDemolitionDetail({ record, onBack, onEdit }: ContractDem
         </div>
         <div className="flex gap-2">
           {(record.status === "待解构" || record.status === "已驳回") && (
-            <Button className="btn btn-primary" onClick={onEdit}>
+            <Button onClick={onEdit}>
               编辑解构
             </Button>
           )}

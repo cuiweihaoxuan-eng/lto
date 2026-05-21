@@ -227,7 +227,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
               />
             </div>
             <div className="flex items-end gap-2">
-              <Button className="btn btn-primary"
+              <Button
                 onClick={handleSearch}
               >
                 <Search className="w-4 h-4 mr-2" />
@@ -323,7 +323,7 @@ export function AssociatePaymentDialog({ open, onOpenChange }: AssociatePaymentD
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button className="btn btn-primary"
+          <Button
             onClick={handleConfirm}
           >
             确认

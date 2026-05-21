@@ -385,8 +385,8 @@ export function ExpertReportPage({ activeTab: initialTab = "expert-call-list" }:
                   {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleCallQuery}>查询</Button>
-                  <Button className="btn btn-outline" onClick={handleCallReset}>
+                  <Button onClick={handleCallQuery}>查询</Button>
+                  <Button variant="outline" onClick={handleCallReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>
@@ -525,8 +525,8 @@ export function ExpertReportPage({ activeTab: initialTab = "expert-call-list" }:
               </div>
               <div className="flex items-center justify-end mt-4">
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleStatsQuery}>查询</Button>
-                  <Button className="btn btn-outline" onClick={handleStatsReset}>
+                  <Button onClick={handleStatsQuery}>查询</Button>
+                  <Button variant="outline" onClick={handleStatsReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>

@@ -197,7 +197,7 @@ export function QualityControl() {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button className="btn btn-outline" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
+                <Button variant="outline" onClick={() => { setSearchText(""); setStatusFilter("all"); }}>
                   重置
                 </Button>
               </div>
@@ -207,7 +207,7 @@ export function QualityControl() {
           {/* 操作按钮区 */}
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
-              <Button className="btn btn-primary">
+              <Button>
                 <Plus className="w-4 h-4 mr-1" />
                 新增控制点
               </Button>
@@ -359,7 +359,7 @@ export function QualityControl() {
                 <Input placeholder="搜索验收项目..." className="w-64" />
               </div>
               <div className="flex gap-2">
-                <Button className="btn btn-primary">
+                <Button>
                   <Plus className="w-4 h-4 mr-1" />
                   新建验收
                 </Button>

@@ -476,11 +476,11 @@ export function RevenueDetailDialog({ open, onClose, record }: RevenueDetailDial
             <RotateCcw className="w-4 h-4" />
             撤回
           </Button>
-          <Button className="btn btn-outline gap-1">
+          <Button variant="outline" className="gap-1">
             <Edit className="w-4 h-4" />
             编辑
           </Button>
-          <Button className="btn btn-primary" onClick={onClose}>
+          <Button onClick={onClose}>
             关闭
           </Button>
         </div>

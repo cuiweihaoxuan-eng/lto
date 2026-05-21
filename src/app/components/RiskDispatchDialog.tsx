@@ -750,7 +750,7 @@ export function RiskDispatchDialog({ open, onClose, rowData }: RiskDispatchDialo
               </Button>
             )}
             {currentStepIndex < steps.length - 1 ? (
-              <Button className="btn btn-primary"
+              <Button
                 onClick={() => {
                   const nextStep = steps[currentStepIndex + 1];
                   setActiveStep(nextStep.key);
@@ -759,7 +759,7 @@ export function RiskDispatchDialog({ open, onClose, rowData }: RiskDispatchDialo
                 下一步
               </Button>
             ) : (
-              <Button className="btn btn-primary" onClick={handleSubmit}>
+              <Button onClick={handleSubmit}>
                 提交派单
               </Button>
             )}

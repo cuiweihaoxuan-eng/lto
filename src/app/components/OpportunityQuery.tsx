@@ -397,10 +397,10 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
                 {showAllConditions ? "收起更多条件" : "展开更多条件"}
               </Button>
               <div className="flex gap-2">
-                <Button className="btn btn-primary" onClick={handleQuery}>
+                <Button onClick={handleQuery}>
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button className="btn btn-outline" onClick={handleReset}>
+                <Button variant="outline" onClick={handleReset}>
                   <RefreshCw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>
@@ -409,15 +409,15 @@ export function OpportunityQuery({ onRowClick }: { onRowClick?: (id: string) => 
 
           {/* 操作按钮卡片 */}
           <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-2">
-            <Button className="btn btn-success">
+            <Button variant="success">
               <Download className="w-3.5 h-3.5 mr-1" />
               同步集团
             </Button>
-            <Button className="btn btn-success">
+            <Button variant="success">
               <Plus className="w-3.5 h-3.5 mr-1" />
               新建项目
             </Button>
-            <Button className="btn btn-cyan">
+            <Button variant="cyan">
               <X className="w-3.5 h-3.5 mr-1" />
               关闭商机
             </Button>

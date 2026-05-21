@@ -186,7 +186,7 @@ export function AssociateReceiptDialog({ open, onOpenChange }: AssociateReceiptD
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button className="btn btn-primary"
+          <Button
             onClick={handleConfirm}
           >
             确认

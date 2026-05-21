@@ -575,11 +575,11 @@ export function SelfDeliverySettlement() {
             </div>
 
             <div className="flex items-end gap-2">
-              <Button className="btn btn-primary gap-1">
+              <Button className="gap-1">
                 <Search className="w-4 h-4" />
                 查询
               </Button>
-              <Button className="btn btn-outline gap-1">
+              <Button variant="outline" className="gap-1">
                 <RefreshCw className="w-4 h-4" />
                 重置
               </Button>
@@ -594,23 +594,23 @@ export function SelfDeliverySettlement() {
           共 <span className="font-medium text-gray-900">{filteredData.length}</span> 条记录
         </div>
         <div className="flex gap-2">
-          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("三联单"); setImportDialogOpen(true); }}>
+          <Button variant="outline" className="gap-1" onClick={() => { setImportType("三联单"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
             导入三联单
           </Button>
-          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("小微标品"); setImportDialogOpen(true); }}>
+          <Button variant="outline" className="gap-1" onClick={() => { setImportType("小微标品"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
             导入小微标品工单
           </Button>
-          <Button className="btn btn-outline gap-1" onClick={() => { setImportType("凭证"); setImportDialogOpen(true); }}>
+          <Button variant="outline" className="gap-1" onClick={() => { setImportType("凭证"); setImportDialogOpen(true); }}>
             <Upload className="w-4 h-4" />
             导入已发放凭证
           </Button>
-          <Button className="btn btn-outline gap-1">
+          <Button variant="outline" className="gap-1">
             <Download className="w-4 h-4" />
             导出
           </Button>
-          <Button className="btn btn-primary gap-1" onClick={() => { setSelectedRowData(null); setApplyDialogOpen(true); }}>
+          <Button className="gap-1" onClick={() => { setSelectedRowData(null); setApplyDialogOpen(true); }}>
             <Plus className="w-4 h-4" />
             申请自交付结算
           </Button>

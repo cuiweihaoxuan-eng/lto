@@ -35,11 +35,18 @@ const RiskManagement = lazy(() => import("./components/RiskManagement").then(m =
 const RevenueManagement = lazy(() => import("./components/RevenueManagement").then(m => ({ default: m.RevenueManagement })));
 const SelfDeliverySettlement = lazy(() => import("./components/SelfDeliverySettlement").then(m => ({ default: m.SelfDeliverySettlement })));
 const TaskWalletList = lazy(() => import("./components/TaskWalletList").then(m => ({ default: m.TaskWalletList })));
+const ProjectList = lazy(() => import("./components/ProjectList").then(m => ({ default: m.ProjectList })));
+const RewardSignReport = lazy(() => import("./components/RewardSignReport").then(m => ({ default: m.RewardSignReport })));
+const BonusPool = lazy(() => import("./components/BonusPool").then(m => ({ default: m.BonusPool })));
 const OppAwardPageList = lazy(() => import("./components/OppAwardPageList").then(m => ({ default: m.OppAwardPageList })));
 const CommissionRewardList = lazy(() => import("./components/CommissionRewardList").then(m => ({ default: m.CommissionRewardList })));
 const LargeBusinessOpportunit = lazy(() => import("./components/LargeBusinessOpportunit").then(m => ({ default: m.LargeBusinessOpportunit })));
 const EffectiveBusinessOpportunity = lazy(() => import("./components/EffectiveBusinessOpportunity").then(m => ({ default: m.EffectiveBusinessOpportunity })));
 const CommissionDistributionReport = lazy(() => import("./components/CommissionDistributionReport").then(m => ({ default: m.CommissionDistributionReport })));
+const EffectiveBusinessOpportunityAward = lazy(() => import("./components/EffectiveBusinessOpportunityAward").then(m => ({ default: m.EffectiveBusinessOpportunityAward })));
+const MyWallet = lazy(() => import("./components/MyWallet").then(m => ({ default: m.MyWallet })));
+const LargeBusinessOpportunityAward = lazy(() => import("./components/LargeBusinessOpportunityAward").then(m => ({ default: m.LargeBusinessOpportunityAward })));
+const ProjectCommissionAward = lazy(() => import("./components/ProjectCommissionAward").then(m => ({ default: m.ProjectCommissionAward })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -96,6 +103,15 @@ useEffect(() => {
     if (activeSidebarItem === "task-wallet-list") {
       return <Suspense fallback={<LoadingSpinner />}><TaskWalletList /></Suspense>;
     }
+    if (activeSidebarItem === "project-list") {
+      return <Suspense fallback={<LoadingSpinner />}><ProjectList /></Suspense>;
+    }
+    if (activeSidebarItem === "reward-sign-report") {
+      return <Suspense fallback={<LoadingSpinner />}><RewardSignReport /></Suspense>;
+    }
+    if (activeSidebarItem === "bonus-pool") {
+      return <Suspense fallback={<LoadingSpinner />}><BonusPool /></Suspense>;
+    }
     if (activeSidebarItem === "opp-award-page") {
       return <Suspense fallback={<LoadingSpinner />}><OppAwardPageList /></Suspense>;
     }
@@ -110,6 +126,18 @@ useEffect(() => {
     }
     if (activeSidebarItem === "commission-distribution-report") {
       return <Suspense fallback={<LoadingSpinner />}><CommissionDistributionReport /></Suspense>;
+    }
+    if (activeSidebarItem === "effective-business-opportunity-award") {
+      return <Suspense fallback={<LoadingSpinner />}><EffectiveBusinessOpportunityAward /></Suspense>;
+    }
+    if (activeSidebarItem === "my-wallet") {
+      return <Suspense fallback={<LoadingSpinner />}><MyWallet /></Suspense>;
+    }
+    if (activeSidebarItem === "large-business-opportunity-award") {
+      return <Suspense fallback={<LoadingSpinner />}><LargeBusinessOpportunityAward /></Suspense>;
+    }
+    if (activeSidebarItem === "project-commission-award") {
+      return <Suspense fallback={<LoadingSpinner />}><ProjectCommissionAward /></Suspense>;
     }
 
     // 专家任务报表

@@ -314,7 +314,7 @@ export function ImplementationMonitoring() {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button className="btn btn-outline" onClick={() => { setSearchText(""); setRiskFilter("all"); }}>
+                <Button variant="outline" onClick={() => { setSearchText(""); setRiskFilter("all"); }}>
                   重置
                 </Button>
               </div>
@@ -466,7 +466,7 @@ export function ImplementationMonitoring() {
                 </Select>
                 <Input placeholder="搜索预警内容..." className="w-64" />
               </div>
-              <Button className="btn btn-primary">
+              <Button>
                 <Plus className="w-4 h-4 mr-1" />
                 新增预警
               </Button>

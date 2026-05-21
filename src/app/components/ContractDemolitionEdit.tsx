@@ -106,7 +106,7 @@ export function ContractDemolitionEdit({ record, onBack, onSave }: ContractDemol
           <Button variant="outline" onClick={onBack}>
             取消
           </Button>
-          <Button className="btn btn-primary" onClick={onSave}>
+          <Button onClick={onSave}>
             <Save className="w-4 h-4 mr-1" />
             保存并提交审批
           </Button>

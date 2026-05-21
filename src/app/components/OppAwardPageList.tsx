@@ -188,8 +188,8 @@ export function OppAwardPageList() {
               )}
               <div className={showMore ? "flex items-end gap-2" : "flex items-end"}>
                 {showMore && <div></div>}
-                <Button className="btn btn-primary" onClick={handleSearch}>查询</Button>
-                <Button className="btn btn-outline" onClick={handleReset}>
+                <Button onClick={handleSearch}>查询</Button>
+                <Button variant="outline" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>

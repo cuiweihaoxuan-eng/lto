@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Preview</title>
+  <style>
+    /* 内联所有 shadcn CSS 变量 */
+    :root {
+      --primary: #1890ff;
+      --primary-foreground: #ffffff;
+      --secondary: #f4f4f5;
+      --secondary-foreground: #666666;
+      --muted: #f5f5f5;
+      --muted-foreground: #999999;
+      --accent: #e9ebef;
+      --accent-foreground: #333333;
+      --destructive: #d4183d;
+      --destructive-foreground: #ffffff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --background: #ffffff;
+      --foreground: #333333;
+      --border: #e8e8e8;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; height: 100vh; overflow: auto; box-sizing: border-box; }
+    iframe { border: none; width: 100%; height: 100%; display: block; }
+    .header { margin-bottom: 16px; }
+    .header h2 { margin: 0; font-size: 16px; color: #1a1a1a; border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+    .preview-section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .demo-item { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: #fafafa; border-radius: 8px; }
+    .demo-label { font-size: 12px; color: #666; font-weight: 500; }
+    .type-tag { font-size: 11px; color: #999; font-weight: normal; margin-left: 8px; }
+    .placeholder { text-align: center; padding: 40px; color: #999; background: white; border-radius: 12px; }
+    .btn-wrapper { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
+
+    /* 按钮样式 - 使用 shadcn 变量 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-default { background: var(--primary); color: var(--primary-foreground); }
+    .btn-default:hover { filter: brightness(0.9); }
+    .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+    .btn-outline { background: var(--background); color: var(--foreground); border-color: var(--border); }
+    .btn-outline:hover { background: var(--accent); }
+    .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .btn-ghost { background: transparent; color: var(--foreground); }
+    .btn-ghost:hover { background: var(--accent); }
+    .btn-link { background: transparent; color: var(--primary); text-decoration: underline; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-cyan { background: #0891b2; color: white; }
+
+    /* 尺寸 */
+    .btn-sm { padding: 4px 12px; font-size: 12px; }
+    .btn-lg { padding: 12px 24px; font-size: 16px; }
+
+    /* Badge */
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+    .badge-default { background: var(--primary); color: white; }
+    .badge-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .badge-destructive { background: var(--destructive); color: white; }
+    .badge-outline { background: transparent; color: var(--foreground); border: 1px solid var(--border); }
+
+    /* Alert */
+    .alert { padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+    .alert-default { background: var(--background); color: var(--foreground); border: 1px solid var(--border); }
+    .alert-info { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+    .alert-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .alert-warning { background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+    .alert-error { background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+
+    /* Input */
+    .input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; width: 100%; max-width: 240px; }
+    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.1); outline: none; }
+
+    /* Select */
+    .select { padding: 8px 32px 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; width: 100%; max-width: 240px; appearance: none; cursor: pointer; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 12px center no-repeat; }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 600; }
+    .card-content { padding: 20px; }
+    .card-footer { padding: 16px 20px; border-top: 1px solid var(--border); background: #fafafa; }
+
+    /* Modal */
+    .modal { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; max-width: 100%; }
+    .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab { padding: 12px 16px; font-size: 14px; cursor: pointer; color: #666; }
+    .tab:hover { color: #333; }
+    .tab-active { color: var(--primary); border-bottom: 2px solid var(--primary); font-weight: 500; }
+
+    /* Checkbox */
+    .checkbox { width: 16px; height: 16px; accent-color: var(--primary); }
+
+    /* Switch */
+    .switch { width: 44px; height: 22px; appearance: none; cursor: pointer; border-radius: 11px; }
+    .switch:checked { background: var(--primary); }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="placeholder">选择左侧组件查看预览效果</div>
+  </div>
+  <script>
+    var app = document.getElementById('app');
+    var componentName = null;
+
+    window.addEventListener('message', function(event) {
+      console.log('[Preview] Received message:', event.data);
+      if (event.data.type === 'render-components') {
+        if (event.data.components && event.data.components.length > 0) {
+          componentName = event.data.components[0].name;
+        }
+        renderComponents(event.data.components);
+      }
+    });
+
+    function isVariantArray(arr) {
+      return Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].name === 'string';
+    }
+
+    function getVariantList(comp) {
+      if (comp.variants && comp.variants.variant && isVariantArray(comp.variants.variant)) {
+        return comp.variants.variant;
+      }
+      return null;
+    }
+
+    function getSizeList(comp) {
+      if (comp.variants && comp.variants.size && isVariantArray(comp.variants.size)) {
+        return comp.variants.size;
+      }
+      return null;
+    }
+
+    function renderComponents(components) {
+      app.innerHTML = '';
+
+      components.forEach(function(comp) {
+        var section = document.createElement('div');
+        section.className = 'preview-section';
+
+        var labelCN = comp.label || comp.name;
+
+        var header = document.createElement('div');
+        header.className = 'header';
+        header.innerHTML = '<h2>' + labelCN + ' <span class="type-tag">(' + (comp.type || 'unknown') + ')</span></h2>';
+        section.appendChild(header);
+
+        var content = document.createElement('div');
+        content.className = 'demo-grid';
+
+        var rendered = false;
+        switch(comp.type) {
+          case 'button': renderButtonDemo(content, comp); rendered = true; break;
+          case 'badge': renderBadgeDemo(content, comp); rendered = true; break;
+          case 'alert': renderAlertDemo(content, comp); rendered = true; break;
+          case 'input': renderInputDemo(content, comp); rendered = true; break;
+          case 'select': renderSelectDemo(content, comp); rendered = true; break;
+          case 'dialog': renderDialogDemo(content, comp); rendered = true; break;
+          case 'card': renderCardDemo(content, comp); rendered = true; break;
+          case 'checkbox': renderCheckboxDemo(content, comp); rendered = true; break;
+          case 'table': renderTableDemo(content, comp); rendered = true; break;
+          case 'form': renderFormDemo(content, comp); rendered = true; break;
+          case 'dropdown': renderDropdownDemo(content, comp); rendered = true; break;
+          case 'datepicker': renderDatePickerDemo(content, comp); rendered = true; break;
+          case 'pagination': renderPaginationDemo(content, comp); rendered = true; break;
+          case 'tabs': renderTabsDemo(content, comp); rendered = true; break;
+          case 'search': renderSearchDemo(content, comp); rendered = true; break;
+          case 'switch': renderSwitchDemo(content, comp); rendered = true; break;
+        }
+
+        if (!rendered) {
+          renderGenericDemo(content, comp);
+        }
+
+        section.appendChild(content);
+        app.appendChild(section);
+      });
+    }
+
+    function renderButtonDemo(container, comp) {
+      var variants = getVariantList(comp);
+
+      // 从组件变体配置中获取样式
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 3';
+      item.innerHTML = '<span class="demo-label">变体 Variants</span><div class="btn-wrapper">';
+
+      // Button 变体 - 直接使用 shadcn 实际样式
+      var btnVariants = [
+        { name: 'default', bg: '#1890ff', color: 'white' },
+        { name: 'destructive', bg: '#d4183d', color: 'white' },
+        { name: 'outline', bg: 'white', color: '#333', border: '1px solid #d9d9d9' },
+        { name: 'secondary', bg: '#f4f4f5', color: '#666' },
+        { name: 'ghost', bg: 'transparent', color: '#333' },
+        { name: 'link', bg: 'transparent', color: '#1890ff', textDecoration: 'underline' },
+        { name: 'warning', bg: '#f59e0b', color: 'white' },
+        { name: 'success', bg: '#10b981', color: 'white' },
+        { name: 'cyan', bg: '#0891b2', color: 'white' }
+      ];
+
+      btnVariants.forEach(function(v) {
+        var btn = document.createElement('button');
+        btn.textContent = v.name;
+        btn.style.cssText = 'padding:8px 16px;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;border:none;display:inline-block;';
+        btn.style.background = v.bg;
+        btn.style.color = v.color;
+        if (v.border) btn.style.border = v.border;
+        if (v.textDecoration) btn.style.textDecoration = v.textDecoration;
+        // 点击变体按钮，通知父窗口
+        (function(variantName) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('[Preview] Variant clicked:', variantName, 'component:', componentName);
+            if (window.parent && window.parent.postMessage) {
+              window.parent.postMessage({
+                type: 'variant-click',
+                component: componentName || 'unknown',
+                variant: variantName
+              }, '*');
+            }
+          });
+          // 确保点击事件可以触发
+          btn.style.pointerEvents = 'auto';
+        })(v.name);
+        item.querySelector('.btn-wrapper').appendChild(btn);
+      });
+
+      item.innerHTML += '</div>';
+      container.appendChild(item);
+
+      // 尺寸
+      var sizeItem = document.createElement('div');
+      sizeItem.className = 'demo-item';
+      sizeItem.innerHTML = '<span class="demo-label">尺寸 Sizes</span><div class="btn-wrapper"><button style="padding:4px 12px;background:#1890ff;color:white;border:none;border-radius:6px;font-size:12px">sm</button><button style="padding:8px 16px;background:#1890ff;color:white;border:none;border-radius:6px;font-size:14px">default</button><button style="padding:12px 24px;background:#1890ff;color:white;border:none;border-radius:6px;font-size:16px">lg</button></div>';
+      container.appendChild(sizeItem);
+    }
+
+    function renderBadgeDemo(container, comp) {
+      var badges = [
+        { name: 'default', bg: '#1890ff', color: 'white' },
+        { name: 'secondary', bg: '#f4f4f5', color: '#666' },
+        { name: 'destructive', bg: '#d4183d', color: 'white' },
+        { name: 'outline', bg: 'transparent', color: '#333', border: '1px solid #d9d9d9' }
+      ];
+
+      badges.forEach(function(v) {
+        var item = document.createElement('div');
+        item.className = 'demo-item';
+        var badge = document.createElement('span');
+        badge.textContent = v.name;
+        badge.style.cssText = 'padding:2px 8px;border-radius:10px;font-size:12px;font-weight:500;display:inline-block;';
+        badge.style.background = v.bg;
+        badge.style.color = v.color;
+        if (v.border) badge.style.border = v.border;
+        item.innerHTML = '<span class="demo-label">' + v.name + '</span>';
+        item.appendChild(badge);
+        container.appendChild(item);
+      });
+    }
+
+    function renderAlertDemo(container, comp) {
+      var alerts = [
+        { name: 'default', bg: 'white', color: '#333', border: '1px solid #e8e8e8', icon: 'ℹ' },
+        { name: 'info', bg: '#e6f7ff', color: '#1890ff', border: '1px solid #91d5ff', icon: 'ℹ' },
+        { name: 'success', bg: '#f6ffed', color: '#52c41a', border: '1px solid #b7eb8f', icon: '✓' },
+        { name: 'warning', bg: '#fffbe6', color: '#faad14', border: '1px solid #ffe58f', icon: '⚠' },
+        { name: 'destructive', bg: '#fff2f0', color: '#ff4d4f', border: '1px solid #ffccc7', icon: '✕' }
+      ];
+
+      alerts.forEach(function(v) {
+        var item = document.createElement('div');
+        item.className = 'demo-item';
+        item.style.gridColumn = 'span 2';
+        var alert = document.createElement('div');
+        alert.className = 'alert';
+        alert.style.background = v.bg;
+        alert.style.color = v.color;
+        alert.style.border = v.border;
+        alert.innerHTML = '<span>' + v.icon + '</span><span>' + v.name + ' 提示信息</span>';
+        item.innerHTML = '<span class="demo-label">' + v.name + '</span>';
+        item.appendChild(alert);
+        container.appendChild(item);
+      });
+    }
+
+    function renderInputDemo(container, comp) {
+      var inputs = [
+        { label: '默认 Default', placeholder: '请输入...' },
+        { label: '聚焦 Focus', placeholder: '聚焦状态...', focus: true },
+        { label: '禁用 Disabled', placeholder: '禁用状态', disabled: true },
+        { label: '有值 With Value', value: '示例文本', placeholder: '请输入...' }
+      ];
+
+      inputs.forEach(function(inp) {
+        var item = document.createElement('div');
+        item.className = 'demo-item';
+        var inputEl = document.createElement('input');
+        inputEl.className = 'input';
+        inputEl.placeholder = inp.placeholder;
+        if (inp.value) inputEl.value = inp.value;
+        if (inp.disabled) inputEl.disabled = true;
+        if (inp.focus) inputEl.style.borderColor = '#1890ff';
+        item.innerHTML = '<span class="demo-label">' + inp.label + '</span>';
+        item.appendChild(inputEl);
+        container.appendChild(item);
+      });
+    }
+
+    function renderSelectDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">选择器 Select</span><select class="select"><option>请选择</option><option>选项 1</option><option>选项 2</option></select>';
+      container.appendChild(item);
+    }
+
+    function renderDialogDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 2';
+      item.style.maxWidth = '400px';
+      item.innerHTML = '<span class="demo-label">对话框 Dialog</span><div class="modal"><div class="modal-header"><span class="modal-title">对话框标题</span><button style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">×</button></div><div class="modal-body">对话框内容区域</div><div class="modal-footer"><button class="btn" style="background:#f4f4f5;color:#666">取消</button><button class="btn btn-default">确定</button></div></div>';
+      container.appendChild(item);
+    }
+
+    function renderCardDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 2';
+      item.style.maxWidth = '400px';
+      item.innerHTML = '<span class="demo-label">卡片 Card</span><div class="card"><div class="card-header">卡片标题</div><div class="card-content">卡片内容区域</div><div class="card-footer"><button class="btn btn-default btn-sm">操作</button></div></div>';
+      container.appendChild(item);
+    }
+
+    function renderCheckboxDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">复选框 Checkbox</span><div style="display:flex;flex-direction:column;gap:8px"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="checkbox" checked><span>选中</span></label><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" class="checkbox"><span>未选中</span></label></div>';
+      container.appendChild(item);
+    }
+
+    function renderSwitchDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">开关 Switch</span><div style="display:flex;flex-direction:column;gap:12px"><label style="display:flex;align-items:center;gap:12px"><input type="checkbox" class="switch" checked><span>开启</span></label><label style="display:flex;align-items:center;gap:12px"><input type="checkbox" class="switch"><span>关闭</span></label></div>';
+      container.appendChild(item);
+    }
+
+    function renderTableDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 3';
+      item.style.overflowX = 'auto';
+      item.innerHTML = '<span class="demo-label">数据表格 Data Table</span><div style="background:white;border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;min-width:500px"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#fafafa"><th style="padding:12px 16px;text-align:left;font-weight:500;border-bottom:1px solid #e8e8e8">列1</th><th style="padding:12px 16px;text-align:left;font-weight:500;border-bottom:1px solid #e8e8e8">列2</th><th style="padding:12px 16px;text-align:left;font-weight:500;border-bottom:1px solid #e8e8e8">操作</th></tr></thead><tbody><tr><td style="padding:12px 16px;border-bottom:1px solid #e8e8e8">数据1</td><td style="padding:12px 16px;border-bottom:1px solid #e8e8e8">数据</td><td style="padding:12px 16px"><button class="btn btn-default btn-sm">编辑</button></td></tr></tbody></table></div>';
+      container.appendChild(item);
+    }
+
+    function renderFormDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 2';
+      item.style.maxWidth = '400px';
+      item.innerHTML = '<span class="demo-label">表单 Form</span><div style="background:white;padding:24px;border:1px solid #e8e8e8;border-radius:8px"><div style="margin-bottom:16px"><label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">输入框</label><input class="input" placeholder="请输入..."></div><div style="margin-bottom:16px"><label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">选择器</label><select class="select"><option>请选择...</option></select></div><div style="display:flex;gap:12px;justify-content:flex-end"><button class="btn" style="background:#f4f4f5;color:#666">重置</button><button class="btn btn-default">提交</button></div></div>';
+      container.appendChild(item);
+    }
+
+    function renderDropdownDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">下拉菜单 Dropdown</span><div style="position:relative"><button class="btn btn-outline" id="dropdown-btn">操作 ▼</button><div id="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:white;border:1px solid #e8e8e8;border-radius:8px;padding:4px;min-width:120px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:10;font-size:14px"><div style="padding:8px 12px;cursor:pointer;border-radius:4px">编辑</div><div style="padding:8px 12px;cursor:pointer;border-radius:4px;color:#d4183d">删除</div></div></div>';
+      container.appendChild(item);
+
+      setTimeout(function() {
+        var btn = document.getElementById('dropdown-btn');
+        var menu = document.getElementById('dropdown-menu');
+        if (btn && menu) {
+          btn.onclick = function() { menu.style.display = menu.style.display === 'none' ? 'block' : 'none'; };
+        }
+      }, 0);
+    }
+
+    function renderDatePickerDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">日期选择 Date Picker</span><input class="input" type="text" value="2024-01-15" style="width:160px">';
+      container.appendChild(item);
+    }
+
+    function renderPaginationDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.innerHTML = '<span class="demo-label">分页 Pagination</span><div class="btn-wrapper"><button class="btn btn-outline btn-sm">«</button><button class="btn btn-outline btn-sm">‹</button><button class="btn btn-default btn-sm">1</button><button class="btn btn-outline btn-sm">2</button><button class="btn btn-outline btn-sm">›</button><button class="btn btn-outline btn-sm">»</button></div>';
+      container.appendChild(item);
+    }
+
+    function renderTabsDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 2';
+      item.innerHTML = '<span class="demo-label">标签页 Tabs</span><div class="tabs"><div class="tab tab-active">标签1</div><div class="tab">标签2</div><div class="tab">标签3</div></div>';
+      container.appendChild(item);
+    }
+
+    function renderSearchDemo(container, comp) {
+      var item = document.createElement('div');
+      item.className = 'demo-item';
+      item.style.gridColumn = 'span 2';
+      item.innerHTML = '<span class="demo-label">搜索面板 Search Panel</span><div style="background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end"><div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">关键词</label><input class="input" placeholder="搜索..."></div><div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">状态</label><select class="select"><option>全部</option><option>启用</option><option>禁用</option></select></div><button class="btn btn-default">搜索</button><button class="btn" style="background:#f4f4f5;color:#666">重置</button></div>';
+      container.appendChild(item);
+    }
+
+    function renderGenericDemo(container, comp) {
+      var variants = getVariantList(comp);
+      var sizes = getSizeList(comp);
+
+      // 显示变体
+      if (variants && variants.length > 0) {
+        var variantsItem = document.createElement('div');
+        variantsItem.className = 'demo-item';
+        variantsItem.style.gridColumn = 'span 2';
+        variantsItem.innerHTML = '<span class="demo-label">变体 Variants</span><div class="btn-wrapper">';
+
+        variants.forEach(function(v) {
+          var btn = document.createElement('button');
+          btn.textContent = v.name;
+          btn.className = 'btn';
+          btn.style.cssText = 'padding:8px 16px;background:#f4f4f5;color:#333;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin-bottom:8px;margin-right:8px;';
+          variantsItem.querySelector('.btn-wrapper').appendChild(btn);
+        });
+
+        variantsItem.innerHTML += '</div>';
+        container.appendChild(variantsItem);
+      }
+
+      // 显示尺寸
+      if (sizes && sizes.length > 0) {
+        var sizesItem = document.createElement('div');
+        sizesItem.className = 'demo-item';
+        sizesItem.innerHTML = '<span class="demo-label">尺寸 Sizes</span><div class="btn-wrapper">';
+
+        sizes.forEach(function(s) {
+          var btn = document.createElement('button');
+          btn.textContent = s.name;
+          btn.className = 'btn btn-default';
+          btn.style.cssText = 'padding:8px 16px;background:#1890ff;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin-right:8px;';
+          sizesItem.querySelector('.btn-wrapper').appendChild(btn);
+        });
+
+        sizesItem.innerHTML += '</div>';
+        container.appendChild(sizesItem);
+      }
+
+      // 默认
+      if ((!variants || variants.length === 0) && (!sizes || sizes.length === 0)) {
+        var item = document.createElement('div');
+        item.className = 'demo-item';
+        item.innerHTML = '<span class="demo-label">默认</span><div style="padding:16px;background:#f5f5f5;border-radius:6px;text-align:center;color:#999">' + (comp.label || comp.name) + '</div>';
+        container.appendChild(item);
+      }
+    }
+  </script>
+</body>
+</html>

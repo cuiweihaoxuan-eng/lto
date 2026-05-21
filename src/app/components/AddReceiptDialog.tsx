@@ -205,7 +205,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
               />
             </div>
             <div className="col-span-2 flex items-end gap-2">
-              <Button className="btn btn-primary"
+              <Button
                 onClick={handleSearch}
               >
                 <Search className="w-4 h-4 mr-2" />
@@ -285,7 +285,7 @@ export function AddReceiptDialog({ open, onOpenChange }: AddReceiptDialogProps) 
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button className="btn btn-primary"
+          <Button
             onClick={handleConfirm}
           >
             确认

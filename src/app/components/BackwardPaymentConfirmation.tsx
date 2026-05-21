@@ -221,7 +221,7 @@ export function BackwardPaymentConfirmation() {
 
       {/* Action Button */}
       <div>
-        <Button className="btn btn-primary"
+        <Button
           onClick={() => setShowAddDialog(true)}
         >
           新增付款确认

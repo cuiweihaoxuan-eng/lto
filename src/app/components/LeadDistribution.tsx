@@ -259,7 +259,7 @@ export function LeadDistribution() {
                     <TableCell>{getStatusBadge(lead.status)}</TableCell>
                     <TableCell className="text-sm text-gray-600">{lead.assignee || "-"}</TableCell>
                     <TableCell>
-                      <Button size="sm" className="btn btn-primary">
+                      <Button size="sm">
                         领取
                       </Button>
                     </TableCell>
@@ -275,7 +275,7 @@ export function LeadDistribution() {
               <span className="text-sm text-gray-700">
                 已选择 <span className="font-medium text-blue-600">{selectedLeads.length}</span> 条线索
               </span>
-              <Button className="btn btn-primary">
+              <Button>
                 批量领取
               </Button>
             </div>
@@ -315,7 +315,7 @@ export function LeadDistribution() {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-medium text-gray-900">待分配线索</h3>
-              <Button className="btn btn-primary">
+              <Button>
                 <UserPlus className="w-4 h-4 mr-1" />
                 批量分配
               </Button>

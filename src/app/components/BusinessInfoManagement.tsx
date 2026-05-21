@@ -620,10 +620,10 @@ export function BusinessInfoManagement() {
                 )}
               </Button>
               <div className="flex gap-2">
-                <Button className="btn btn-primary" onClick={handleQuery}>
+                <Button onClick={handleQuery}>
                   <Search className="w-4 h-4 mr-1" />查询
                 </Button>
-                <Button className="btn btn-outline" onClick={handleReset}>
+                <Button variant="outline" onClick={handleReset}>
                   <RefreshCw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>

@@ -682,8 +682,8 @@ export function TaskWalletList() {
                   {showAllConditions ? "收起更多条件" : "展开更多条件"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleProjectQuery}>查询</Button>
-                  <Button className="btn btn-outline" onClick={handleProjectReset}>
+                  <Button onClick={handleProjectQuery}>查询</Button>
+                  <Button variant="outline" onClick={handleProjectReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>
@@ -911,8 +911,8 @@ export function TaskWalletList() {
 
               <div className="flex items-center justify-end mt-4">
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleRewardQuery}>查询</Button>
-                  <Button className="btn btn-outline" onClick={handleRewardReset}>
+                  <Button onClick={handleRewardQuery}>查询</Button>
+                  <Button variant="outline" onClick={handleRewardReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>
@@ -1056,8 +1056,8 @@ export function TaskWalletList() {
 
               <div className="flex items-center justify-end mt-4">
                 <div className="flex gap-2">
-                  <Button className="btn btn-primary" onClick={handleBonusQuery}>查询</Button>
-                  <Button className="btn btn-outline" onClick={handleBonusReset}>
+                  <Button onClick={handleBonusQuery}>查询</Button>
+                  <Button variant="outline" onClick={handleBonusReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
                 </div>

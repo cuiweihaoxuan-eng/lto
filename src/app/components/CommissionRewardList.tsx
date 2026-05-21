@@ -150,8 +150,8 @@ export function CommissionRewardList() {
                 </div>
               </div>
               <div className="flex items-end">
-                <Button className="btn btn-primary" onClick={handleSearch}>查询</Button>
-                <Button className="btn btn-outline ml-2" onClick={handleReset}>
+                <Button onClick={handleSearch}>查询</Button>
+                <Button variant="outline" className="ml-2" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
               </div>

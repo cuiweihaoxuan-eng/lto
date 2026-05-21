@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
+import { Button } from "./button";
 
 /* ============ 类型定义 ============ */
 
@@ -81,15 +82,15 @@ export function SearchPanel({
   const itemClass = compact ? "min-w-[160px]" : "min-w-[200px]";
 
   return (
-    <div className="search-panel">
+    <div className="bg-white rounded-lg p-4 mb-4">
       {/* 主要字段行 */}
       <div className={`flex flex-wrap items-end ${rowClass}`}>
         {visibleFields.map((field) => (
-          <div key={field.id} className={`search-item ${itemClass}`}>
-            <label className="search-label">{field.label}</label>
+          <div key={field.id} className={`flex flex-col gap-1 ${itemClass}`}>
+            <label className="text-sm font-medium text-gray-700">{field.label}</label>
             {field.type === "select" ? (
               <select
-                className="search-field"
+                className="h-8 px-3 border border-gray-200 rounded-md text-sm outline-none transition-shadow focus:border-[#1890ff] focus:shadow-[0_0_0_2px_rgba(24,144,255,0.1)] bg-white"
                 value={values[field.id] || ""}
                 onChange={(e) => handleChange(field.id, e.target.value)}
               >
@@ -103,7 +104,7 @@ export function SearchPanel({
             ) : (
               <input
                 type={field.type || "text"}
-                className="search-field"
+                className="h-8 px-3 border border-gray-200 rounded-md text-sm outline-none transition-shadow focus:border-[#1890ff] focus:shadow-[0_0_0_2px_rgba(24,144,255,0.1)]"
                 placeholder={field.placeholder || `请输入${field.label}`}
                 value={values[field.id] || ""}
                 onChange={(e) => handleChange(field.id, e.target.value)}
@@ -113,19 +114,19 @@ export function SearchPanel({
         ))}
 
         {/* 操作按钮 */}
-        <div className="search-actions">
+        <div className="flex gap-2 ml-auto">
           {extraButtons}
-          <button className="btn btn-primary" onClick={handleSearch}>
+          <Button onClick={handleSearch}>
             <Search className="w-4 h-4" />
             查询
-          </button>
-          <button className="btn btn-secondary" onClick={handleReset}>
+          </Button>
+          <Button variant="secondary" onClick={handleReset}>
             <RefreshCw className="w-4 h-4" />
             重置
-          </button>
+          </Button>
           {showMoreToggle && hiddenFields.length > 0 && (
-            <button
-              className="btn btn-secondary"
+            <Button
+              variant="secondary"
               onClick={() => setShowMore(!showMore)}
             >
               {showMore ? (
@@ -139,7 +140,7 @@ export function SearchPanel({
                   展开
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -148,11 +149,11 @@ export function SearchPanel({
       {showMore && hiddenFields.length > 0 && (
         <div className={`flex flex-wrap items-end ${rowClass} mt-4 pt-4 border-t border-gray-200`}>
           {hiddenFields.map((field) => (
-            <div key={field.id} className={`search-item ${itemClass}`}>
-              <label className="search-label">{field.label}</label>
+            <div key={field.id} className={`flex flex-col gap-1 ${itemClass}`}>
+              <label className="text-sm font-medium text-gray-700">{field.label}</label>
               {field.type === "select" ? (
                 <select
-                  className="search-field"
+                  className="h-8 px-3 border border-gray-200 rounded-md text-sm outline-none transition-shadow focus:border-[#1890ff] focus:shadow-[0_0_0_2px_rgba(24,144,255,0.1)] bg-white"
                   value={values[field.id] || ""}
                   onChange={(e) => handleChange(field.id, e.target.value)}
                 >
@@ -166,7 +167,7 @@ export function SearchPanel({
               ) : (
                 <input
                   type={field.type || "text"}
-                  className="search-field"
+                  className="h-8 px-3 border border-gray-200 rounded-md text-sm outline-none transition-shadow focus:border-[#1890ff] focus:shadow-[0_0_0_2px_rgba(24,144,255,0.1)]"
                   placeholder={field.placeholder || `请输入${field.label}`}
                   value={values[field.id] || ""}
                   onChange={(e) => handleChange(field.id, e.target.value)}

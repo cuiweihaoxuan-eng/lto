@@ -167,13 +167,13 @@ export function ProcessList() {
         <div className="flex items-center justify-between mt-4">
           <div />
           <div className="flex gap-2">
-            <Button className="btn btn-primary" size="sm" onClick={handleQuery}>
+            <Button size="sm" onClick={handleQuery}>
               <Search className="w-4 h-4 mr-1" />查询
             </Button>
-            <Button className="btn btn-outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset}>
               <RefreshCw className="w-4 h-4 mr-1" />重置
             </Button>
-            <Button className="btn btn-primary" size="sm" onClick={handleAdd}>
+            <Button size="sm" onClick={handleAdd}>
               <Plus className="w-4 h-4 mr-1" />新增流程
             </Button>
           </div>

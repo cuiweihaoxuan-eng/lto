@@ -96,12 +96,25 @@ const menuItems: MenuItem[] = [
     label: "宁波产数钱包",
     icon: <Wallet className="w-4 h-4" />,
     children: [
+      { id: "my-wallet", label: "我的钱包" },
+      { id: "project-list", label: "项目清单" },
+      { id: "effective-business-opportunity-award", label: "有效商机奖" },
+      { id: "large-business-opportunity-award", label: "大额商机奖" },
+      { id: "project-commission-award", label: "项目提成奖" },
+      { id: "reward-sign-report", label: "奖励签报清单" },
+      { id: "bonus-pool", label: "奖金池" },
       { id: "task-wallet-list", label: "宁波钱包" },
-      { id: "commission-reward-list", label: "项目提成奖清单" },
-      { id: "opp-award-page", label: "商机奖奖励清单" },
-      { id: "large-business-opportunit", label: "大额商机奖发放统计报表" },
-      { id: "effective-business-opportunity", label: "有效商机统计报表" },
-      { id: "commission-distribution-report", label: "项目提成奖发放统计报表" },
+      {
+        id: "wallet-report-group",
+        label: "宁波产数钱包发放报表",
+        children: [
+          { id: "commission-reward-list", label: "项目提成奖发放清单" },
+          { id: "opp-award-page", label: "商机奖奖励发放清单" },
+          { id: "effective-business-opportunity", label: "有效商机奖发放统计报表" },
+          { id: "large-business-opportunit", label: "大额商机奖发放统计报表" },
+          { id: "commission-distribution-report", label: "项目提成奖发放统计报表" },
+        ]
+      },
     ]
   },
   {
@@ -198,10 +211,7 @@ export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem,
   }, []);
 
   const cascadeChildren = cascadeParent
-    ? menuItems
-        .find(m => m.id === "report")
-        ?.children?.find(c => c.id === cascadeParent)
-        ?.children || []
+    ? menuItems.flatMap(m => m.children || []).find(c => c.id === cascadeParent)?.children || []
     : [];
 
   return (

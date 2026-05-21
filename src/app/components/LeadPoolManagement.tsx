@@ -153,7 +153,7 @@ export function LeadPoolManagement() {
           {/* 操作按钮 */}
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
-              <Button className="btn btn-primary">
+              <Button>
                 <Plus className="w-4 h-4 mr-1" />
                 新建线索池
               </Button>

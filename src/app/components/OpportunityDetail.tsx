@@ -153,7 +153,7 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-700 font-medium">投标管理</span>
-            <Button size="sm" className="btn btn-primary h-7 px-3" onClick={onAddBid}>
+            <Button size="sm" className="h-7 px-3" onClick={onAddBid}>
               维护投标信息
             </Button>
           </div>
@@ -330,7 +330,7 @@ function ContentForwardBid({ onAddBid, bidRecords }: { onAddBid?: () => void; bi
               </SelectContent>
             </Select>
           </div>
-          <Button size="sm" className="btn btn-primary h-8">查询</Button>
+          <Button size="sm" className="h-8">查询</Button>
         </div>
 
         <div className="flex gap-2 mb-3">
@@ -792,7 +792,7 @@ export function OpportunityDetail({ onBack }: OpportunityDetailProps) {
               })}
             </div>
             <div className="mt-4">
-              <Button size="sm" className="btn btn-primary w-full h-8 text-sm">
+              <Button size="sm" className="w-full h-8 text-sm">
                 推进
               </Button>
             </div>
