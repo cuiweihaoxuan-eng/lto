@@ -237,9 +237,47 @@
     e.preventDefault();
     e.stopPropagation();
 
-    gSelectedElement = e.target;
+    // 优先使用悬停时记录的元素
+    var clickedElement = gHoveredElement;
+
+    // 如果没有悬停记录，使用 elementFromPoint 获取
+    if (!clickedElement) {
+      clickedElement = document.elementFromPoint(e.clientX, e.clientY);
+    }
+
+    // 确保不是根元素
+    if (!clickedElement || clickedElement === document.documentElement || clickedElement === document.body) {
+      // 遍历找到更具体的元素
+      var allElements = document.querySelectorAll('#root *');
+      var bestElement = null;
+      var bestArea = Infinity;
+
+      allElements.forEach(function(el) {
+        var rect = el.getBoundingClientRect();
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          var area = rect.width * rect.height;
+          if (area < bestArea) {
+            bestArea = area;
+            bestElement = el;
+          }
+        }
+      });
+
+      if (bestElement) clickedElement = bestElement;
+    }
+
+    if (!clickedElement || clickedElement === document.documentElement) {
+      alert('无法确定点击的元素，请尝试悬停后再点击');
+      return;
+    }
+
+    gSelectedElement = clickedElement;
+    console.log('[Selector] Clicked element:', gSelectedElement);
+    console.log('[Selector] Tag:', gSelectedElement.tagName, 'Class:', gSelectedElement.className);
+
     toggleElementSelector(false);
-    showElementInfoPanel(e.target);
+    showElementInfoPanel(clickedElement);
   }
 
   function showSelectorHint() {
@@ -276,7 +314,7 @@
       'dialog': /^dialog|modal/i,
       'table': /^table/i,
       'badge': /badge/i,
-      'input': /^input|^form-input/i,
+      'input': /input|form-input/i,
       'select': /^select/i,
       'checkbox': /checkbox/i,
       'tabs': /tab/i,
@@ -360,8 +398,13 @@
     var existing = document.getElementById('cl-selector-panel');
     if (existing) existing.remove();
 
+    console.log('[Selector] showElementInfoPanel called with:', element);
+
     var info = identifyComponentType(element);
     var styles = getElementStyles(element);
+
+    console.log('[Selector] Component info:', info);
+    console.log('[Selector] Styles:', styles);
 
     gSelectorPanel = document.createElement('div');
     gSelectorPanel.id = 'cl-selector-panel';
