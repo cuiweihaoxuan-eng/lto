@@ -12,6 +12,46 @@
       '#' + BTN_ID + '{position:fixed;bottom:74px;left:24px;z-index:99999;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:10px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s}',
       '#' + BTN_ID + ':hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.2)}',
       '#' + BTN_ID + ' svg{width:16px;height:16px}',
+      // 下拉菜单
+      '.cl-dropdown-btn{display:flex;align-items:center;gap:6px}',
+      '.cl-dropdown-btn .cl-arrow{font-size:10px;transition:transform .2s}',
+      '#cl-dropdown-menu{position:fixed;bottom:120px;left:24px;width:140px;background:white;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:999999;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}',
+      '#cl-dropdown-menu.open{opacity:1;pointer-events:auto;transform:translateY(0)}',
+      '.cl-dropdown-item{padding:10px 16px;cursor:pointer;font-size:13px;color:#333;border-radius:6px;margin:4px}',
+      '.cl-dropdown-item:hover{background:#f0f1ff}',
+      '.cl-dropdown-item[data-action="selector"]{color:#1890ff}',
+      // 元素选择高亮层
+      '#cl-highlight-layer{position:fixed;pointer-events:none;z-index:99997;border:2px solid #ff6600;background:rgba(255,102,0,0.1);transition:all .1s;display:none}',
+      // 选择模式提示
+      '#cl-selector-hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:6px;font-size:14px;z-index:999999;display:flex;align-items:center;gap:12px}',
+      '#cl-selector-hint .cl-hint-text{flex:1}',
+      // 元素信息面板
+      '#cl-selector-panel{position:fixed;top:0;right:0;width:360px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:99998;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}',
+      '#cl-selector-panel.open{transform:translateX(0)}',
+      '#cl-selector-panel .cl-sel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%)}',
+      '#cl-selector-panel .cl-sel-header h3{margin:0;font-size:16px;font-weight:600}',
+      '#cl-selector-panel .cl-sel-body{flex:1;overflow-y:auto;padding:16px}',
+      '#cl-selector-panel .cl-sel-info{background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:16px}',
+      '#cl-selector-panel .cl-sel-info-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}',
+      '#cl-selector-panel .cl-sel-info-label{color:#666}',
+      '#cl-selector-panel .cl-sel-info-value{color:#333;font-weight:500}',
+      '#cl-selector-panel .cl-style-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
+      '#cl-selector-panel .cl-style-row{display:flex;align-items:center;gap:8px;padding:6px 0}',
+      '#cl-selector-panel .cl-style-label{width:60px;font-size:12px;color:#666;flex-shrink:0}',
+      '#cl-selector-panel .cl-style-input{flex:1;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px}',
+      '#cl-selector-panel .cl-class-list{display:flex;flex-wrap:wrap;gap:4px;max-height:100px;overflow-y:auto}',
+      '#cl-selector-panel .cl-class-tag{padding:2px 8px;background:#eef0ff;color:#667eea;border-radius:4px;font-size:11px}',
+      '#cl-selector-panel .cl-action-row{display:flex;gap:8px;margin-top:16px}',
+      '#cl-selector-panel .cl-action-btn{flex:1;padding:10px 16px;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500}',
+      '#cl-selector-panel .cl-action-btn.primary{background:#1890ff;color:white}',
+      '#cl-selector-panel .cl-action-btn.secondary{background:#f4f4f5;color:#666}',
+      // 批量替换弹窗
+      '#cl-batch-dialog{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;display:flex;align-items:center;justify-content:center}',
+      '#cl-batch-dialog .cl-batch-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4)}',
+      '#cl-batch-dialog .cl-batch-content{position:relative;background:white;padding:24px;border-radius:12px;width:400px;max-width:90%}',
+      '#cl-batch-dialog .cl-batch-content h3{margin:0 0 16px;font-size:16px}',
+      '#cl-batch-dialog .cl-batch-select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:16px}',
+      '#cl-batch-dialog .cl-batch-actions{display:flex;gap:8px;justify-content:flex-end}',
       '#' + PANEL_ID + '{position:fixed;top:0;right:0;width:950px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:99998;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}',
       '#' + PANEL_ID + '.open{transform:translateX(0)}',
       '.cl-panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%)}',
@@ -46,11 +86,490 @@
     document.head.appendChild(style);
   }
 
+  var gSelectorMode = false;
+  var gHoveredElement = null;
+  var gSelectedElement = null;
+  var gSelectorHighlight = null;
+  var gSelectorHint = null;
+  var gSelectorPanel = null;
+
   function createButton() {
     var btn = document.createElement('button');
     btn.id = BTN_ID;
-    btn.innerHTML = '组件库';
+    btn.className = 'cl-dropdown-btn';
+    btn.innerHTML = '组件库 <span class="cl-arrow">▼</span>';
+
+    // 创建下拉菜单
+    var dropdown = document.createElement('div');
+    dropdown.id = 'cl-dropdown-menu';
+    dropdown.innerHTML = [
+      '<div class="cl-dropdown-item" data-action="panel">组件库</div>',
+      '<div class="cl-dropdown-item" data-action="selector">⟳ 箭头鼠标</div>'
+    ].join('');
+
+    document.body.appendChild(dropdown);
+
+    // 按钮点击展开/收起
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = dropdown.classList.contains('open');
+      dropdown.classList.toggle('open');
+      btn.querySelector('.cl-arrow').textContent = isOpen ? '▼' : '▲';
+    });
+
+    // 菜单项点击
+    dropdown.querySelectorAll('.cl-dropdown-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var action = item.dataset.action;
+        dropdown.classList.remove('open');
+        btn.querySelector('.cl-arrow').textContent = '▼';
+
+        if (action === 'panel') {
+          openComponentPanel();
+        } else if (action === 'selector') {
+          toggleElementSelector(true);
+        }
+      });
+    });
+
+    // 点击外部关闭
+    document.addEventListener('click', function(e) {
+      if (!dropdown.contains(e.target) && e.target !== btn) {
+        dropdown.classList.remove('open');
+        btn.querySelector('.cl-arrow').textContent = '▼';
+      }
+    });
+
     return btn;
+  }
+
+  function openComponentPanel() {
+    document.getElementById(PANEL_ID).classList.add('open');
+    document.querySelector('.cl-overlay').classList.add('open');
+
+    loadComponents().then(function(data) {
+      gComponents = data;
+      gActiveComponent = null;
+      gActiveVariant = null;
+      renderComponentList();
+      document.getElementById('cl-detail-panel').innerHTML = '<div class="cl-empty">选择一个组件</div>';
+    });
+  }
+
+  // ==================== 元素选择模式 ====================
+
+  function toggleElementSelector(enable) {
+    gSelectorMode = enable;
+
+    if (enable) {
+      // 关闭组件面板
+      document.getElementById(PANEL_ID).classList.remove('open');
+      document.querySelector('.cl-overlay').classList.remove('open');
+
+      // 改变鼠标样式
+      document.body.style.cursor = 'crosshair';
+
+      // 创建高亮层
+      if (!gSelectorHighlight) {
+        gSelectorHighlight = document.createElement('div');
+        gSelectorHighlight.id = 'cl-highlight-layer';
+        document.body.appendChild(gSelectorHighlight);
+      }
+
+      // 显示提示
+      showSelectorHint();
+
+      // 启用悬停和点击
+      document.addEventListener('mouseover', onSelectorMouseOver, true);
+      document.addEventListener('mouseout', onSelectorMouseOut, true);
+      document.addEventListener('click', onSelectorClick, true);
+    } else {
+      // 恢复鼠标样式
+      document.body.style.cursor = 'default';
+
+      // 隐藏高亮层
+      if (gSelectorHighlight) {
+        gSelectorHighlight.style.display = 'none';
+      }
+
+      // 移除事件监听
+      document.removeEventListener('mouseover', onSelectorMouseOver, true);
+      document.removeEventListener('mouseout', onSelectorMouseOut, true);
+      document.removeEventListener('click', onSelectorClick, true);
+
+      // 移除提示
+      if (gSelectorHint) {
+        gSelectorHint.remove();
+        gSelectorHint = null;
+      }
+    }
+  }
+
+  function onSelectorMouseOver(e) {
+    if (!gSelectorMode) return;
+    // 忽略自身 UI 元素
+    if (e.target.closest('#cl-selector-panel') || e.target.closest('#' + BTN_ID) ||
+        e.target.closest('#cl-dropdown-menu') || e.target.closest('#cl-selector-hint') ||
+        e.target.closest('#cl-batch-dialog')) return;
+
+    gHoveredElement = e.target;
+    var rect = e.target.getBoundingClientRect();
+    gSelectorHighlight.style.display = 'block';
+    gSelectorHighlight.style.left = (rect.left - 2) + 'px';
+    gSelectorHighlight.style.top = (rect.top - 2) + 'px';
+    gSelectorHighlight.style.width = (rect.width - 4) + 'px';
+    gSelectorHighlight.style.height = (rect.height - 4) + 'px';
+  }
+
+  function onSelectorMouseOut(e) {
+    if (!gSelectorMode) return;
+    gSelectorHighlight.style.display = 'none';
+    gHoveredElement = null;
+  }
+
+  function onSelectorClick(e) {
+    if (!gSelectorMode) return;
+    // 忽略自身 UI 元素
+    if (e.target.closest('#cl-selector-panel') || e.target.closest('#' + BTN_ID) ||
+        e.target.closest('#cl-dropdown-menu') || e.target.closest('#cl-selector-hint') ||
+        e.target.closest('#cl-batch-dialog')) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    gSelectedElement = e.target;
+    toggleElementSelector(false);
+    showElementInfoPanel(e.target);
+  }
+
+  function showSelectorHint() {
+    gSelectorHint = document.createElement('div');
+    gSelectorHint.id = 'cl-selector-hint';
+    gSelectorHint.innerHTML = [
+      '<span class="cl-hint-text">🔍 点击页面元素查看信息，按 ESC 退出</span>',
+      '<button id="cl-exit-selector" style="background:#666;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px">退出</button>'
+    ].join('');
+    document.body.appendChild(gSelectorHint);
+
+    document.getElementById('cl-exit-selector').addEventListener('click', function() {
+      toggleElementSelector(false);
+    });
+  }
+
+  function identifyComponentType(element) {
+    var info = {
+      component: null,
+      variant: 'default',
+      classList: []
+    };
+
+    // 1. 检查 data-* 属性
+    if (element.dataset.component) {
+      info.component = element.dataset.component;
+      info.variant = element.dataset.variant || 'default';
+    }
+
+    // 2. 检查 classList 中的组件标识
+    var componentPatterns = {
+      'button': /^btn/i,
+      'card': /^card/i,
+      'dialog': /^dialog|modal/i,
+      'table': /^table/i,
+      'badge': /badge/i,
+      'input': /^input|^form-input/i,
+      'select': /^select/i,
+      'checkbox': /checkbox/i,
+      'tabs': /tab/i,
+      'menu': /menu/i,
+      'breadcrumb': /breadcrumb/i,
+      'pagination': /pagination|pager/i,
+      'alert': /alert/i,
+      'search': /search/i,
+      'dropdown': /dropdown/i,
+      'sheet': /sheet|drawer/i,
+      'toast': /toast/i,
+      'sidebar': /sidebar/i,
+      'header': /header/i,
+      'footer': /footer/i
+    };
+
+    for (var i = 0; i < element.classList.length; i++) {
+      var cls = element.classList[i];
+      info.classList.push(cls);
+
+      if (!info.component) {
+        for (var type in componentPatterns) {
+          if (componentPatterns[type].test(cls)) {
+            info.component = type;
+            break;
+          }
+        }
+      }
+    }
+
+    // 3. 检查父元素
+    if (!info.component) {
+      var parent = element.parentElement;
+      while (parent && parent !== document.body) {
+        for (var type in componentPatterns) {
+          if (componentPatterns[type].test(parent.className)) {
+            info.component = type;
+            break;
+          }
+        }
+        if (info.component) break;
+        parent = parent.parentElement;
+      }
+    }
+
+    // 4. 检查标签名
+    if (!info.component) {
+      var tagName = element.tagName.toLowerCase();
+      if (tagName === 'button') info.component = 'button';
+      else if (tagName === 'input') info.component = 'input';
+      else if (tagName === 'select') info.component = 'select';
+      else if (tagName === 'table') info.component = 'table';
+      else if (tagName === 'a') info.component = 'link';
+    }
+
+    return info;
+  }
+
+  function getElementStyles(element) {
+    var computed = window.getComputedStyle(element);
+    return {
+      backgroundColor: computed.backgroundColor,
+      color: computed.color,
+      fontSize: computed.fontSize,
+      fontFamily: computed.fontFamily,
+      fontWeight: computed.fontWeight,
+      padding: computed.paddingTop + ' ' + computed.paddingRight + ' ' + computed.paddingBottom + ' ' + computed.paddingLeft,
+      margin: computed.marginTop + ' ' + computed.marginRight + ' ' + computed.marginBottom + ' ' + computed.marginLeft,
+      border: computed.borderWidth + ' ' + computed.borderStyle + ' ' + computed.borderColor,
+      borderRadius: computed.borderRadius,
+      boxShadow: computed.boxShadow,
+      width: computed.width,
+      height: computed.height,
+      lineHeight: computed.lineHeight,
+      textAlign: computed.textAlign
+    };
+  }
+
+  function showElementInfoPanel(element) {
+    // 移除已有的面板
+    var existing = document.getElementById('cl-selector-panel');
+    if (existing) existing.remove();
+
+    var info = identifyComponentType(element);
+    var styles = getElementStyles(element);
+
+    gSelectorPanel = document.createElement('div');
+    gSelectorPanel.id = 'cl-selector-panel';
+    gSelectorPanel.innerHTML = [
+      '<div class="cl-sel-header">',
+        '<h3>🎯 元素信息</h3>',
+        '<button id="cl-close-selector-panel" style="background:none;border:none;font-size:20px;cursor:pointer;color:#666">×</button>',
+      '</div>',
+      '<div class="cl-sel-body">',
+        // 组件信息
+        '<div class="cl-section">',
+          '<h3>组件信息</h3>',
+          '<div class="cl-sel-info">',
+            '<div class="cl-sel-info-row"><span class="cl-sel-info-label">标签</span><span class="cl-sel-info-value">' + element.tagName.toLowerCase() + '</span></div>',
+            '<div class="cl-sel-info-row"><span class="cl-sel-info-label">组件</span><span class="cl-sel-info-value">' + (info.component || '未知') + '</span></div>',
+            '<div class="cl-sel-info-row"><span class="cl-sel-info-label">变体</span><span class="cl-sel-info-value">' + info.variant + '</span></div>',
+          '</div>',
+        '</div>',
+        // 样式编辑
+        '<div class="cl-section">',
+          '<h3>样式编辑</h3>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">背景色</label>',
+            '<input type="color" class="cl-style-input" id="cl-sel-bg" value="' + normalizeColor(styles.backgroundColor) + '">',
+            '<input type="text" class="cl-style-input" id="cl-sel-bg-text" value="' + styles.backgroundColor + '" style="flex:1">',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">文字色</label>',
+            '<input type="color" class="cl-style-input" id="cl-sel-color" value="' + normalizeColor(styles.color) + '">',
+            '<input type="text" class="cl-style-input" id="cl-sel-color-text" value="' + styles.color + '" style="flex:1">',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">字号</label>',
+            '<input type="text" class="cl-style-input" id="cl-sel-fontSize" value="' + styles.fontSize + '">',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">字重</label>',
+            '<select class="cl-style-input" id="cl-sel-fontWeight">',
+              '<option value="400"' + (styles.fontWeight === '400' ? ' selected' : '') + '>正常 (400)</option>',
+              '<option value="500"' + (styles.fontWeight === '500' ? ' selected' : '') + '>中等 (500)</option>',
+              '<option value="600"' + (styles.fontWeight === '600' ? ' selected' : '') + '>偏粗 (600)</option>',
+              '<option value="700"' + (styles.fontWeight === '700' ? ' selected' : '') + '>粗体 (700)</option>',
+            '</select>',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">内边距</label>',
+            '<input type="text" class="cl-style-input" id="cl-sel-padding" value="' + styles.padding + '">',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">圆角</label>',
+            '<input type="text" class="cl-style-input" id="cl-sel-borderRadius" value="' + styles.borderRadius + '">',
+          '</div>',
+          '<div class="cl-style-row">',
+            '<label class="cl-style-label">阴影</label>',
+            '<input type="text" class="cl-style-input" id="cl-sel-boxShadow" value="' + (styles.boxShadow || 'none') + '">',
+          '</div>',
+        '</div>',
+        // CSS 类名
+        '<div class="cl-section">',
+          '<h3>CSS 类名</h3>',
+          '<div class="cl-class-list">',
+            info.classList.map(function(c) { return '<span class="cl-class-tag">' + c + '</span>'; }).join(''),
+          '</div>',
+        '</div>',
+        // 操作按钮
+        '<div class="cl-action-row">',
+          '<button id="cl-sel-apply" class="cl-action-btn primary">应用样式</button>',
+          '<button id="cl-sel-batch" class="cl-action-btn secondary">批量替换同类</button>',
+        '</div>',
+        '<div class="cl-action-row">',
+          '<button id="cl-sel-reset" class="cl-action-btn secondary">重置样式</button>',
+          '<button id="cl-sel-continues" class="cl-action-btn secondary">继续选择</button>',
+        '</div>',
+      '</div>'
+    ].join('');
+
+    document.body.appendChild(gSelectorPanel);
+    gSelectorPanel.classList.add('open');
+
+    // 绑定事件
+    document.getElementById('cl-close-selector-panel').addEventListener('click', closeSelectorPanel);
+    document.getElementById('cl-sel-reset').addEventListener('click', function() {
+      gSelectedElement.removeAttribute('style');
+      showElementInfoPanel(gSelectedElement);
+    });
+    document.getElementById('cl-sel-continues').addEventListener('click', function() {
+      closeSelectorPanel();
+      toggleElementSelector(true);
+    });
+    document.getElementById('cl-sel-batch').addEventListener('click', function() {
+      showBatchReplaceDialog(info.component, info.variant);
+    });
+
+    // 样式编辑联动
+    bindSelectorStyleEvents();
+  }
+
+  function bindSelectorStyleEvents() {
+    var fields = [
+      { color: 'bg', prop: 'backgroundColor' },
+      { color: 'color', prop: 'color' },
+      { text: 'fontSize', prop: 'fontSize' },
+      { select: 'fontWeight', prop: 'fontWeight' },
+      { text: 'padding', prop: 'padding' },
+      { text: 'borderRadius', prop: 'borderRadius' },
+      { text: 'boxShadow', prop: 'boxShadow' }
+    ];
+
+    fields.forEach(function(field) {
+      var input = document.getElementById('cl-sel-' + field.color);
+      if (!input) input = document.getElementById('cl-sel-' + field.text);
+      if (!input) input = document.getElementById('cl-sel-' + field.select);
+      if (!input) return;
+
+      input.addEventListener('change', function() {
+        if (gSelectedElement) {
+          gSelectedElement.style[field.prop] = input.value;
+          // 同步文本框
+          if (field.color && document.getElementById('cl-sel-' + field.color + '-text')) {
+            document.getElementById('cl-sel-' + field.color + '-text').value = input.value;
+          }
+        }
+      });
+
+      if (field.color) {
+        var textInput = document.getElementById('cl-sel-' + field.color + '-text');
+        if (textInput) {
+          textInput.addEventListener('change', function() {
+            if (gSelectedElement) {
+              gSelectedElement.style[field.prop] = textInput.value;
+              input.value = textInput.value;
+            }
+          });
+        }
+      }
+    });
+  }
+
+  function closeSelectorPanel() {
+    if (gSelectorPanel) {
+      gSelectorPanel.classList.remove('open');
+      setTimeout(function() {
+        if (gSelectorPanel) {
+          gSelectorPanel.remove();
+          gSelectorPanel = null;
+        }
+      }, 300);
+    }
+    gSelectedElement = null;
+  }
+
+  function showBatchReplaceDialog(component, currentVariant) {
+    var dialog = document.createElement('div');
+    dialog.id = 'cl-batch-dialog';
+    dialog.innerHTML = [
+      '<div class="cl-batch-overlay"></div>',
+      '<div class="cl-batch-content">',
+        '<h3>批量替换 ' + (component || '未知组件') + '</h3>',
+        '<p style="color:#666;font-size:13px;margin-bottom:12px">将页面所有同类组件的样式替换为：</p>',
+        '<select id="cl-batch-target-variant" class="cl-batch-select">',
+          '<option value="default">default - 默认</option>',
+          '<option value="primary">primary - 主要</option>',
+          '<option value="secondary">secondary - 次要</option>',
+          '<option value="destructive">destructive - 危险</option>',
+          '<option value="outline">outline - 描边</option>',
+          '<option value="ghost">ghost - 幽灵</option>',
+        '</select>',
+        '<div class="cl-batch-actions">',
+          '<button id="cl-batch-cancel" class="cl-action-btn secondary">取消</button>',
+          '<button id="cl-batch-confirm" class="cl-action-btn primary">确认替换</button>',
+        '</div>',
+      '</div>'
+    ].join('');
+
+    document.body.appendChild(dialog);
+
+    dialog.querySelector('.cl-batch-overlay').addEventListener('click', function() {
+      dialog.remove();
+    });
+    document.getElementById('cl-batch-cancel').addEventListener('click', function() {
+      dialog.remove();
+    });
+    document.getElementById('cl-batch-confirm').addEventListener('click', function() {
+      var newVariant = document.getElementById('cl-batch-target-variant').value;
+      batchReplaceSameType(component, newVariant);
+      dialog.remove();
+    });
+  }
+
+  function batchReplaceSameType(component, newVariant) {
+    if (!component) {
+      alert('无法识别组件类型，无法批量替换');
+      return;
+    }
+
+    var count = 0;
+    var selector = '[data-component="' + component + '"], [class*="' + component + '"]';
+
+    document.querySelectorAll(selector).forEach(function(el) {
+      el.dataset.variant = newVariant;
+      count++;
+    });
+
+    if (count === 0) {
+      alert('未找到同类组件');
+    } else {
+      alert('已在 ' + count + ' 个元素上应用 ' + newVariant + ' 变体');
+    }
   }
 
   function createPanel() {
@@ -1713,6 +2232,21 @@
     document.body.appendChild(panel);
     document.body.appendChild(overlay);
 
+    // ESC 快捷键退出选择模式
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (gSelectorMode) {
+          toggleElementSelector(false);
+        } else if (gSelectorPanel) {
+          closeSelectorPanel();
+        } else {
+          // 关闭组件面板
+          panel.classList.remove('open');
+          overlay.classList.remove('open');
+        }
+      }
+    });
+
     // 监听 iframe 消息（保留用于 iframe 模式）
     window.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'variant-click') {
@@ -1724,19 +2258,6 @@
         renderDetail();
         renderPreview();
       }
-    });
-
-    btn.addEventListener('click', function() {
-      panel.classList.add('open');
-      overlay.classList.add('open');
-
-      loadComponents().then(function(data) {
-        gComponents = data;
-        gActiveComponent = null;
-        gActiveVariant = null;
-        renderComponentList();
-        document.getElementById('cl-detail-panel').innerHTML = '<div class="cl-empty">选择一个组件</div>';
-      });
     });
 
     document.getElementById('cl-close-btn').addEventListener('click', function() {
