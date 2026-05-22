@@ -19,6 +19,23 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// 转换颜色值为 #rrggbb 格式
+function convertToHex(color) {
+  if (!color) return color;
+  if (color.startsWith('#')) return color.toLowerCase();
+  if (color === 'white') return '#ffffff';
+  if (color === 'black') return '#000000';
+  // rgb 转 #rrggbb
+  const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (match) {
+    const r = parseInt(match[1]).toString(16).padStart(2, '0');
+    const g = parseInt(match[2]).toString(16).padStart(2, '0');
+    const b = parseInt(match[3]).toString(16).padStart(2, '0');
+    return '#' + r + g + b;
+  }
+  return color;
+}
+
 // 解析CSS变量
 function parseCSSVariables(content) {
   const variables = {};
@@ -414,14 +431,25 @@ function findReferences(componentName, variant = null) {
 
         lines.forEach((line, index) => {
           if (importRegex.test(line)) {
-            // 找到引用该组件的文件
+            // 找到引用该组件的文件，收集所有包含 variant 的使用
             const usageMatches = [];
-            const usageRegex = new RegExp(`<\\w+[^>]*variant=["']${variant || '\\w+'}["'][^>]*>|<${componentName}[^>]*>`, 'g');
+            // 匹配所有 variant 使用和组件本身使用
+            const usageRegex = /variant=["']([^"']+)["']|<[A-Z]\w+/g;
 
             for (let i = 0; i < lines.length; i++) {
               const usageLine = lines[i];
               let match;
               while ((match = usageRegex.exec(usageLine)) !== null) {
+                // 收集 variant 值
+                if (match[1]) {
+                  usageMatches.push({
+                    line: i + 1,
+                    content: usageLine.trim()
+                  });
+                }
+              }
+              // 也收集没有 variant 的组件标签使用
+              if (usageLine.includes('<') && usageLine.includes(componentName)) {
                 usageMatches.push({
                   line: i + 1,
                   content: usageLine.trim()
@@ -621,6 +649,66 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200);
         res.end(JSON.stringify({ success: true, results }));
+      });
+      return;
+    }
+
+    // POST /api/styles/save - 保存样式
+    if (pathname === '/api/styles/save' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => body += chunk);
+      req.on('end', () => {
+        try {
+          const styleData = JSON.parse(body);
+          const { component, variant, styles } = styleData;
+
+          // 直接修改 default_theme.css 文件
+          const themeFile = path.join(STYLES_DIR, 'default_theme.css');
+          if (!fs.existsSync(themeFile)) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ success: false, error: '主题文件不存在' }));
+            return;
+          }
+
+          let content = fs.readFileSync(themeFile, 'utf-8');
+
+          // 根据样式更新 CSS 变量
+          if (styles.backgroundColor) {
+            // 转换颜色格式（如 rgb(255,255,255) -> #ffffff）
+            const bgColor = convertToHex(styles.backgroundColor);
+            // 替换 --primary 的值
+            content = content.replace(/--primary:\s*[^;]+;/, '--primary: ' + bgColor + ';');
+          }
+          if (styles.color) {
+            const fgColor = convertToHex(styles.color);
+            content = content.replace(/--primary-foreground:\s*[^;]+;/, '--primary-foreground: ' + fgColor + ';');
+          }
+          if (styles.borderColor) {
+            const borderColor = convertToHex(styles.borderColor);
+            content = content.replace(/--border:\s*[^;]+;/, '--border: ' + borderColor + ';');
+          }
+          if (styles.fontSize) {
+            const fontSize = styles.fontSize.replace(/px$/, '') + 'px';
+            content = content.replace(/--font-size:\s*[^;]+;/, '--font-size: ' + fontSize + ';');
+          }
+
+          // 写回文件
+          fs.writeFileSync(themeFile, content, 'utf-8');
+
+          // 同时保存到 styles 目录作为备份
+          const stylesDir = path.join(DATA_DIR, 'styles');
+          if (!fs.existsSync(stylesDir)) {
+            fs.mkdirSync(stylesDir, { recursive: true });
+          }
+          const styleFile = path.join(stylesDir, `${component}.${variant}.json`);
+          fs.writeFileSync(styleFile, JSON.stringify(styleData, null, 2), 'utf-8');
+
+          res.writeHead(200);
+          res.end(JSON.stringify({ success: true, message: '样式已保存到 ' + themeFile }));
+        } catch (err) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ success: false, error: err.message }));
+        }
       });
       return;
     }

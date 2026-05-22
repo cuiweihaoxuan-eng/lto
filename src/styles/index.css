@@ -3,3 +3,8 @@
 @import 'tw-animate-css';
 @import './default_theme.css';
 @import '../app/styles/tokens.css';
+
+/* 覆盖按钮的默认 outline 为透明 */
+button {
+  outline-color: var(--color-text-primary, #1f2937);
+}

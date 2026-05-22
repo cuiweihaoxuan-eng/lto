@@ -73,6 +73,67 @@ useEffect(() => {
   else document.head.insertAdjacentHTML('beforeend', `<meta name="prd-route" content="${activeSidebarItem}">`);
 }, [activeSidebarItem]);
 
+  // 监听组件库页面跳转事件
+  useEffect(() => {
+    const handleSwitchPage = (e: CustomEvent) => {
+      const componentName = e.detail?.component;
+      if (!componentName) return;
+
+      // 组件名到 sidebarItem 的映射
+      const componentMap: Record<string, string> = {
+        'Dashboard': 'dashboard',
+        'ProcessNodeConfig': 'process-config',
+        'SixPositioning': 'six-positioning',
+        'RevenueManagement': 'revenue-management',
+        'SelfDeliverySettlement': 'self-delivery-settlement',
+        'TaskWalletList': 'task-wallet-list',
+        'ProjectList': 'project-list',
+        'RewardSignReport': 'reward-sign-report',
+        'BonusPool': 'bonus-pool',
+        'OppAwardPageList': 'opp-award-page',
+        'CommissionRewardList': 'commission-reward-list',
+        'LargeBusinessOpportunit': 'large-business-opportunit',
+        'EffectiveBusinessOpportunity': 'effective-business-opportunity',
+        'CommissionDistributionReport': 'commission-distribution-report',
+        'EffectiveBusinessOpportunityAward': 'effective-business-opportunity-award',
+        'MyWallet': 'my-wallet',
+        'LargeBusinessOpportunityAward': 'large-business-opportunity-award',
+        'ProjectCommissionAward': 'project-commission-award',
+        'ExpertReportPage': 'expert-report',
+        'FullFlowTable': 'full-flow-table',
+        'LowMarginReport': 'low-margin-report',
+        'RevenuePlanActualDiff': 'revenue-plan-actual-diff',
+        'RevenueCostDiff': 'revenue-cost-diff',
+        'FirstPaymentDiff': 'first-payment-diff',
+        'IctShareAbnormalReport': 'ict-share-abnormal',
+        'IctGrossProfitReport': 'ict-gross-profit',
+        'IctBudgetDetail': 'ict-budget-detail',
+        'ConstructNotFixedNoExpense': 'construct-not-fixed',
+        'CostEstimateReport': 'cost-estimate',
+        'BusinessInfoManagement': 'business-info',
+        'LeadAcquisition': 'lead-acquisition',
+        'LeadPoolManagement': 'lead-pool',
+        'LeadMerge': 'lead-merge',
+        'LeadDistribution': 'lead-distribution',
+        'OpportunityQuery': 'opportunity-query',
+        'OpportunityDetail': 'opportunity-detail',
+        'ProgressManagement': 'progress-management',
+        'ContractPaymentConfirmation': 'contract-payment',
+        'RiskManagement': 'risk-management',
+      };
+
+      const sidebarItem = componentMap[componentName];
+      if (sidebarItem) {
+        setActiveSidebarItem(sidebarItem);
+      }
+    };
+
+    window.addEventListener('switch-page', handleSwitchPage as EventListener);
+    return () => {
+      window.removeEventListener('switch-page', handleSwitchPage as EventListener);
+    };
+  }, []);
+
   const renderContent = () => {
     // 首页
     if (activeSidebarItem === "dashboard") {
