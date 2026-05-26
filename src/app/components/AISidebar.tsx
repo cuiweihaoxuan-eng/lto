@@ -130,7 +130,7 @@ function processSequentialNumbers(text: string): string {
   text = text.replace(/(\d+[、])(?=\d)/g, (match) => match + '\n');
 
   // 模式2：第x格式，如：第一步：xxx，第二步：xxx
-  const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]/g;
+  const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级])/g;
   const matches = text.match(diPattern);
 
   if (matches && matches.length > 1) {
