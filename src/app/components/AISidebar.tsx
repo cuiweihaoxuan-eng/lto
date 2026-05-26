@@ -110,8 +110,9 @@ function renderMarkdownLinks(text: string): React.ReactNode[] {
     } else if (h4Match) {
       parts.push(<h4 key={`h4-${i}`} className="text-sm font-medium text-gray-600 mt-2 mb-1">{h4Match[1]}</h4>);
     } else {
-      // 不是标题，处理链接和加粗
-      const lineContent = processInlineFormatting(trimmedLine);
+      // 处理连续序号换行
+      const lineWithNewlines = processSequentialNumbers(trimmedLine);
+      const lineContent = processInlineFormatting(lineWithNewlines);
       if (lineContent) {
         parts.push(<span key={`line-${i}`}>{lineContent}</span>);
       }
@@ -120,6 +121,56 @@ function renderMarkdownLinks(text: string): React.ReactNode[] {
   }
 
   return parts;
+}
+
+// 处理连续序号换行（1、2、3、或 第一、第二、第三）
+function processSequentialNumbers(text: string): string {
+  // 模式1：数字+顿号/逗号/句号 格式
+  // 如：1、2、3、 或 1,2,3, 或 1.2.3.
+  const numPattern = /(\d+[、，,](?:\s*\d+[、，,])+)/g;
+  // 模式2：第x+量词格式
+  // 如：第一、第二、第三 或 第一步、第二步
+  const diPattern = /(第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]+)[，,、]?)+/g;
+  // 模式3：纯数字+句号开头（带空格）
+  // 如：1. xxx  2. xxx  3. xxx
+  const listPattern = /^(\d+\.\s+.*?)(\s+\d+\.\s+)+/;
+
+  let result = text;
+
+  // 处理数字顿号格式：1、2、3、 -> 换行
+  result = result.replace(/(\d+[、])(?=\d)/g, (match) => {
+    return match + '\n';
+  });
+
+  // 处理第x格式：第一、第二、第三 -> 换行
+  result = result.replace(/(第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]+))/g, (match, p1, offset) => {
+    // 如果前面是换行或开头，直接返回
+    if (offset === 0 || result[offset - 1] === '\n' || result.slice(0, offset).endsWith('\n')) {
+      return match;
+    }
+    // 检查后面是否有顿号或逗号
+    const afterMatch = result.slice(offset + match.length);
+    if (afterMatch.match(/^[，,、]/)) {
+      return '\n' + match;
+    }
+    return match;
+  });
+
+  // 处理纯数字+句号列表格式：1. xxx 2. xxx -> 换行
+  result = result.replace(/(\d+\.\s*)(?=\d+\.)/g, '\n$1');
+
+  // 处理逗号分隔的数字列表：1,2,3 -> 换行
+  result = result.replace(/(\d+)(,|\s)(?=\d+)/g, (match, num, sep) => {
+    // 只在连续数字序列中换行，避免把正常逗号也换行
+    const before = result.slice(0, result.indexOf(match));
+    const after = result.slice(result.indexOf(match) + match.length);
+    if (/^\d/.test(after) || /^\d/.test(before.slice(-10))) {
+      return num + '\n';
+    }
+    return match;
+  });
+
+  return result;
 }
 
 // 处理行内格式化：链接和加粗
