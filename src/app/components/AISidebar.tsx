@@ -38,6 +38,14 @@ interface ToolCallBlock {
   isRealToolCall?: boolean;
 }
 
+// 消息段落类型
+interface MessageSegment {
+  id: string;
+  type: 'text' | 'toolcall' | 'thinking';
+  content?: string;  // 仅 text 类型
+  toolCall?: ToolCallBlock;  // 仅 toolcall/thinking 类型
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -45,7 +53,8 @@ interface Message {
   timestamp: Date;
   files?: FileItem[];
   conversationId?: string;
-  thoughts: ToolCallBlock[];
+  // 思考/工具调用作为段落，按顺序插入到消息中
+  segments: MessageSegment[];
   userQuery?: string; // 保存用户的原始输入，用于重新生成
 }
 
@@ -679,7 +688,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       role: "assistant",
       content: "你好！我是 AI 助手，可以帮你分析数据、解答问题、生成报表。有什么可以帮你的吗？",
       timestamp: new Date(),
-      thoughts: [],
+      segments: [],
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -718,6 +727,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
           ? "你好！我是本体查询助手，可以帮你查询业务数据。有什么可以帮你的吗？"
           : "你好！我是 LTO 客服助手，可以帮你解答问题、导航页面。有什么可以帮你的吗？",
         timestamp: new Date(),
+        segments: [], // 初始消息没有段落
       },
     ]);
     if (agent === 'ontology') {
@@ -807,6 +817,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       timestamp: new Date(),
       files: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
       userQuery: userQuery,
+      segments: [],  // 用户消息没有段落
     };
 
     console.log("[AISidebar] 准备发送消息，files:", userMessage.files);
@@ -819,15 +830,22 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
     // 创建 AI 消息占位（用于流式追加内容）
     const aiMessageId = generateMessageId();
     setCurrentStreamId(aiMessageId);
-    setMessages((prev) => [...prev, {
+
+    // 创建 AI 消息，初始化 segments 和当前文字内容
+    const initialAIMessage = {
       id: aiMessageId,
-      role: "assistant",
+      role: "assistant" as const,
       content: "",
       timestamp: new Date(),
       conversationId: agentConfig.conversationId,
-      thoughts: [],
-      userQuery: userQuery, // 保存用户输入，用于重新生成
-    }]);
+      segments: [],  // 按顺序存储段落
+      userQuery: userQuery,
+    };
+    setMessages((prev) => [...prev, initialAIMessage]);
+
+    // 当前文字段落
+    let currentTextSegment = { id: `seg_${Date.now()}_0`, type: 'text' as const, content: '' };
+    initialAIMessage.segments.push(currentTextSegment);
 
     // 调用 Dify API
     const controller = new AbortController();
@@ -845,6 +863,10 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       files: userMessage.files,
       onMessage: (chunk) => {
         fullAnswer += chunk;
+
+        // 更新当前文字段落内容
+        currentTextSegment.content = fullAnswer;
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === aiMessageId
@@ -855,41 +877,25 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       },
       onToolCall: (toolCall) => {
         console.log('[AISidebar] 收到 toolCall:', JSON.stringify(toolCall, null, 2));
+
+        // 创建新的工具调用/思考段落
+        const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+        const newSegment: MessageSegment = {
+          id: segmentId,
+          type: toolCall.isRealToolCall ? 'toolcall' : 'thinking',
+          toolCall: {
+            ...toolCall,
+            isCollapsed: true,  // 默认折叠
+          },
+        };
+
+        // 在最后一个文字段落之后插入新的段落
         setMessages((prev) =>
           prev.map((m) =>
             m.id === aiMessageId
               ? {
                   ...m,
-                  thoughts: (() => {
-                    // 尝试合并同 toolName 的工具调用
-                    const existingIndex = m.thoughts.findIndex(t =>
-                      t.isRealToolCall && t.toolName === toolCall.toolName
-                    );
-
-                    if (existingIndex >= 0) {
-                      // 合并到已存在的工具调用
-                      const updated = [...m.thoughts];
-                      const existing = updated[existingIndex];
-                      updated[existingIndex] = {
-                        ...existing,
-                        response: toolCall.response || existing.response,
-                        thought: toolCall.thought || existing.thought,
-                      };
-                      return updated;
-                    } else {
-                      // 添加新的工具调用
-                      return [...m.thoughts, {
-                        id: toolCall.id,
-                        toolName: toolCall.toolName,
-                        thought: toolCall.thought,
-                        observation: toolCall.observation,
-                        request: toolCall.request,
-                        response: toolCall.response,
-                        isCollapsed: true,
-                        isRealToolCall: toolCall.isRealToolCall,
-                      }];
-                    }
-                  })(),
+                  segments: [...m.segments, newSegment],
                 }
               : m
           )
@@ -1082,7 +1088,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                         role: m.role as 'user' | 'assistant',
                         content: m.content,
                         timestamp: new Date(m.created_at),
-                        thoughts: [],
+                        segments: [],  // 历史消息没有段落
                         files: [],
                       }));
                       setMessages(historyMessages);
@@ -1167,24 +1173,26 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                 </div>
               )}
 
-              {/* 文本内容 - 回复内容（先显示，避免遮挡） */}
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {renderMessageContent(message.content, message.thoughts)}
-              </div>
-
-              {/* Thinking/工具调用块 - 显示在回复内容之后，按返回顺序展示 */}
-              {message.role === "assistant" && message.thoughts?.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  {message.thoughts.map((thought) => {
-                    if (thought.isRealToolCall) {
-                      // 真正的工具调用
+              {/* 消息段落 - 按顺序显示 */}
+              {message.role === "assistant" && message.segments?.length > 0 ? (
+                <div className="space-y-2">
+                  {message.segments.map((segment) => {
+                    if (segment.type === 'text') {
+                      // 文字段落
+                      return (
+                        <div key={segment.id} className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {renderMessageContent(segment.content || '')}
+                        </div>
+                      );
+                    } else if (segment.type === 'toolcall' && segment.toolCall) {
+                      // 工具调用段落
                       return (
                         <ToolCallBlock
-                          key={thought.id}
-                          toolName={thought.toolName}
-                          request={thought.request}
-                          response={thought.response}
-                          isCollapsed={thought.isCollapsed}
+                          key={segment.id}
+                          toolName={segment.toolCall.toolName}
+                          request={segment.toolCall.request}
+                          response={segment.toolCall.response}
+                          isCollapsed={segment.toolCall.isCollapsed}
                           isRealToolCall={true}
                           onToggle={() => {
                             setMessages((prev) =>
@@ -1192,8 +1200,10 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                                 m.id === message.id
                                   ? {
                                       ...m,
-                                      thoughts: m.thoughts.map((t) =>
-                                        t.id === thought.id ? { ...t, isCollapsed: !t.isCollapsed } : t
+                                      segments: m.segments.map((s) =>
+                                        s.id === segment.id && s.toolCall
+                                          ? { ...s, toolCall: { ...s.toolCall, isCollapsed: !s.toolCall.isCollapsed } }
+                                          : s
                                       ),
                                     }
                                   : m
@@ -1202,21 +1212,23 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                           }}
                         />
                       );
-                    } else {
-                      // 思考内容
+                    } else if (segment.type === 'thinking' && segment.toolCall) {
+                      // 思考段落
                       return (
                         <ThinkingBlock
-                          key={thought.id}
-                          thought={thought.thought || thought.observation || ''}
-                          isCollapsed={thought.isCollapsed}
+                          key={segment.id}
+                          thought={segment.toolCall.thought || segment.toolCall.observation || ''}
+                          isCollapsed={segment.toolCall.isCollapsed}
                           onToggle={() => {
                             setMessages((prev) =>
                               prev.map((m) =>
                                 m.id === message.id
                                   ? {
                                       ...m,
-                                      thoughts: m.thoughts.map((t) =>
-                                        t.id === thought.id ? { ...t, isCollapsed: !t.isCollapsed } : t
+                                      segments: m.segments.map((s) =>
+                                        s.id === segment.id && s.toolCall
+                                          ? { ...s, toolCall: { ...s.toolCall, isCollapsed: !s.toolCall.isCollapsed } }
+                                          : s
                                       ),
                                     }
                                   : m
@@ -1226,7 +1238,13 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                         />
                       );
                     }
+                    return null;
                   })}
+                </div>
+              ) : (
+                /* 非助手消息或没有段落的消息，显示纯文本内容 */
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {renderMessageContent(message.content)}
                 </div>
               )}
 
