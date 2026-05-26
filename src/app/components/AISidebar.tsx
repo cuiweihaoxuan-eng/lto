@@ -125,37 +125,38 @@ function renderMarkdownLinks(text: string): React.ReactNode[] {
 
 // 处理连续序号换行（1、2、3、或 第一、第二、第三）
 function processSequentialNumbers(text: string): string {
+  // 如果包含明显的金额格式（如 8,992,105），不处理逗号换行
+  const hasMoneyFormat = /\d{1,3}(,\d{3})+/g.test(text);
+
   // 模式1：数字+顿号格式
   // 如：1、2、3、 -> 换行
   text = text.replace(/(\d+[、])(?=\d)/g, (match) => match + '\n');
 
-  // 模式2：第x格式
-  // 如：第一步：xxx，第二步：xxx，第一步xxx第二步xxx
-  // 匹配所有"第x步/第x次/第x章"等结构
-  const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]/g;
-  const matches = text.match(diPattern);
+  // 模式2：第x格式（仅处理序号，不处理金额）
+  // 如：第一步：xxx，第二步：xxx
+  if (!hasMoneyFormat) {
+    const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]/g;
+    const matches = text.match(diPattern);
 
-  if (matches && matches.length > 1) {
-    // 找到所有"第x"的位置
-    const positions: { start: number; length: number }[] = [];
-    let searchIdx = 0;
-    for (const match of matches) {
-      const idx = text.indexOf(match, searchIdx);
-      if (idx !== -1) {
-        positions.push({ start: idx, length: match.length });
-        searchIdx = idx + match.length;
+    if (matches && matches.length > 1) {
+      const positions: { start: number; length: number }[] = [];
+      let searchIdx = 0;
+      for (const match of matches) {
+        const idx = text.indexOf(match, searchIdx);
+        if (idx !== -1) {
+          positions.push({ start: idx, length: match.length });
+          searchIdx = idx + match.length;
+        }
       }
-    }
 
-    // 在除了第一个之外的所有"第x"前面插入换行
-    if (positions.length > 1) {
-      let offset = 0;
-      for (let i = 1; i < positions.length; i++) {
-        const pos = positions[i].start + offset;
-        // 检查前面是否已经是换行
-        if (text[pos - 1] !== '\n') {
-          text = text.slice(0, pos) + '\n' + text.slice(pos);
-          offset++;
+      if (positions.length > 1) {
+        let offset = 0;
+        for (let i = 1; i < positions.length; i++) {
+          const pos = positions[i].start + offset;
+          if (text[pos - 1] !== '\n') {
+            text = text.slice(0, pos) + '\n' + text.slice(pos);
+            offset++;
+          }
         }
       }
     }
@@ -164,15 +165,19 @@ function processSequentialNumbers(text: string): string {
   // 模式3：纯数字+句号列表格式：1. xxx 2. xxx -> 换行
   text = text.replace(/(\d+\.\s*)(?=\d+\.)/g, '\n$1');
 
-  // 模式4：逗号分隔的数字列表：1,2,3 -> 换行（仅在连续数字序列中）
-  text = text.replace(/(\d+)(,|\s)(?=\d)/g, (match, num, sep) => {
-    const before = text.slice(0, text.indexOf(match));
-    const after = text.slice(text.indexOf(match) + match.length);
-    if (/^\d/.test(after) || /^\d/.test(before.slice(-10))) {
-      return num + '\n';
-    }
-    return match;
-  });
+  // 模式4：逗号分隔的数字列表 -> 仅在没有金额格式时处理
+  // 且仅处理明显的序号模式（如 1,2,3）
+  if (!hasMoneyFormat) {
+    text = text.replace(/(\d+)(,|\s)(?=\d)/g, (match, num, sep) => {
+      const before = text.slice(0, text.indexOf(match));
+      const after = text.slice(text.indexOf(match) + match.length);
+      // 只在连续纯数字序列中换行
+      if (/^\d/.test(after) && /^\d/.test(before.slice(-5))) {
+        return num + '\n';
+      }
+      return match;
+    });
+  }
 
   return text;
 }
