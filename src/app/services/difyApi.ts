@@ -372,14 +372,37 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
               case 'agent_message':
               case 'message':
-                // 累积 answer 内容（可能是分段发送的）
+                // 处理 answer 内容
                 if (parsed.answer) {
-                  const newContent = parsed.answer.trim();
-                  // 只有新内容比旧的更长时才更新（避免闪烁）
-                  if (newContent.length > accumulatedAnswer.length) {
-                    accumulatedAnswer = newContent;
-                    onMessage(accumulatedAnswer, parsed.event);
+                  // 如果包含think标签，提取并通知
+                  if (parsed.answer.includes('<think>') || parsed.answer.includes('<think')) {
+                    // 提取think标签内容
+                    const thinkMatches = parsed.answer.match(/<think[\s\S]*?<\/think>/gi) || [];
+                    for (const thinkMatch of thinkMatches) {
+                      // 清理think标签
+                      const thinkContent = thinkMatch
+                        .replace(/<\/?think[^>]*>/gi, '')
+                        .trim();
+                      if (thinkContent && onToolCall) {
+                        onToolCall({
+                          id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                          toolName: '思考中',
+                          thought: thinkContent,
+                          observation: undefined,
+                          request: undefined,
+                          response: undefined,
+                          isRealToolCall: false,
+                        });
+                      }
+                    }
+                    // 移除think标签后发送
+                    accumulatedAnswer = parsed.answer
+                      .replace(/<think[\s\S]*?<\/think>/gi, '')
+                      .trim();
+                  } else {
+                    accumulatedAnswer = parsed.answer;
                   }
+                  onMessage(accumulatedAnswer, parsed.event);
                 }
                 break;
 
@@ -394,6 +417,13 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
               case 'message_end':
                 // 对话结束，确保发送最终内容
                 if (accumulatedAnswer) {
+                  // 最终清理think标签
+                  const finalContent = accumulatedAnswer
+                    .replace(/<think[\s\S]*?<\/think>/gi, '')
+                    .trim();
+                  if (finalContent !== accumulatedAnswer) {
+                    accumulatedAnswer = finalContent;
+                  }
                   onMessage(accumulatedAnswer, 'message_end');
                 }
                 // 保存 conversation_id
