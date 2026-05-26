@@ -15,11 +15,12 @@
       // 下拉菜单
       '.cl-dropdown-btn{display:flex;align-items:center;gap:6px}',
       '.cl-dropdown-btn .cl-arrow{font-size:10px;transition:transform .2s}',
-      '#cl-dropdown-menu{position:fixed;bottom:120px;left:24px;width:140px;background:white;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:999999;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}',
+      '#cl-dropdown-menu{position:fixed;bottom:120px;left:24px;width:160px;background:white;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:999999;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}',
       '#cl-dropdown-menu.open{opacity:1;pointer-events:auto;transform:translateY(0)}',
-      '.cl-dropdown-item{padding:10px 16px;cursor:pointer;font-size:13px;color:#333;border-radius:6px;margin:4px}',
+      '.cl-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:13px;color:#333;border-radius:6px;margin:2px 6px}',
       '.cl-dropdown-item:hover{background:#f0f1ff}',
-      '.cl-dropdown-item[data-action="selector"]{color:#1890ff}',
+      '.cl-dropdown-item svg{flex-shrink:0;color:#666}',
+      '.cl-dropdown-item[data-action="selector"] svg{color:#1890ff}',
       // 元素选择高亮层
       '#cl-highlight-layer{position:fixed;pointer-events:none;z-index:99997;border:2px solid #ff6600;background:rgba(255,102,0,0.1);transition:all .1s;display:none}',
       // 选择模式提示
@@ -103,11 +104,21 @@
     var dropdown = document.createElement('div');
     dropdown.id = 'cl-dropdown-menu';
     dropdown.innerHTML = [
-      '<div class="cl-dropdown-item" data-action="panel">组件库</div>',
-      '<div class="cl-dropdown-item" data-action="selector">⟳ 箭头鼠标</div>'
+      '<div class="cl-dropdown-item" data-action="panel">',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+        '<span>组件库</span>',
+      '</div>',
+      '<div class="cl-dropdown-item" data-action="selector">',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 2-3 6z"/><circle cx="18" cy="6" r="3"/></svg>',
+        '<span>选择元素</span>',
+      '</div>'
     ].join('');
 
     document.body.appendChild(dropdown);
+
+    // 默认展开下拉菜单
+    dropdown.classList.add('open');
+    btn.querySelector('.cl-arrow').textContent = '▲';
 
     // 按钮点击展开/收起
     btn.addEventListener('click', function(e) {

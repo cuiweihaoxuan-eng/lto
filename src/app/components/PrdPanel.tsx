@@ -264,6 +264,44 @@ const CollapsibleSection: React.FC<{
   );
 };
 
+// 链接点击跳转映射
+const LINK_PAGE_MAP: Record<string, string> = {
+  'dashboard': 'Dashboard',
+  'lead-acquisition': 'LeadAcquisition',
+  'lead-pool': 'LeadPoolManagement',
+  'lead-merge': 'LeadMerge',
+  'lead-distribution': 'LeadDistribution',
+  'opportunity': 'OpportunityQuery',
+  'opp-detail': 'OpportunityDetail',
+  'business-info': 'BusinessInfoManagement',
+  'process-config': 'ProcessNodeConfig',
+  'risk-dispatch': 'RiskManagement',
+  'six-positioning': 'SixPositioning',
+  'revenue-management': 'RevenueManagement',
+  'self-delivery-settlement': 'SelfDeliverySettlement',
+  'progress-management': 'ProgressManagement',
+  'contract-payment-confirmation': 'ContractPaymentConfirmation',
+  'expert-report': 'ExpertReportPage',
+  'full-flow-table': 'FullFlowTable',
+  'low-margin-report': 'LowMarginReport',
+  'revenue-plan-actual-diff': 'RevenuePlanActualDiff',
+  'revenue-cost-diff': 'RevenueCostDiff',
+  'first-payment-diff': 'FirstPaymentDiff',
+  'ict-share-abnormal': 'IctShareAbnormalReport',
+  'ict-gross-profit-report': 'IctGrossProfitReport',
+  'ict-budget-detail': 'IctBudgetDetail',
+  'construct-not-fixed-no-expense': 'ConstructNotFixedNoExpense',
+  'cost-estimate-report': 'CostEstimateReport',
+  'my-wallet': 'MyWallet',
+  'project-list': 'ProjectList',
+  'effective-business-opportunity-award': 'EffectiveBusinessOpportunityAward',
+  'large-business-opportunity-award': 'LargeBusinessOpportunityAward',
+  'project-commission-award': 'ProjectCommissionAward',
+  'reward-sign-report': 'RewardSignReport',
+  'bonus-pool': 'BonusPool',
+  'task-wallet-list': 'TaskWalletList',
+};
+
 // 渲染内容行
 const renderContent = (raw: string) => {
   return (
@@ -292,6 +330,32 @@ const renderContent = (raw: string) => {
           );
         },
         pre: ({ children }) => <pre className="prd-pre">{children}</pre>,
+        a: ({ href, children, ...props }) => {
+          if (href) {
+            try {
+              const url = new URL(href);
+              const page = url.searchParams.get('page');
+              const componentName = page ? LINK_PAGE_MAP[page] : null;
+              if (componentName) {
+                return (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.dispatchEvent(new CustomEvent('switch-page', { detail: { component: componentName } }));
+                    }}
+                    className="prd-link"
+                    title={`打开${typeof children === 'string' ? children : '页面'}`}
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                );
+              }
+            } catch {}
+          }
+          return <a href={href} target="_blank" rel="noopener noreferrer" className="prd-link" {...props}>{children}</a>;
+        },
         input: ({ type, checked, ...props }) => {
           if (type === 'checkbox') {
             return (

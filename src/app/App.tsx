@@ -47,6 +47,7 @@ const EffectiveBusinessOpportunityAward = lazy(() => import("./components/Effect
 const MyWallet = lazy(() => import("./components/MyWallet").then(m => ({ default: m.MyWallet })));
 const LargeBusinessOpportunityAward = lazy(() => import("./components/LargeBusinessOpportunityAward").then(m => ({ default: m.LargeBusinessOpportunityAward })));
 const ProjectCommissionAward = lazy(() => import("./components/ProjectCommissionAward").then(m => ({ default: m.ProjectCommissionAward })));
+const AIAssistantConfig = lazy(() => import("./components/AIAssistantConfig").then(m => ({ default: m.AIAssistantConfig })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -57,6 +58,51 @@ function LoadingSpinner() {
   );
 }
 
+// 路由ID到组件名的映射（用于 URL 参数解析）
+const ROUTE_TO_COMPONENT: Record<string, string> = {
+  'dashboard': 'Dashboard',
+  'lead-acquisition': 'LeadAcquisition',
+  'lead-pool': 'LeadPoolManagement',
+  'lead-merge': 'LeadMerge',
+  'lead-distribution': 'LeadDistribution',
+  'opportunity': 'OpportunityQuery',
+  'opp-detail': 'OpportunityDetail',
+  'business-info': 'BusinessInfoManagement',
+  'process-config': 'ProcessNodeConfig',
+  'risk-dispatch': 'RiskManagement',
+  'six-positioning': 'SixPositioning',
+  'revenue-management': 'RevenueManagement',
+  'self-delivery-settlement': 'SelfDeliverySettlement',
+  'progress-management': 'ProgressManagement',
+  'contract-payment-confirmation': 'ContractPaymentConfirmation',
+  'expert-report': 'ExpertReportPage',
+  'full-flow-table': 'FullFlowTable',
+  'low-margin-report': 'LowMarginReport',
+  'revenue-plan-actual-diff': 'RevenuePlanActualDiff',
+  'revenue-cost-diff': 'RevenueCostDiff',
+  'first-payment-diff': 'FirstPaymentDiff',
+  'ict-share-abnormal': 'IctShareAbnormalReport',
+  'ict-gross-profit-report': 'IctGrossProfitReport',
+  'ict-budget-detail': 'IctBudgetDetail',
+  'construct-not-fixed-no-expense': 'ConstructNotFixedNoExpense',
+  'cost-estimate-report': 'CostEstimateReport',
+  'my-wallet': 'MyWallet',
+  'project-list': 'ProjectList',
+  'effective-business-opportunity-award': 'EffectiveBusinessOpportunityAward',
+  'large-business-opportunity-award': 'LargeBusinessOpportunityAward',
+  'project-commission-award': 'ProjectCommissionAward',
+  'reward-sign-report': 'RewardSignReport',
+  'bonus-pool': 'BonusPool',
+  'task-wallet-list': 'TaskWalletList',
+  'commission-reward-list': 'CommissionRewardList',
+  'opp-award-page': 'OppAwardPageList',
+  'effective-business-opportunity': 'EffectiveBusinessOpportunity',
+  'large-business-opportunit': 'LargeBusinessOpportunit',
+  'commission-distribution-report': 'CommissionDistributionReport',
+  'settings': 'settings',
+  'ai-assistant-config': 'AIAssistantConfig',
+};
+
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeSidebarItem, setActiveSidebarItem] = useState("dashboard");
@@ -64,6 +110,18 @@ export default function App() {
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [aiSidebarWidth, setAiSidebarWidth] = useState(400);
   const [prdSidebarOpen, setPrdSidebarOpen] = useState(false);
+
+  // 解析 URL 参数并自动跳转页面
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    if (page && ROUTE_TO_COMPONENT[page]) {
+      const componentName = ROUTE_TO_COMPONENT[page];
+      window.dispatchEvent(new CustomEvent('switch-page', { detail: { component: componentName } }));
+      // 清除 URL 参数
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
 // 注入当前路由给 prd-inject.js（SPA 无法从 URL 识别路由）
 useEffect(() => {
@@ -76,6 +134,7 @@ useEffect(() => {
   // 监听组件库页面跳转事件
   useEffect(() => {
     const handleSwitchPage = (e: CustomEvent) => {
+      console.log('[App] 收到 switch-page 事件:', e.detail);
       const componentName = e.detail?.component;
       if (!componentName) return;
 
@@ -115,14 +174,16 @@ useEffect(() => {
         'LeadPoolManagement': 'lead-pool',
         'LeadMerge': 'lead-merge',
         'LeadDistribution': 'lead-distribution',
-        'OpportunityQuery': 'opportunity-query',
-        'OpportunityDetail': 'opportunity-detail',
+        'OpportunityQuery': 'opportunity',
+        'OpportunityDetail': 'opp-detail',
         'ProgressManagement': 'progress-management',
-        'ContractPaymentConfirmation': 'contract-payment',
-        'RiskManagement': 'risk-management',
+        'ContractPaymentConfirmation': 'contract-payment-confirmation',
+        'RiskManagement': 'risk-dispatch',
+        'AIAssistantConfig': 'ai-assistant-config',
       };
 
       const sidebarItem = componentMap[componentName];
+      console.log('[App] 映射结果:', { componentName, sidebarItem });
       if (sidebarItem) {
         setActiveSidebarItem(sidebarItem);
       }
@@ -254,6 +315,11 @@ useEffect(() => {
     // 风险管理页面
     if (activeSidebarItem === "risk-dispatch") {
       return <Suspense fallback={<LoadingSpinner />}><RiskManagement /></Suspense>;
+    }
+
+    // AI助手配置页面
+    if (activeSidebarItem === "ai-assistant-config") {
+      return <Suspense fallback={<LoadingSpinner />}><AIAssistantConfig /></Suspense>;
     }
 
     // 未匹配到任何页面时显示首页

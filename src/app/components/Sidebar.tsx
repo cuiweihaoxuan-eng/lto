@@ -143,7 +143,10 @@ const menuItems: MenuItem[] = [
   {
     id: "settings",
     label: "系统设置",
-    icon: <Settings className="w-4 h-4" />
+    icon: <Settings className="w-4 h-4" />,
+    children: [
+      { id: "ai-assistant-config", label: "AI助手配置" },
+    ]
   }
 ];
 
