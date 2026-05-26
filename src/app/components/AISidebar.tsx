@@ -853,31 +853,29 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       platform: agentConfig.platform || '星辰平台',  // 传递平台类型
       files: userMessage.files,
       onMessage: (chunk, event) => {
-        // 流式输出文字内容
-        fullAnswer = chunk;
-
+        // 流式输出文字内容：直接设置，不做复杂处理
         setMessages((prev) => {
           return prev.map((m) => {
             if (m.id !== aiMessageId) return m;
 
-            // 找到最后一个文字段落并更新内容
-            const updatedSegments = [...m.segments];
-            const lastTextIndex = updatedSegments.findLastIndex(s => s.type === 'text');
-            if (lastTextIndex >= 0) {
-              updatedSegments[lastTextIndex] = {
-                ...updatedSegments[lastTextIndex],
-                content: fullAnswer,
-              };
+            // 创建新的 segments 数组
+            const newSegments = [...m.segments];
+
+            // 找到或创建文字段落
+            const textIndex = newSegments.findIndex(s => s.type === 'text');
+            if (textIndex >= 0) {
+              // 更新现有文字段落
+              newSegments[textIndex] = { ...newSegments[textIndex], content: chunk };
             } else {
-              // 如果没有文字段落，创建一个
-              updatedSegments.unshift({
-                id: `seg_${Date.now()}_text`,
+              // 添加新的文字段落
+              newSegments.push({
+                id: `text_${Date.now()}`,
                 type: 'text',
-                content: fullAnswer,
+                content: chunk,
               });
             }
 
-            return { ...m, content: fullAnswer, segments: updatedSegments };
+            return { ...m, content: chunk, segments: newSegments };
           });
         });
       },
