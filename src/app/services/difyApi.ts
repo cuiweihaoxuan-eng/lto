@@ -374,8 +374,12 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
               case 'message':
                 // 累积 answer 内容（可能是分段发送的）
                 if (parsed.answer) {
-                  accumulatedAnswer = parsed.answer; // 直接替换，不累积
-                  onMessage(accumulatedAnswer, parsed.event);
+                  const newContent = parsed.answer.trim();
+                  // 只有新内容比旧的更长时才更新（避免闪烁）
+                  if (newContent.length > accumulatedAnswer.length) {
+                    accumulatedAnswer = newContent;
+                    onMessage(accumulatedAnswer, parsed.event);
+                  }
                 }
                 break;
 
@@ -388,7 +392,11 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 break;
 
               case 'message_end':
-                // 对话结束，保存 conversation_id
+                // 对话结束，确保发送最终内容
+                if (accumulatedAnswer) {
+                  onMessage(accumulatedAnswer, 'message_end');
+                }
+                // 保存 conversation_id
                 if (parsed.conversation_id) {
                   lastConversationId = parsed.conversation_id;
                 }

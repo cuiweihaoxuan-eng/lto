@@ -556,8 +556,7 @@ function renderMarkdownTable(text: string): React.ReactNode {
 }
 
 // 渲染完整的消息内容（支持表格）
-// 会过滤掉已被Thinking块显示的思考内容，避免重复
-function renderMessageContent(content: string, thoughts: { thought: string }[] = []): React.ReactNode {
+function renderMessageContent(content: string): React.ReactNode {
   // 安全检查：确保 content 是字符串
   if (typeof content !== 'string') {
     return null;
@@ -565,19 +564,11 @@ function renderMessageContent(content: string, thoughts: { thought: string }[] =
 
   let filteredContent = content;
 
-  // 如果content是完整的Markdown格式（以<think>开头），说明是AI直接输出完整内容
-  // 需要过滤掉<think>...标签对
-  if (/<\/think>/.test(filteredContent)) {
-    filteredContent = filteredContent
-      .replace(/<think>[\s\S]*?<\/think>/g, '')
-      .trim();
-  }
-
   // 清理残留的空行
   filteredContent = filteredContent.replace(/\n{3,}/g, '\n\n').trim();
 
-  if (!filteredContent || filteredContent.length < 2) {
-    return <span className="text-gray-400 text-xs">正在处理...</span>;
+  if (!filteredContent) {
+    return null;
   }
 
   // 处理表格和链接
