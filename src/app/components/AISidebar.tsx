@@ -129,32 +129,9 @@ function processSequentialNumbers(text: string): string {
   // 模式1：数字+顿号格式，如：1、2、3、 -> 换行
   text = text.replace(/(\d+[、])(?=\d)/g, (match) => match + '\n');
 
-  // 模式2：第x格式，如：第一步：xxx，第二步：xxx
-  // 简单直接：找到所有"第一步"、"第二步"等，在它们前面加换行
-  const diRegex = /第[一二三四五六七八九十百千\d]+[步次章节阶段点级][^，,。\n]*/g;
-  const matches = text.match(diRegex);
-
-  if (matches && matches.length > 1) {
-    // 从后往前替换，避免位置偏移问题
-    const reversedPositions: { match: string; index: number }[] = [];
-    let searchFrom = 0;
-    for (const match of matches) {
-      const idx = text.indexOf(match, searchFrom);
-      if (idx !== -1) {
-        reversedPositions.push({ match, index: idx });
-        searchFrom = idx + 1;
-      }
-    }
-
-    // 反向遍历，从后往前插入换行
-    for (let i = reversedPositions.length - 1; i > 0; i--) {
-      const current = reversedPositions[i];
-      // 在当前匹配项前面插入换行
-      if (current.index > 0 && text[current.index - 1] !== '\n') {
-        text = text.slice(0, current.index) + '\n' + text.slice(current.index);
-      }
-    }
-  }
+  // 模式2：第x格式，每个"第x步/次/章..."都在前面换行
+  // 直接在每个匹配前面加换行（不需要判断是否连续）
+  text = text.replace(/(第[一二三四五六七八九十百千\d]+[步次章节阶段点级])/g, '\n$1');
 
   // 模式3：纯数字+句号列表格式，如：1. xxx 2. xxx -> 换行
   text = text.replace(/(\d+\.\s*)(?=\d+\.)/g, '\n$1');
