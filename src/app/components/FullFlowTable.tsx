@@ -687,7 +687,7 @@ export function FullFlowTable(_props: FullFlowTableProps) {
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
           {/* 基础信息（不显示分组标题） */}
           <div className="mb-4">
-            <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-6 gap-x-6 gap-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">地市</label>
                 <Select value={(queryParams.city as string) ?? ""} onValueChange={v => setQueryParams(p => ({ ...p, city: v }))}>
@@ -735,6 +735,21 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     <SelectItem value="yiliao">医疗行业部</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">客户编码</label>
+                <Input placeholder="请输入" value={(queryParams.customerCode as string) ?? ""}
+                  onChange={e => setQueryParams(p => ({ ...p, customerCode: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">客户名称</label>
+                <Input placeholder="请输入" value={(queryParams.customerName as string) ?? ""}
+                  onChange={e => setQueryParams(p => ({ ...p, customerName: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">客户行业属性(三级)</label>
+                <Input placeholder="请输入" value={(queryParams.customerIndustry as string) ?? ""}
+                  onChange={e => setQueryParams(p => ({ ...p, customerIndustry: e.target.value }))} />
               </div>
             </div>
           </div>
@@ -872,6 +887,220 @@ export function FullFlowTable(_props: FullFlowTableProps) {
                     <span className="text-gray-400">-</span>
                     <Input type="date" value={(queryParams.contractEndDateEnd as string) ?? ""}
                       onChange={e => setQueryParams(p => ({ ...p, contractEndDateEnd: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">后向合同编码</label>
+                  <Input placeholder="请输入" value={(queryParams.supplierContractCode as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, supplierContractCode: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">后向合同名称</label>
+                  <Input placeholder="请输入" value={(queryParams.supplierContractName as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, supplierContractName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">后向供应商名称</label>
+                  <Input placeholder="请输入" value={(queryParams.supplierName as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, supplierName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分成合同编码</label>
+                  <Input placeholder="请输入" value={(queryParams.shareContractCode as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, shareContractCode: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分成合同名称</label>
+                  <Input placeholder="请输入" value={(queryParams.shareContractName as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, shareContractName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分成供应商名称</label>
+                  <Input placeholder="请输入" value={(queryParams.shareSupplierName as string) ?? ""}
+                    onChange={e => setQueryParams(p => ({ ...p, shareSupplierName: e.target.value }))} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 收入 */}
+          {showAllConditions && (
+            <div className="pt-4 border-t border-gray-100">
+              <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                <span className="w-1 h-4 bg-blue-500 rounded mr-2"></span>
+                收入
+              </div>
+              <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">模式会总收入（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.incomeTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.incomeTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目计划总收入（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.incomePlanTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomePlanTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.incomePlanTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomePlanTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目实际总收入（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.incomeActualTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeActualTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.incomeActualTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeActualTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">累计到期收入计划（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.incomePlanAccumMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomePlanAccumMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.incomePlanAccumMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomePlanAccumMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">本年项目累计收入（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.incomeYearMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeYearMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.incomeYearMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, incomeYearMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">累计已开票金额（含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.invoicedAmountMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, invoicedAmountMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.invoicedAmountMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, invoicedAmountMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目累计应收账款</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.receivableAmountMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, receivableAmountMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.receivableAmountMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, receivableAmountMax: e.target.value }))} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 支出 */}
+          {showAllConditions && (
+            <div className="pt-4 border-t border-gray-100">
+              <div className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+                <span className="w-1 h-4 bg-red-500 rounded mr-2"></span>
+                支出
+              </div>
+              <div className="grid grid-cols-5 gap-x-6 gap-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">模式会支出总金额（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.costTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.costTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目计划支出总金额（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.costPlanTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costPlanTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.costPlanTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costPlanTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目实际支出总金额（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.costActualTotalMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costActualTotalMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.costActualTotalMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costActualTotalMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">累计到期支出计划（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.costPlanAccumMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costPlanAccumMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.costPlanAccumMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costPlanAccumMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">本年项目累计支出（不含税）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.costYearMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costYearMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.costYearMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, costYearMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目累计付款金额</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.paymentAmountMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, paymentAmountMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.paymentAmountMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, paymentAmountMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目累计未付款金额（应付金额）</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.unpaidAmountMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, unpaidAmountMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.unpaidAmountMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, unpaidAmountMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">累计已发生投资额</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.investAmountMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, investAmountMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.investAmountMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, investAmountMax: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ICT项目总体可用预算</label>
+                  <div className="flex gap-2 items-center">
+                    <Input type="number" placeholder="起" value={(queryParams.totalBudgetMin as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, totalBudgetMin: e.target.value }))} />
+                    <span className="text-gray-400">-</span>
+                    <Input type="number" placeholder="止" value={(queryParams.totalBudgetMax as string) ?? ""}
+                      onChange={e => setQueryParams(p => ({ ...p, totalBudgetMax: e.target.value }))} />
                   </div>
                 </div>
               </div>
