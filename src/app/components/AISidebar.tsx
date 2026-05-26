@@ -893,33 +893,76 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       onToolCall: (toolCall) => {
         console.log('[AISidebar] 收到 toolCall:', JSON.stringify(toolCall, null, 2));
 
-        // 创建新的工具调用/思考段落
-        const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-        const newSegment: MessageSegment = {
-          id: segmentId,
-          type: toolCall.isRealToolCall ? 'toolcall' : 'thinking',
-          toolCall: {
-            id: toolCall.id,
-            toolName: toolCall.toolName,
-            thought: toolCall.thought || '',
-            observation: toolCall.observation,
-            request: toolCall.request,
-            response: toolCall.response,
-            isCollapsed: true,
-            isRealToolCall: toolCall.isRealToolCall,
-          },
-        };
+        // 对于工具调用，尝试合并到已存在的同类型段落
+        if (toolCall.isRealToolCall && toolCall.toolName) {
+          setMessages((prev) => {
+            return prev.map((m) => {
+              if (m.id !== aiMessageId) return m;
 
-        // 在 segments 中插入新的段落
-        setMessages((prev) =>
-          prev.map((m) => {
-            if (m.id !== aiMessageId) return m;
-            return {
-              ...m,
-              segments: [...m.segments, newSegment],
-            };
-          })
-        );
+              // 查找最后一个同 toolName 的工具调用段落
+              const lastToolIndex = [...m.segments].reverse().findIndex(
+                s => s.type === 'toolcall' && s.toolCall?.toolName === toolCall.toolName
+              );
+
+              if (lastToolIndex >= 0) {
+                // 找到了，合并到已有的段落
+                const actualIndex = m.segments.length - 1 - lastToolIndex;
+                const updatedSegments = [...m.segments];
+                const existingSegment = updatedSegments[actualIndex];
+                updatedSegments[actualIndex] = {
+                  ...existingSegment,
+                  toolCall: {
+                    ...existingSegment.toolCall!,
+                    response: toolCall.response || existingSegment.toolCall?.response,
+                    thought: toolCall.thought || existingSegment.toolCall?.thought,
+                  },
+                };
+                return { ...m, segments: updatedSegments };
+              }
+
+              // 没找到，创建新的段落
+              const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+              const newSegment: MessageSegment = {
+                id: segmentId,
+                type: 'toolcall',
+                toolCall: {
+                  id: toolCall.id,
+                  toolName: toolCall.toolName,
+                  thought: toolCall.thought || '',
+                  observation: toolCall.observation,
+                  request: toolCall.request,
+                  response: toolCall.response,
+                  isCollapsed: true,
+                  isRealToolCall: true,
+                },
+              };
+              return { ...m, segments: [...m.segments, newSegment] };
+            });
+          });
+        } else {
+          // 思考内容总是创建新段落
+          const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+          const newSegment: MessageSegment = {
+            id: segmentId,
+            type: 'thinking',
+            toolCall: {
+              id: toolCall.id,
+              toolName: '思考中',
+              thought: toolCall.thought || toolCall.observation || '',
+              observation: toolCall.observation,
+              request: undefined,
+              response: undefined,
+              isCollapsed: true,
+              isRealToolCall: false,
+            },
+          };
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m.id !== aiMessageId) return m;
+              return { ...m, segments: [...m.segments, newSegment] };
+            })
+          );
+        }
       },
       onComplete: (newConversationId) => {
         setIsTyping(false);
