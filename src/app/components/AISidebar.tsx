@@ -129,8 +129,9 @@ function processSequentialNumbers(text: string): string {
   // 模式1：数字+顿号格式，如：1、2、3、 -> 换行
   text = text.replace(/(\d+[、])(?=\d)/g, (match) => match + '\n');
 
-  // 模式2：第x格式，如：第一步：xxx，第二步：xxx
-  const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级])/g;
+  // 模式2：第x格式，如：第一步xxx，第二步xxx 或 第一步：xxx，第二步：xxx
+  // 匹配完整的"第...步/次/章..."结构
+  const diPattern = /第[一二三四五六七八九十百千\d]+[步次章节阶段点级][^，,。\n]*/g;
   const matches = text.match(diPattern);
 
   if (matches && matches.length > 1) {
