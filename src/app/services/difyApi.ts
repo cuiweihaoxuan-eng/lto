@@ -293,69 +293,71 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 const toolName = parsed.tool || '';
                 const toolInput = parsed.tool_input || '';
 
-                // 判断是思考还是工具调用
-                const hasThinkTag = thoughtContent.includes('<think>') || thoughtContent.includes('<think');
-                const isToolContent = observationContent.startsWith('{');
+                // 判断是否有明确的工具调用（必须同时有 tool_input 或 JSON 格式的 observation）
                 const hasToolInput = toolInput.length > 0;
+                const isToolContent = observationContent.startsWith('{');
+                const isRealToolCall = hasToolInput || isToolContent;
 
-                if (thoughtContent || observationContent || toolName || hasToolInput) {
-                  let request = undefined;
-                  let response = undefined;
+                // 只有包含<think>标签的内容才进入思考模块
+                const hasThinkTag = thoughtContent.includes('<think>') || thoughtContent.includes('<think');
 
-                  // 从 tool_input 中提取请求信息（JSON 字符串格式）
-                  if (hasToolInput) {
-                    try {
-                      const parsedToolInput = JSON.parse(toolInput);
-                      request = parsedToolInput;
-                    } catch {
-                      request = { raw: toolInput };
-                    }
+                if (!isRealToolCall && !hasThinkTag) {
+                  // 没有工具调用也没有think标签，跳过不处理
+                  // 这些内容会在 agent_message/message 中返回
+                  break;
+                }
+
+                let request = undefined;
+                let response = undefined;
+
+                // 从 tool_input 中提取请求信息（JSON 字符串格式）
+                if (hasToolInput) {
+                  try {
+                    const parsedToolInput = JSON.parse(toolInput);
+                    request = parsedToolInput;
+                  } catch {
+                    request = { raw: toolInput };
                   }
+                }
 
-                  // 从 observation 中提取响应（如果是 JSON 格式）
-                  if (isToolContent) {
-                    try {
-                      const parsedObs = JSON.parse(observationContent);
-                      // observation 格式是 {"tool_name": "result"}，result 可能是字符串或嵌套 JSON
-                      const toolResultKey = Object.keys(parsedObs)[0];
-                      const toolResult = parsedObs[toolResultKey];
+                // 从 observation 中提取响应（如果是 JSON 格式）
+                if (isToolContent) {
+                  try {
+                    const parsedObs = JSON.parse(observationContent);
+                    const toolResultKey = Object.keys(parsedObs)[0];
+                    const toolResult = parsedObs[toolResultKey];
 
-                      if (toolResult) {
-                        // 尝试解析 result（如果是 JSON 字符串）
-                        try {
-                          const parsedResult = JSON.parse(toolResult);
-                          response = parsedResult;
-                        } catch {
-                          // result 不是 JSON，保持原样
-                          response = { result: toolResult };
-                        }
+                    if (toolResult) {
+                      try {
+                        const parsedResult = JSON.parse(toolResult);
+                        response = parsedResult;
+                      } catch {
+                        response = { result: toolResult };
                       }
-                    } catch {
-                      // 解析失败，保持原始内容
                     }
+                  } catch {
+                    // 解析失败，保持原始内容
                   }
+                }
 
-                  // 清理 thought 中的 think 标签
-                  const cleanThought = thoughtContent
-                    .replace(/<think>[\s\S]*?<\/think>/g, '')
-                    .trim();
+                // 清理 thought 中的 think 标签
+                const cleanThought = thoughtContent
+                  .replace(/<think>[\s\S]*?<\/think>/g, '')
+                  .replace(/<think>[\s\S]*?<\/think>/g, '')
+                  .trim();
 
-                  // 如果有 tool_input 或 observation 是 JSON，识别为真正的工具调用
-                  const isRealToolCall = hasToolInput || isToolContent;
+                const toolCall: ToolCall = {
+                  id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                  toolName: isRealToolCall ? (toolName || '工具调用') : '思考中',
+                  thought: cleanThought || undefined,
+                  observation: !isRealToolCall ? observationContent : undefined,
+                  request: request,
+                  response: response,
+                  isRealToolCall: isRealToolCall,
+                };
 
-                  const toolCall: ToolCall = {
-                    id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                    toolName: isRealToolCall ? (toolName || '工具调用') : (hasThinkTag ? '思考中' : toolName || '思考中'),
-                    thought: cleanThought,
-                    observation: !isRealToolCall ? observationContent : undefined,
-                    request: request,
-                    response: response,
-                    isRealToolCall: isRealToolCall,
-                  };
-
-                  if (onToolCall) {
-                    onToolCall(toolCall);
-                  }
+                if (onToolCall) {
+                  onToolCall(toolCall);
                 }
                 break;
 

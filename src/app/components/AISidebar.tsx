@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, KeyboardEvent, DragEvent } from "react";
-import { X, Send, Paperclip, Image, Sparkles, User, ChevronDown, ChevronUp, Trash2, Brain, Terminal, BarChart3, PieChart, LineChart, Download, Copy, RefreshCw, Volume2 } from "lucide-react";
+import { X, Send, Paperclip, Image, Sparkles, User, ChevronDown, ChevronUp, Trash2, Brain, Terminal, BarChart3, PieChart, LineChart, Download, Copy, RefreshCw, Volume2, Wrench } from "lucide-react";
 import { sendDifyMessage, generateMessageId, type DifyMessage, type FileItem, getConversations, getConversationMessages, type ToolCall } from "../services/difyApi";
 import { DIFY_CONFIG, DIFY_CONFIG_LTO } from "../config/dify";
 import { loadAIConfigs, getConfigByName, updateSessionCount } from "../config/aiAssistant";
@@ -575,23 +575,65 @@ function renderMessageContent(content: string, thoughts: { thought: string }[] =
   return <>{renderMarkdownTable(filteredContent)}</>;
 }
 
-// Thinking块组件 - 蓝色页眉
-function ThinkingBlock({ thought, observation, toolName, isCollapsed, onToggle }: {
+// 思考块组件 - 单独显示思考内容
+function ThinkingBlock({ thought, isCollapsed, onToggle }: {
   thought: string;
-  observation?: string;
-  toolName: string;
   isCollapsed: boolean;
   onToggle: () => void;
 }) {
   return (
-    <div className="mt-2 rounded-lg overflow-hidden border border-gray-200">
+    <div className="mt-2 rounded-lg border border-purple-200 overflow-hidden">
       <div
-        className="flex items-center justify-between px-3 py-2 bg-blue-500 cursor-pointer"
-        onClick={onToggle}
+        className="flex items-center justify-between px-3 py-2 bg-purple-50 cursor-pointer select-none"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
       >
         <div className="flex items-center gap-2">
-          <Brain className="w-3.5 h-3.5 text-white" />
-          <span className="text-sm text-white font-medium">已使用 {toolName}</span>
+          <Brain className="w-3.5 h-3.5 text-purple-600" />
+          <span className="px-2 py-0.5 text-xs font-medium rounded border bg-purple-100 text-purple-700 border-purple-200">
+            思考中
+          </span>
+        </div>
+        {isCollapsed ? (
+          <ChevronDown className="w-4 h-4 text-purple-500" />
+        ) : (
+          <ChevronUp className="w-4 h-4 text-purple-500" />
+        )}
+      </div>
+      {!isCollapsed && (
+        <div className="p-3 bg-purple-50/50 text-sm">
+          <div className="text-gray-700 whitespace-pre-wrap">{thought}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 工具调用块组件 - 只显示工具调用信息
+function ToolCallBlock({ toolName, request, response, isCollapsed, onToggle, isRealToolCall }: {
+  toolName: string;
+  request?: Record<string, unknown>;
+  response?: Record<string, unknown>;
+  isCollapsed: boolean;
+  onToggle: () => void;
+  isRealToolCall?: boolean;
+}) {
+  return (
+    <div className="mt-2 rounded-lg border border-blue-200 overflow-hidden">
+      <div
+        className="flex items-center justify-between px-3 py-2 bg-blue-500 cursor-pointer select-none"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Wrench className="w-3.5 h-3.5 text-white" />
+          <span className="px-2 py-0.5 text-xs font-medium rounded border bg-blue-100 text-blue-700 border-blue-200">
+            {toolName}
+          </span>
         </div>
         {isCollapsed ? (
           <ChevronDown className="w-4 h-4 text-white" />
@@ -600,78 +642,7 @@ function ThinkingBlock({ thought, observation, toolName, isCollapsed, onToggle }
         )}
       </div>
       {!isCollapsed && (
-        <div className="p-3 bg-gray-50 text-sm">
-          {thought && (
-            <div className="mb-2">
-              <div className="text-gray-500 text-xs mb-1">思考</div>
-              <div className="text-gray-700 whitespace-pre-wrap">{thought}</div>
-            </div>
-          )}
-          {observation && (
-            <div>
-              <div className="text-gray-500 text-xs mb-1">观察</div>
-              <div className="text-gray-700 whitespace-pre-wrap">{observation}</div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// 工具调用块组件
-function ToolCallBlock({ toolName, request, response, thought, isCollapsed, onToggle, isRealToolCall }: {
-  toolName: string;
-  request?: Record<string, unknown>;
-  response?: Record<string, unknown>;
-  thought?: string;
-  isCollapsed: boolean;
-  onToggle: () => void;
-  isRealToolCall?: boolean;
-}) {
-  // 根据类型选择样式：真正的工具调用用蓝色页眉，思考过程用灰色页眉
-  const isBlueHeader = isRealToolCall;
-  const headerBg = isBlueHeader ? 'bg-blue-500' : 'bg-gray-100';
-  const headerTextColor = isBlueHeader ? 'text-white' : 'text-gray-600';
-  const iconColor = isBlueHeader ? 'text-white' : 'text-gray-600';
-  const chevronColor = isBlueHeader ? 'text-white' : 'text-gray-500';
-  const labelBg = isBlueHeader ? 'bg-blue-100' : 'bg-purple-100';
-  const labelTextColor = isBlueHeader ? 'text-blue-700' : 'text-purple-700';
-
-  return (
-    <div className="mt-2 rounded-lg border border-gray-200 overflow-hidden">
-      <div
-        className={`flex items-center justify-between px-3 py-2 ${headerBg} cursor-pointer select-none`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <Brain className={`w-3.5 h-3.5 ${iconColor}`} />
-          <span className={`px-2 py-0.5 text-xs font-medium rounded border ${labelBg} ${labelTextColor} ${isBlueHeader ? 'border-blue-200' : 'border-purple-200'}`}>
-            {isRealToolCall ? `已使用 ${toolName}` : toolName}
-          </span>
-        </div>
-        {isCollapsed ? (
-          <ChevronDown className={`w-4 h-4 ${chevronColor}`} />
-        ) : (
-          <ChevronUp className={`w-4 h-4 ${chevronColor}`} />
-        )}
-      </div>
-      {!isCollapsed && (
         <div className="p-3 space-y-3 bg-gray-50">
-          {thought && (
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-1 h-4 bg-blue-500 rounded"></div>
-                <span className="text-xs font-medium text-gray-600">思考</span>
-              </div>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200 overflow-x-auto max-h-60">
-                {thought}
-              </pre>
-            </div>
-          )}
           {request && (
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -1204,31 +1175,58 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
               {/* Thinking/工具调用块 - 显示在回复内容之后，按返回顺序展示 */}
               {message.role === "assistant" && message.thoughts?.length > 0 && (
                 <div className="mt-2 space-y-2">
-                  {message.thoughts.map((thought) => (
-                    <ToolCallBlock
-                      key={thought.id}
-                      toolName={thought.toolName}
-                      request={thought.request}
-                      response={thought.response}
-                      thought={thought.thought}
-                      isCollapsed={thought.isCollapsed}
-                      isRealToolCall={thought.isRealToolCall}
-                      onToggle={() => {
-                        setMessages((prev) =>
-                          prev.map((m) =>
-                            m.id === message.id
-                              ? {
-                                  ...m,
-                                  thoughts: m.thoughts.map((t) =>
-                                    t.id === thought.id ? { ...t, isCollapsed: !t.isCollapsed } : t
-                                  ),
-                                }
-                              : m
-                          )
-                        );
-                      }}
-                    />
-                  ))}
+                  {message.thoughts.map((thought) => {
+                    if (thought.isRealToolCall) {
+                      // 真正的工具调用
+                      return (
+                        <ToolCallBlock
+                          key={thought.id}
+                          toolName={thought.toolName}
+                          request={thought.request}
+                          response={thought.response}
+                          isCollapsed={thought.isCollapsed}
+                          isRealToolCall={true}
+                          onToggle={() => {
+                            setMessages((prev) =>
+                              prev.map((m) =>
+                                m.id === message.id
+                                  ? {
+                                      ...m,
+                                      thoughts: m.thoughts.map((t) =>
+                                        t.id === thought.id ? { ...t, isCollapsed: !t.isCollapsed } : t
+                                      ),
+                                    }
+                                  : m
+                              )
+                            );
+                          }}
+                        />
+                      );
+                    } else {
+                      // 思考内容
+                      return (
+                        <ThinkingBlock
+                          key={thought.id}
+                          thought={thought.thought || thought.observation || ''}
+                          isCollapsed={thought.isCollapsed}
+                          onToggle={() => {
+                            setMessages((prev) =>
+                              prev.map((m) =>
+                                m.id === message.id
+                                  ? {
+                                      ...m,
+                                      thoughts: m.thoughts.map((t) =>
+                                        t.id === thought.id ? { ...t, isCollapsed: !t.isCollapsed } : t
+                                      ),
+                                    }
+                                  : m
+                              )
+                            );
+                          }}
+                        />
+                      );
+                    }
+                  })}
                 </div>
               )}
 
