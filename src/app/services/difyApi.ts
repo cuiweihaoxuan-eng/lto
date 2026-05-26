@@ -293,10 +293,12 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 const toolName = parsed.tool || '';
                 const toolInput = parsed.tool_input || '';
 
-                // 判断是否有明确的工具调用
+                // 判断是否有明确的工具调用（必须有 tool_input）
                 const hasToolInput = toolInput.length > 0;
                 const isToolContent = observationContent.startsWith('{');
-                const isRealToolCall = hasToolInput || isToolContent;
+
+                // 判断是否是真正的工具调用：有 tool_input 字段
+                const isRealToolCall = hasToolInput;
 
                 // 判断是否包含think标签
                 const hasThinkTag = thoughtContent.includes('<think>') || thoughtContent.includes('<think');
@@ -307,11 +309,14 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                   .replace(/<think[\s\S]*?<\/think>/gi, '')
                   .trim();
 
-                // 情况1：有工具调用 -> 创建工具调用块
-                // 情况2：有think标签 -> 创建思考块
-                // 情况3：有非空思考内容（没有think标签但有其他思考内容） -> 也创建思考块
-                // 情况4：只有observation（无工具无think）-> 跳过，等message事件
-                const shouldCreateBlock = isRealToolCall || hasThinkTag || (thoughtContent.length > 0 && !isToolContent && !hasToolInput);
+                // 判断是否有可显示的内容
+                const hasVisibleContent = cleanThought.length > 0 || observationContent.length > 0;
+
+                // 决定创建什么类型的块
+                // 1. 有 tool_input → 工具调用块
+                // 2. 有 think 标签或观察内容 → 思考块
+                // 3. 只有普通思考内容 → 也创建思考块
+                const shouldCreateBlock = isRealToolCall || hasThinkTag || (hasVisibleContent && !isRealToolCall);
 
                 if (!shouldCreateBlock) {
                   break;
@@ -320,7 +325,7 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 let request = undefined;
                 let response = undefined;
 
-                // 从 tool_input 中提取请求信息
+                // 从 tool_input 中提取请求信息（仅工具调用需要）
                 if (hasToolInput) {
                   try {
                     const parsedToolInput = JSON.parse(toolInput);
@@ -330,7 +335,7 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                   }
                 }
 
-                // 从 observation 中提取响应
+                // 从 observation 中提取响应（仅工具调用需要）
                 if (isToolContent) {
                   try {
                     const parsedObs = JSON.parse(observationContent);

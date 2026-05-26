@@ -861,19 +861,34 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       baseUrl: agentConfig.config.baseUrl,
       platform: agentConfig.platform || '星辰平台',  // 传递平台类型
       files: userMessage.files,
-      onMessage: (chunk) => {
-        fullAnswer += chunk;
+      onMessage: (chunk, event) => {
+        // 流式输出文字内容
+        fullAnswer = chunk;
 
-        // 更新当前文字段落内容
-        currentTextSegment.content = fullAnswer;
+        setMessages((prev) => {
+          return prev.map((m) => {
+            if (m.id !== aiMessageId) return m;
 
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === aiMessageId
-              ? { ...m, content: fullAnswer }
-              : m
-          )
-        );
+            // 找到最后一个文字段落并更新内容
+            const updatedSegments = [...m.segments];
+            const lastTextIndex = updatedSegments.findLastIndex(s => s.type === 'text');
+            if (lastTextIndex >= 0) {
+              updatedSegments[lastTextIndex] = {
+                ...updatedSegments[lastTextIndex],
+                content: fullAnswer,
+              };
+            } else {
+              // 如果没有文字段落，创建一个
+              updatedSegments.unshift({
+                id: `seg_${Date.now()}_text`,
+                type: 'text',
+                content: fullAnswer,
+              });
+            }
+
+            return { ...m, content: fullAnswer, segments: updatedSegments };
+          });
+        });
       },
       onToolCall: (toolCall) => {
         console.log('[AISidebar] 收到 toolCall:', JSON.stringify(toolCall, null, 2));
@@ -884,21 +899,26 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
           id: segmentId,
           type: toolCall.isRealToolCall ? 'toolcall' : 'thinking',
           toolCall: {
-            ...toolCall,
-            isCollapsed: true,  // 默认折叠
+            id: toolCall.id,
+            toolName: toolCall.toolName,
+            thought: toolCall.thought || '',
+            observation: toolCall.observation,
+            request: toolCall.request,
+            response: toolCall.response,
+            isCollapsed: true,
+            isRealToolCall: toolCall.isRealToolCall,
           },
         };
 
-        // 在最后一个文字段落之后插入新的段落
+        // 在 segments 中插入新的段落
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === aiMessageId
-              ? {
-                  ...m,
-                  segments: [...m.segments, newSegment],
-                }
-              : m
-          )
+          prev.map((m) => {
+            if (m.id !== aiMessageId) return m;
+            return {
+              ...m,
+              segments: [...m.segments, newSegment],
+            };
+          })
         );
       },
       onComplete: (newConversationId) => {
