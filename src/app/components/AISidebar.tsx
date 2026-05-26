@@ -125,52 +125,56 @@ function renderMarkdownLinks(text: string): React.ReactNode[] {
 
 // 处理连续序号换行（1、2、3、或 第一、第二、第三）
 function processSequentialNumbers(text: string): string {
-  // 模式1：数字+顿号/逗号/句号 格式
-  // 如：1、2、3、 或 1,2,3, 或 1.2.3.
-  const numPattern = /(\d+[、，,](?:\s*\d+[、，,])+)/g;
-  // 模式2：第x+量词格式
-  // 如：第一、第二、第三 或 第一步、第二步
-  const diPattern = /(第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]+)[，,、]?)+/g;
-  // 模式3：纯数字+句号开头（带空格）
-  // 如：1. xxx  2. xxx  3. xxx
-  const listPattern = /^(\d+\.\s+.*?)(\s+\d+\.\s+)+/;
+  // 模式1：数字+顿号格式
+  // 如：1、2、3、 -> 换行
+  text = text.replace(/(\d+[、])(?=\d)/g, (match) => match + '\n');
 
-  let result = text;
+  // 模式2：第x格式
+  // 如：第一步：xxx，第二步：xxx，第一步xxx第二步xxx
+  // 匹配所有"第x步/第x次/第x章"等结构
+  const diPattern = /第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]/g;
+  const matches = text.match(diPattern);
 
-  // 处理数字顿号格式：1、2、3、 -> 换行
-  result = result.replace(/(\d+[、])(?=\d)/g, (match) => {
-    return match + '\n';
-  });
-
-  // 处理第x格式：第一、第二、第三 -> 换行
-  result = result.replace(/(第[一二三四五六七八九十百千\d]+(?:[步次章节阶段点级]+))/g, (match, p1, offset) => {
-    // 如果前面是换行或开头，直接返回
-    if (offset === 0 || result[offset - 1] === '\n' || result.slice(0, offset).endsWith('\n')) {
-      return match;
+  if (matches && matches.length > 1) {
+    // 找到所有"第x"的位置
+    const positions: { start: number; length: number }[] = [];
+    let searchIdx = 0;
+    for (const match of matches) {
+      const idx = text.indexOf(match, searchIdx);
+      if (idx !== -1) {
+        positions.push({ start: idx, length: match.length });
+        searchIdx = idx + match.length;
+      }
     }
-    // 检查后面是否有顿号或逗号
-    const afterMatch = result.slice(offset + match.length);
-    if (afterMatch.match(/^[，,、]/)) {
-      return '\n' + match;
+
+    // 在除了第一个之外的所有"第x"前面插入换行
+    if (positions.length > 1) {
+      let offset = 0;
+      for (let i = 1; i < positions.length; i++) {
+        const pos = positions[i].start + offset;
+        // 检查前面是否已经是换行
+        if (text[pos - 1] !== '\n') {
+          text = text.slice(0, pos) + '\n' + text.slice(pos);
+          offset++;
+        }
+      }
     }
-    return match;
-  });
+  }
 
-  // 处理纯数字+句号列表格式：1. xxx 2. xxx -> 换行
-  result = result.replace(/(\d+\.\s*)(?=\d+\.)/g, '\n$1');
+  // 模式3：纯数字+句号列表格式：1. xxx 2. xxx -> 换行
+  text = text.replace(/(\d+\.\s*)(?=\d+\.)/g, '\n$1');
 
-  // 处理逗号分隔的数字列表：1,2,3 -> 换行
-  result = result.replace(/(\d+)(,|\s)(?=\d+)/g, (match, num, sep) => {
-    // 只在连续数字序列中换行，避免把正常逗号也换行
-    const before = result.slice(0, result.indexOf(match));
-    const after = result.slice(result.indexOf(match) + match.length);
+  // 模式4：逗号分隔的数字列表：1,2,3 -> 换行（仅在连续数字序列中）
+  text = text.replace(/(\d+)(,|\s)(?=\d)/g, (match, num, sep) => {
+    const before = text.slice(0, text.indexOf(match));
+    const after = text.slice(text.indexOf(match) + match.length);
     if (/^\d/.test(after) || /^\d/.test(before.slice(-10))) {
       return num + '\n';
     }
     return match;
   });
 
-  return result;
+  return text;
 }
 
 // 处理行内格式化：链接和加粗
