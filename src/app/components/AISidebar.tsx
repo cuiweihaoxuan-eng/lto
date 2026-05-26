@@ -1176,9 +1176,14 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                 </div>
               )}
 
-              {/* Thinking/工具调用块 - 按返回顺序展示在回复内容之前 */}
+              {/* 文本内容 - 回复内容（先显示，避免遮挡） */}
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                {renderMessageContent(message.content, message.thoughts)}
+              </div>
+
+              {/* Thinking/工具调用块 - 显示在回复内容之后，按返回顺序展示 */}
               {message.role === "assistant" && message.thoughts?.length > 0 && (
-                <div className="mb-2 space-y-2">
+                <div className="mt-2 space-y-2">
                   {message.thoughts.map((thought) => (
                     <ToolCallBlock
                       key={thought.id}
@@ -1206,11 +1211,6 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                   ))}
                 </div>
               )}
-
-              {/* 文本内容 - 回复内容 */}
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {renderMessageContent(message.content, message.thoughts)}
-              </div>
 
               {/* 时间戳和操作按钮 */}
               <div className="flex items-center justify-between mt-1">
