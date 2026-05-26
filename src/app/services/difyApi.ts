@@ -293,24 +293,34 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 const toolName = parsed.tool || '';
                 const toolInput = parsed.tool_input || '';
 
-                // 判断是否有明确的工具调用（必须同时有 tool_input 或 JSON 格式的 observation）
+                // 判断是否有明确的工具调用
                 const hasToolInput = toolInput.length > 0;
                 const isToolContent = observationContent.startsWith('{');
                 const isRealToolCall = hasToolInput || isToolContent;
 
-                // 只有包含<think>标签的内容才进入思考模块
+                // 判断是否包含think标签
                 const hasThinkTag = thoughtContent.includes('<think>') || thoughtContent.includes('<think');
 
-                if (!isRealToolCall && !hasThinkTag) {
-                  // 没有工具调用也没有think标签，跳过不处理
-                  // 这些内容会在 agent_message/message 中返回
+                // 清理 thought 中的 think 标签
+                const cleanThought = thoughtContent
+                  .replace(/<think>[\s\S]*?<\/think>/g, '')
+                  .replace(/<think[\s\S]*?<\/think>/gi, '')
+                  .trim();
+
+                // 情况1：有工具调用 -> 创建工具调用块
+                // 情况2：有think标签 -> 创建思考块
+                // 情况3：有非空思考内容（没有think标签但有其他思考内容） -> 也创建思考块
+                // 情况4：只有observation（无工具无think）-> 跳过，等message事件
+                const shouldCreateBlock = isRealToolCall || hasThinkTag || (thoughtContent.length > 0 && !isToolContent && !hasToolInput);
+
+                if (!shouldCreateBlock) {
                   break;
                 }
 
                 let request = undefined;
                 let response = undefined;
 
-                // 从 tool_input 中提取请求信息（JSON 字符串格式）
+                // 从 tool_input 中提取请求信息
                 if (hasToolInput) {
                   try {
                     const parsedToolInput = JSON.parse(toolInput);
@@ -320,7 +330,7 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                   }
                 }
 
-                // 从 observation 中提取响应（如果是 JSON 格式）
+                // 从 observation 中提取响应
                 if (isToolContent) {
                   try {
                     const parsedObs = JSON.parse(observationContent);
@@ -336,15 +346,9 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                       }
                     }
                   } catch {
-                    // 解析失败，保持原始内容
+                    // 解析失败
                   }
                 }
-
-                // 清理 thought 中的 think 标签
-                const cleanThought = thoughtContent
-                  .replace(/<think>[\s\S]*?<\/think>/g, '')
-                  .replace(/<think>[\s\S]*?<\/think>/g, '')
-                  .trim();
 
                 const toolCall: ToolCall = {
                   id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
@@ -364,7 +368,6 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
               case 'agent_message':
               case 'message':
                 // 累积 answer 内容（可能是分段发送的）
-                // 注意：如果answer包含think标签，说明是完整内容，需要过滤
                 if (parsed.answer) {
                   accumulatedAnswer = parsed.answer; // 直接替换，不累积
                   onMessage(accumulatedAnswer, parsed.event);
