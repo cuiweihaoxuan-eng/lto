@@ -259,10 +259,6 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
     let lastConversationId = conversationId || '';
     // 累积答案，用于处理分段发送
     let accumulatedAnswer = '';
-    // 思考状态：是否正在处理think标签内容
-    let inThinkBlock = false;
-    // 当前思考内容
-    let currentThinkContent = '';
 
     while (true) {
       const { done, value } = await reader.read();
@@ -316,15 +312,13 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 // 判断是否有可显示的内容
                 const hasVisibleContent = cleanThought.length > 0 || observationContent.length > 0;
 
-                // 决定创建什么类型的块
-                // 1. 有 tool_input → 工具调用块
-                // 2. 有 think 标签或观察内容 → 思考块
-                // 3. 只有普通思考内容 → 也创建思考块
-                const shouldCreateBlock = isRealToolCall || hasThinkTag || (hasVisibleContent && !isRealToolCall);
-
-                if (!shouldCreateBlock) {
+                // 只要有内容就创建思考块
+                if (!hasVisibleContent) {
                   break;
                 }
+
+                // 决定创建什么类型的块：有 tool_input 是工具调用，否则是思考
+                const isToolCallBlock = hasToolInput;
 
                 let request = undefined;
                 let response = undefined;
@@ -361,12 +355,12 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
                 const toolCall: ToolCall = {
                   id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                  toolName: isRealToolCall ? (toolName || '工具调用') : '思考中',
+                  toolName: isToolCallBlock ? (toolName || '工具调用') : '思考中',
                   thought: cleanThought || undefined,
-                  observation: !isRealToolCall ? observationContent : undefined,
+                  observation: !isToolCallBlock ? observationContent : undefined,
                   request: request,
                   response: response,
-                  isRealToolCall: isRealToolCall,
+                  isRealToolCall: isToolCallBlock,
                 };
 
                 if (onToolCall) {
@@ -376,65 +370,11 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
               case 'agent_message':
               case 'message':
-                // 处理 answer 内容，处理分段think标签
+                // 处理 answer 内容
                 if (parsed.answer) {
-                  const answerText = parsed.answer;
-
-                  // 检测think标签开始
-                  if (!inThinkBlock && (answerText.includes('<think>') || answerText.includes('<think'))) {
-                    inThinkBlock = true;
-                  }
-
-                  // 如果在思考状态
-                  if (inThinkBlock) {
-                    // 检查是否有结束标签
-                    const thinkEndMatch = answerText.match(/<\/think>/i);
-                    if (thinkEndMatch) {
-                      // 思考结束，提取完整的思考内容
-                      inThinkBlock = false;
-                      // 提取从<think>到之间的内容
-                      const fullThinkMatch = answerText.match(/<think[\s\S]*?<\/think>/i);
-                      if (fullThinkMatch) {
-                        const thinkContent = fullThinkMatch[0]
-                          .replace(/<\/?think[^>]*>/gi, '')
-                          .trim();
-                        if (thinkContent && onToolCall) {
-                          onToolCall({
-                            id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                            toolName: '思考中',
-                            thought: thinkContent,
-                            observation: undefined,
-                            request: undefined,
-                            response: undefined,
-                            isRealToolCall: false,
-                          });
-                        }
-                      }
-                      // 移除think标签后发送剩余文字
-                      accumulatedAnswer = answerText
-                        .replace(/<think[\s\S]*?<\/think>/gi, '')
-                        .trim();
-                      onMessage(accumulatedAnswer, parsed.event);
-                    } else {
-                      // think标签未关闭，提取think内容（不发送文字）
-                      const thinkStartMatch = answerText.match(/<think[\s\S]*$/i);
-                      if (thinkStartMatch) {
-                        const thinkPart = thinkStartMatch[0]
-                          .replace(/<\/?think[^>]*>/gi, '')
-                          .trim();
-                        currentThinkContent += thinkPart;
-                      }
-                      // 发送非think的部分（如果有）
-                      const withoutThink = answerText.replace(/<think[\s\S]*$/i, '').trim();
-                      if (withoutThink) {
-                        onMessage(withoutThink, parsed.event);
-                      }
-                    }
-                  } else {
-                    // 不在思考状态，直接发送
-                    accumulatedAnswer = answerText;
-                    onMessage(accumulatedAnswer, parsed.event);
-                  }
+                  // 直接累积所有内容
+                  accumulatedAnswer = parsed.answer;
+                  onMessage(accumulatedAnswer, parsed.event);
                 }
                 break;
 
@@ -449,13 +389,6 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
               case 'message_end':
                 // 对话结束，确保发送最终内容
                 if (accumulatedAnswer) {
-                  // 最终清理think标签
-                  const finalContent = accumulatedAnswer
-                    .replace(/<think[\s\S]*?<\/think>/gi, '')
-                    .trim();
-                  if (finalContent !== accumulatedAnswer) {
-                    accumulatedAnswer = finalContent;
-                  }
                   onMessage(accumulatedAnswer, 'message_end');
                 }
                 // 保存 conversation_id
