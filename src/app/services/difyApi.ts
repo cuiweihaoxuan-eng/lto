@@ -259,6 +259,10 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
     let lastConversationId = conversationId || '';
     // 累积答案，用于处理分段发送
     let accumulatedAnswer = '';
+    // 思考状态：是否正在处理think标签内容
+    let inThinkBlock = false;
+    // 当前思考内容
+    let currentThinkContent = '';
 
     while (true) {
       const { done, value } = await reader.read();
@@ -372,37 +376,65 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
               case 'agent_message':
               case 'message':
-                // 处理 answer 内容
+                // 处理 answer 内容，处理分段think标签
                 if (parsed.answer) {
-                  // 如果包含think标签，提取并通知
-                  if (parsed.answer.includes('<think>') || parsed.answer.includes('<think')) {
-                    // 提取think标签内容
-                    const thinkMatches = parsed.answer.match(/<think[\s\S]*?<\/think>/gi) || [];
-                    for (const thinkMatch of thinkMatches) {
-                      // 清理think标签
-                      const thinkContent = thinkMatch
-                        .replace(/<\/?think[^>]*>/gi, '')
+                  const answerText = parsed.answer;
+
+                  // 检测think标签开始
+                  if (!inThinkBlock && (answerText.includes('<think>') || answerText.includes('<think'))) {
+                    inThinkBlock = true;
+                  }
+
+                  // 如果在思考状态
+                  if (inThinkBlock) {
+                    // 检查是否有结束标签
+                    const thinkEndMatch = answerText.match(/<\/think>/i);
+                    if (thinkEndMatch) {
+                      // 思考结束，提取完整的思考内容
+                      inThinkBlock = false;
+                      // 提取从<think>到之间的内容
+                      const fullThinkMatch = answerText.match(/<think[\s\S]*?<\/think>/i);
+                      if (fullThinkMatch) {
+                        const thinkContent = fullThinkMatch[0]
+                          .replace(/<\/?think[^>]*>/gi, '')
+                          .trim();
+                        if (thinkContent && onToolCall) {
+                          onToolCall({
+                            id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                            toolName: '思考中',
+                            thought: thinkContent,
+                            observation: undefined,
+                            request: undefined,
+                            response: undefined,
+                            isRealToolCall: false,
+                          });
+                        }
+                      }
+                      // 移除think标签后发送剩余文字
+                      accumulatedAnswer = answerText
+                        .replace(/<think[\s\S]*?<\/think>/gi, '')
                         .trim();
-                      if (thinkContent && onToolCall) {
-                        onToolCall({
-                          id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                          toolName: '思考中',
-                          thought: thinkContent,
-                          observation: undefined,
-                          request: undefined,
-                          response: undefined,
-                          isRealToolCall: false,
-                        });
+                      onMessage(accumulatedAnswer, parsed.event);
+                    } else {
+                      // think标签未关闭，提取think内容（不发送文字）
+                      const thinkStartMatch = answerText.match(/<think[\s\S]*$/i);
+                      if (thinkStartMatch) {
+                        const thinkPart = thinkStartMatch[0]
+                          .replace(/<\/?think[^>]*>/gi, '')
+                          .trim();
+                        currentThinkContent += thinkPart;
+                      }
+                      // 发送非think的部分（如果有）
+                      const withoutThink = answerText.replace(/<think[\s\S]*$/i, '').trim();
+                      if (withoutThink) {
+                        onMessage(withoutThink, parsed.event);
                       }
                     }
-                    // 移除think标签后发送
-                    accumulatedAnswer = parsed.answer
-                      .replace(/<think[\s\S]*?<\/think>/gi, '')
-                      .trim();
                   } else {
-                    accumulatedAnswer = parsed.answer;
+                    // 不在思考状态，直接发送
+                    accumulatedAnswer = answerText;
+                    onMessage(accumulatedAnswer, parsed.event);
                   }
-                  onMessage(accumulatedAnswer, parsed.event);
                 }
                 break;
 
