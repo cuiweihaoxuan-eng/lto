@@ -122,15 +122,15 @@ const queryFields = [
     fields: [
       { key: "serviceIncomePlan", label: "收入计划", type: "number-range" as const },
       { key: "serviceIncomeActual", label: "实际入收", type: "number-range" as const },
-      { key: "serviceIncomeProgress", label: "确收进度(%)", type: "text" as const, placeholder: "如: 87.5" },
+      { key: "serviceIncomeProgress", label: "确收进度(%)", type: "number-range" as const },
       { key: "serviceCostPlan", label: "支出计划", type: "number-range" as const },
       { key: "serviceCostActual", label: "实际支出", type: "number-range" as const },
-      { key: "serviceCostProgress", label: "支出进度(%)", type: "text" as const, placeholder: "如: 83.3" },
-      { key: "serviceCostDiffRate", label: "收支差异率(%)", type: "text" as const, placeholder: "如: 4.2" },
+      { key: "serviceCostProgress", label: "支出进度(%)", type: "number-range" as const },
+      { key: "serviceCostDiffRate", label: "收支差异率(%)", type: "number-range" as const },
       { key: "serviceShouldAmount", label: "应入账金额", type: "number-range" as const },
       { key: "serviceEstimateAmount", label: "暂估金额", type: "number-range" as const },
       { key: "serviceUnestimatedAmount", label: "未估金额", type: "number-range" as const },
-      { key: "servicePostingRate", label: "列账率(%)", type: "text" as const, placeholder: "如: 95.0" },
+      { key: "servicePostingRate", label: "列账率(%)", type: "number-range" as const },
     ]
   },
   {
@@ -138,15 +138,15 @@ const queryFields = [
     fields: [
       { key: "equipIncomePlan", label: "收入计划", type: "number-range" as const },
       { key: "equipIncomeActual", label: "实际入收", type: "number-range" as const },
-      { key: "equipIncomeProgress", label: "确收进度(%)", type: "text" as const, placeholder: "如: 86.7" },
+      { key: "equipIncomeProgress", label: "确收进度(%)", type: "number-range" as const },
       { key: "equipCostPlan", label: "支出计划", type: "number-range" as const },
       { key: "equipCostActual", label: "实际支出", type: "number-range" as const },
-      { key: "equipCostProgress", label: "支出进度(%)", type: "text" as const, placeholder: "如: 85.0" },
-      { key: "equipCostDiffRate", label: "收支差异率(%)", type: "text" as const, placeholder: "如: 1.7" },
+      { key: "equipCostProgress", label: "支出进度(%)", type: "number-range" as const },
+      { key: "equipCostDiffRate", label: "收支差异率(%)", type: "number-range" as const },
       { key: "equipShouldAmount", label: "应入账金额", type: "number-range" as const },
       { key: "equipEstimateAmount", label: "暂估金额", type: "number-range" as const },
       { key: "equipUnestimatedAmount", label: "未估金额", type: "number-range" as const },
-      { key: "equipPostingRate", label: "列账率(%)", type: "text" as const, placeholder: "如: 95.0" },
+      { key: "equipPostingRate", label: "列账率(%)", type: "number-range" as const },
     ]
   },
 ];
