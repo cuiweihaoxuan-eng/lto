@@ -343,7 +343,6 @@ export function SelfDeliverySettlement() {
   // 查询条件状态
   const [searchArea, setSearchArea] = useState("");
   const [searchBusinessUnit, setSearchBusinessUnit] = useState("");
-  const [searchType, setSearchType] = useState<string>("全部");
   const [searchStatus, setSearchStatus] = useState<string>("全部");
   const [searchApplyTimeStart, setSearchApplyTimeStart] = useState("");
   const [searchApplyTimeEnd, setSearchApplyTimeEnd] = useState("");
@@ -372,8 +371,11 @@ export function SelfDeliverySettlement() {
   const [searchAcceptTimeStart, setSearchAcceptTimeStart] = useState("");
   const [searchAcceptTimeEnd, setSearchAcceptTimeEnd] = useState("");
 
-  // 四块区域的展开/收起状态
-  const [expandedBasic, setExpandedBasic] = useState(false);
+  // 小微标品/三联单创建时间范围
+  const [searchCreateTimeStart, setSearchCreateTimeStart] = useState("");
+  const [searchCreateTimeEnd, setSearchCreateTimeEnd] = useState("");
+
+  // 各类型的展开/收起状态
   const [expandedProject, setExpandedProject] = useState(false);
   const [expandedSmallProduct, setExpandedSmallProduct] = useState(false);
   const [expandedTriple, setExpandedTriple] = useState(false);
@@ -388,7 +390,7 @@ export function SelfDeliverySettlement() {
   const [auditRecord, setAuditRecord] = useState<InnerRecord | null>(null);
   const [auditResult, setAuditResult] = useState<"通过" | "驳回" | null>(null);
   const [auditOpinion, setAuditOpinion] = useState("");
-  const [activeTab, setActiveTab] = useState<"全部" | "待我审核" | "历史审核">("全部");
+  const [typeTab, setTypeTab] = useState<SettlementType>("项目型");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importType, setImportType] = useState<"三联单" | "小微标品" | "凭证">("三联单");
 
@@ -427,15 +429,15 @@ export function SelfDeliverySettlement() {
 
   // 筛选数据
   const filteredData = mockSettlementData.filter(item => {
+    // 按类型Tab筛选
+    if (item.type !== typeTab) return false;
     // 基本信息筛选
     if (searchArea && !item.branch.includes(searchArea)) return false;
     if (searchBusinessUnit && !item.businessUnit.includes(searchBusinessUnit)) return false;
-    if (searchType !== "全部" && item.type !== searchType) return false;
     if (searchStatus !== "全部" && item.status !== searchStatus) return false;
-    if (searchCustomerName && !item.customerName.includes(searchCustomerName)) return false;
 
     // 项目型筛选
-    if (item.type === "项目型" || searchType === "全部") {
+    if (item.type === "项目型") {
       if (searchOppName && !item.oppName.includes(searchOppName)) return false;
       if (searchOppCode && !item.oppCode.includes(searchOppCode)) return false;
       if (searchContractName && !item.contractName.includes(searchContractName)) return false;
@@ -461,9 +463,9 @@ export function SelfDeliverySettlement() {
     return true;
   });
 
-  // 计算统计数据
+  // 计算统计数据（基于全量数据，不受Tab筛选影响）
   const calculateStats = (type: SettlementType | null) => {
-    const data = type ? filteredData.filter(d => d.type === type) : filteredData;
+    const data = type ? mockSettlementData.filter(d => d.type === type) : mockSettlementData;
 
     // 全部：所有记录
     const all = data;
@@ -501,20 +503,6 @@ export function SelfDeliverySettlement() {
       <div className="px-6 pt-6 pb-0 flex-shrink-0">
         <h2 className="text-lg font-medium text-gray-900">自交付结算管理</h2>
         <p className="text-sm text-gray-500 mt-1">自交付结算情况统计与管理</p>
-      </div>
-
-      {/* Tab页签 */}
-      <div className="px-6 mt-4 flex-shrink-0">
-        <TabNav
-          style="pill"
-          tabs={[
-            { id: "全部", label: "全部", count: filteredData.length },
-            { id: "待我审核", label: "待我审核", count: filteredData.filter(d => d.innerList.some(i => i.status === "已申请" || i.status === "审核中")).length },
-            { id: "历史审核", label: "历史审核", count: filteredData.filter(d => d.innerList.some(i => i.status === "审核通过" || i.status === "审核驳回")).length }
-          ]}
-          activeTab={activeTab}
-          onTabChange={(id) => setActiveTab(id as "全部" | "待我审核" | "历史审核")}
-        />
       </div>
 
       {/* 统计卡片区域 - 15个统计卡片分3组，每组5个 */}
@@ -556,11 +544,25 @@ export function SelfDeliverySettlement() {
         </div>
       </div>
 
+      {/* 类型Tab页签 */}
+      <div className="px-6 mt-4 flex-shrink-0">
+        <TabNav
+          style="pill"
+          tabs={[
+            { id: "项目型", label: "项目型", count: projectStats.all.count },
+            { id: "小微标品", label: "小微标品", count: standardStats.all.count },
+            { id: "三联单", label: "三联单", count: tripleStats.all.count }
+          ]}
+          activeTab={typeTab}
+          onTabChange={(id) => setTypeTab(id as SettlementType)}
+        />
+      </div>
+
       {/* 查询条件区域 */}
       <div className="px-6 mt-4 flex-shrink-0">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          {/* 基本信息 */}
-          <div className="mb-4">
+          {/* 项目型查询 */}
+          {typeTab === "项目型" && (
             <div className="grid grid-cols-4 gap-x-6 gap-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">区域</label>
@@ -569,18 +571,6 @@ export function SelfDeliverySettlement() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">经营单元</label>
                 <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
-                <Select value={searchType} onValueChange={setSearchType}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="全部">全部</SelectItem>
-                    <SelectItem value="项目型">项目型</SelectItem>
-                    <SelectItem value="小微标品">小微标品</SelectItem>
-                    <SelectItem value="三联单">三联单</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
@@ -596,154 +586,154 @@ export function SelfDeliverySettlement() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </div>
-
-          {/* 基本信息-更多 */}
-          {expandedBasic && (
-            <div className="mb-4 pt-4 border-t border-gray-100">
-              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">申请时间起</label>
-                  <Input type="date" value={searchApplyTimeStart} onChange={e => setSearchApplyTimeStart(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">申请时间止</label>
-                  <Input type="date" value={searchApplyTimeEnd} onChange={e => setSearchApplyTimeEnd(e.target.value)} />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">客户名称</label>
-                  <Input placeholder="请输入" value={searchCustomerName} onChange={e => setSearchCustomerName(e.target.value)} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 项目型 */}
-          <div className="mb-4 pt-4 border-t border-gray-100">
-            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
-              <span className="w-1 h-4 bg-blue-500 rounded mr-2"></span>
-              项目型
-            </div>
-            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">商机名称</label>
                 <Input placeholder="请输入" value={searchOppName} onChange={e => setSearchOppName(e.target.value)} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">商机编码</label>
-                <Input placeholder="请输入" value={searchOppCode} onChange={e => setSearchOppCode(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">合同名称</label>
-                <Input placeholder="请输入" value={searchContractName} onChange={e => setSearchContractName(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">合同编码</label>
-                <Input placeholder="请输入" value={searchContractCode} onChange={e => setSearchContractCode(e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* 项目型-更多 */}
-          {expandedProject && (
-            <div className="mb-4 pt-4 border-t border-gray-100">
-              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
-                  <Input placeholder="请输入" value={searchProjectName} onChange={e => setSearchProjectName(e.target.value)} />
-                </div>
-                <div className="col-span-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
-                  <Input placeholder="请输入" value={searchProjectCode} onChange={e => setSearchProjectCode(e.target.value)} />
-                </div>
-              </div>
+              {expandedProject && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">商机编码</label>
+                    <Input placeholder="请输入" value={searchOppCode} onChange={e => setSearchOppCode(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">合同名称</label>
+                    <Input placeholder="请输入" value={searchContractName} onChange={e => setSearchContractName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">合同编码</label>
+                    <Input placeholder="请输入" value={searchContractCode} onChange={e => setSearchContractCode(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                    <Input placeholder="请输入" value={searchProjectName} onChange={e => setSearchProjectName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
+                    <Input placeholder="请输入" value={searchProjectCode} onChange={e => setSearchProjectCode(e.target.value)} />
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* 小微标品 */}
-          <div className="mb-4 pt-4 border-t border-gray-100">
-            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
-              <span className="w-1 h-4 bg-green-500 rounded mr-2"></span>
-              小微标品
-            </div>
+          {/* 小微标品查询 */}
+          {typeTab === "小微标品" && (
             <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">区域</label>
+                <Input placeholder="请输入" value={searchArea} onChange={e => setSearchArea(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">经营单元</label>
+                <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                <Select value={searchStatus} onValueChange={setSearchStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="未发">未发</SelectItem>
+                    <SelectItem value="已申请">已申请</SelectItem>
+                    <SelectItem value="审核中">审核中</SelectItem>
+                    <SelectItem value="审核通过">审核通过</SelectItem>
+                    <SelectItem value="发放完成">发放完成</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">工单编号</label>
                 <Input placeholder="请输入" value={searchWorkOrderNo} onChange={e => setSearchWorkOrderNo(e.target.value)} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">主定单编码</label>
-                <Input placeholder="请输入" value={searchMainOrderCode} onChange={e => setSearchMainOrderCode(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
-                <Input placeholder="请输入" value={searchOrderCode} onChange={e => setSearchOrderCode(e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* 小微标品-更多 */}
-          {expandedSmallProduct && (
-            <div className="mb-4 pt-4 border-t border-gray-100">
-              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
-                <div className="col-span-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">小微标品类型</label>
-                  <Select value={searchSmallProductType} onValueChange={setSearchSmallProductType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="全部">全部</SelectItem>
-                      <SelectItem value="视联网">视联网</SelectItem>
-                      <SelectItem value="机房整治">机房整治</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              {expandedSmallProduct && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">主定单编码</label>
+                    <Input placeholder="请输入" value={searchMainOrderCode} onChange={e => setSearchMainOrderCode(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
+                    <Input placeholder="请输入" value={searchOrderCode} onChange={e => setSearchOrderCode(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
+                    <Select value={searchSmallProductType} onValueChange={setSearchSmallProductType}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="全部">全部</SelectItem>
+                        <SelectItem value="视联网">视联网</SelectItem>
+                        <SelectItem value="机房整治">机房整治</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">创建时间</label>
+                    <div className="flex gap-2">
+                      <Input type="date" value={searchCreateTimeStart} onChange={e => setSearchCreateTimeStart(e.target.value)} />
+                      <span className="self-center text-gray-400">-</span>
+                      <Input type="date" value={searchCreateTimeEnd} onChange={e => setSearchCreateTimeEnd(e.target.value)} />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* 三联单 */}
-          <div className="mb-4 pt-4 border-t border-gray-100">
-            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
-              <span className="w-1 h-4 bg-purple-500 rounded mr-2"></span>
-              三联单
-            </div>
-            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
-                <Input placeholder="请输入" value={searchTripleOrderCode} onChange={e => setSearchTripleOrderCode(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">受理的业务号码</label>
-                <Input placeholder="请输入" value={searchServiceNumber} onChange={e => setSearchServiceNumber(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">资产唯一编码</label>
-                <Input placeholder="请输入" value={searchAssetCode} onChange={e => setSearchAssetCode(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">优惠编码</label>
-                <Input placeholder="请输入" value={searchDiscountCode} onChange={e => setSearchDiscountCode(e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* 三联单-更多 */}
-          {expandedTriple && (
-            <div className="mb-4 pt-4 border-t border-gray-100">
+          {/* 三联单查询 - 合并基础查询和特有查询 */}
+          {typeTab === "三联单" && (
+            <div>
               <div className="grid grid-cols-4 gap-x-6 gap-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">优惠名称</label>
-                  <Input placeholder="请输入" value={searchDiscountName} onChange={e => setSearchDiscountName(e.target.value)} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">经营单元</label>
+                  <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">受理时间起</label>
-                  <Input type="date" value={searchAcceptTimeStart} onChange={e => setSearchAcceptTimeStart(e.target.value)} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                  <Select value={searchStatus} onValueChange={setSearchStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="全部">全部</SelectItem>
+                      <SelectItem value="未发">未发</SelectItem>
+                      <SelectItem value="已申请">已申请</SelectItem>
+                      <SelectItem value="审核中">审核中</SelectItem>
+                      <SelectItem value="审核通过">审核通过</SelectItem>
+                      <SelectItem value="发放完成">发放完成</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">受理时间止</label>
-                  <Input type="date" value={searchAcceptTimeEnd} onChange={e => setSearchAcceptTimeEnd(e.target.value)} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
+                  <Input placeholder="请输入" value={searchTripleOrderCode} onChange={e => setSearchTripleOrderCode(e.target.value)} />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">受理的业务号码</label>
+                  <Input placeholder="请输入" value={searchServiceNumber} onChange={e => setSearchServiceNumber(e.target.value)} />
+                </div>
+                {expandedTriple && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">资产唯一编码</label>
+                      <Input placeholder="请输入" value={searchAssetCode} onChange={e => setSearchAssetCode(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">优惠编码</label>
+                      <Input placeholder="请输入" value={searchDiscountCode} onChange={e => setSearchDiscountCode(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">优惠名称</label>
+                      <Input placeholder="请输入" value={searchDiscountName} onChange={e => setSearchDiscountName(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">创建时间</label>
+                      <div className="flex gap-2">
+                        <Input type="date" value={searchCreateTimeStart} onChange={e => setSearchCreateTimeStart(e.target.value)} />
+                        <span className="self-center text-gray-400">-</span>
+                        <Input type="date" value={searchCreateTimeEnd} onChange={e => setSearchCreateTimeEnd(e.target.value)} />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -752,14 +742,16 @@ export function SelfDeliverySettlement() {
           <div className="flex justify-between items-center pt-4 border-t border-gray-100">
             <button
               onClick={() => {
-                setExpandedBasic(!expandedBasic);
                 setExpandedProject(!expandedProject);
                 setExpandedSmallProduct(!expandedSmallProduct);
                 setExpandedTriple(!expandedTriple);
               }}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
-              {expandedBasic || expandedProject || expandedSmallProduct || expandedTriple ? "收起更多条件" : "展开更多条件"}
+              {(typeTab === "项目型" && expandedProject) ||
+               (typeTab === "小微标品" && expandedSmallProduct) ||
+               (typeTab === "三联单" && expandedTriple)
+                ? "收起更多条件" : "展开更多条件"}
             </button>
             <div className="flex gap-2">
               <Button variant="outline" className="gap-1">
@@ -809,228 +801,469 @@ export function SelfDeliverySettlement() {
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">展开</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">支局</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">类型</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">商机名称</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">商机编码</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">合同名称</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">合同编码</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">项目名称</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">项目编码</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">客户名称</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">客户编码</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">是否维保</th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">周期</th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">开始时间</th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">结束时间</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">成本金额</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">自交付金额</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">可申请</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
-              </tr>
+              {/* 项目型表头 */}
+              {typeTab === "项目型" && (
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">展开</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">支局</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">类型</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">商机名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">商机编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">合同名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">合同编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">项目名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">项目编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">客户名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">客户编码</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">是否维保</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">周期</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">开始时间</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">结束时间</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">成本金额</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">自交付金额</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">可申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
+                </tr>
+              )}
+              {/* 小微标品表头 */}
+              {typeTab === "小微标品" && (
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">展开</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">区域</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">类型</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">工单编号</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32">主订单编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">订单编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">业务类型</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">客户名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">工单状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">收单人</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">环节名称</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">可申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
+                </tr>
+              )}
+              {/* 三联单表头 */}
+              {typeTab === "三联单" && (
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">展开</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">类型</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">VIP客户名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">VIP卡号</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">统计合同额</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-32">竣工时间</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">受理归属分局</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">受理归属支局</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">受理人名称</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">受理人工号</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">受理金额</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-32">受理时间</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">订单编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">订单状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">资产唯一编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">受理的业务号码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">优惠编码</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">优惠名称</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">翼装大师</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">营销归属分局</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">营销归属支局</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">营销人姓名</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">营销人工号</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">可申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
+                </tr>
+              )}
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredData.map(row => (
                 <React.Fragment key={row.id}>
-                  <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
-                    <td className="px-3 py-3 bg-white sticky left-0 z-10">
-                      <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
-                        {expandedRows.has(row.id) ? (
-                          <ChevronDown className="w-4 h-4 text-gray-500" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-gray-500" />
-                        )}
-                      </button>
-                    </td>
-                    <td className="px-3 py-3">{row.index}</td>
-                    <td className="px-3 py-3">{row.businessUnit}</td>
-                    <td className="px-3 py-3">{row.branch}</td>
-                    <td className="px-3 py-3">
-                      <Badge className={
-                        row.type === "项目型" ? "bg-blue-100 text-blue-700" :
-                        row.type === "小微标品" ? "bg-green-100 text-green-700" :
-                        "bg-purple-100 text-purple-700"
-                      }>
-                        {row.type}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-3 max-w-36 truncate" title={row.oppName}>{row.oppName}</td>
-                    <td className="px-3 py-3">{row.oppCode}</td>
-                    <td className="px-3 py-3 max-w-32 truncate" title={row.contractName}>{row.contractName}</td>
-                    <td className="px-3 py-3">{row.contractCode}</td>
-                    <td className="px-3 py-3 max-w-32 truncate" title={row.projectName}>{row.projectName}</td>
-                    <td className="px-3 py-3">{row.projectCode}</td>
-                    <td className="px-3 py-3 max-w-24 truncate" title={row.customerName}>{row.customerName}</td>
-                    <td className="px-3 py-3">{row.customerCode}</td>
-                    <td className="px-3 py-3 text-right">{row.forwardAmount}</td>
-                    <td className="px-3 py-3 text-center">
-                      {row.isWarrantyProject ? "是" : "否"}
-                    </td>
-                    <td className="px-3 py-3 text-center">{row.cycle}</td>
-                    <td className="px-3 py-3 text-center">{row.startDate}</td>
-                    <td className="px-3 py-3 text-center">{row.endDate}</td>
-                    <td className="px-3 py-3 text-right">{row.selfDeliveryForwardAmount}</td>
-                    <td className="px-3 py-3 text-right">{row.selfDeliveryCostAmount}</td>
-                    <td className="px-3 py-3 text-right">{row.forwardContractSelfDeliveryAmount}</td>
-                    <td className="px-3 py-3 text-right font-medium">{row.canApplyAmount}</td>
-                    <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
-                    <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
-                    <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
-                    <td className="px-3 py-3">
-                      <Badge className={getStatusBadge(row.status)}>{row.status}</Badge>
-                    </td>
-                    <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap"
-                        onClick={() => {
-                          // 传入一个只有基本信息的对象，清空innerList以确保是新增模式
-                          const newRowData = {
-                            ...row,
-                            innerList: [],
-                            isEditMode: false
-                          };
-                          setSelectedRowData(newRowData);
-                          setApplyDialogOpen(true);
-                        }}
-                      >
-                        <Plus className="w-3 h-3" />
-                        申请自交付结算
-                      </Button>
-                    </td>
-                  </tr>
-
-                  {/* 内层结算单列表 */}
-                  {expandedRows.has(row.id) && (
-                    <tr className="bg-gray-50">
-                      <td colSpan={26} className="p-0 align-top">
-                        <div className="py-3 px-4">
-                          <div className="bg-white border border-gray-200 rounded-lg">
-                            <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
-                              <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                <span className="w-1 h-4 bg-blue-500 rounded flex-shrink-0"></span>
-                                结算单列表
+                  {/* 项目型行 */}
+                  {typeTab === "项目型" && (
+                    <>
+                      <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
+                        <td className="px-3 py-3 bg-white sticky left-0 z-10">
+                          <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
+                            {expandedRows.has(row.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+                          </button>
+                        </td>
+                        <td className="px-3 py-3">{row.index}</td>
+                        <td className="px-3 py-3">{row.businessUnit}</td>
+                        <td className="px-3 py-3">{row.branch}</td>
+                        <td className="px-3 py-3"><Badge className="bg-blue-100 text-blue-700">{row.type}</Badge></td>
+                        <td className="px-3 py-3 max-w-36 truncate" title={row.oppName}>{row.oppName}</td>
+                        <td className="px-3 py-3">{row.oppCode}</td>
+                        <td className="px-3 py-3 max-w-32 truncate" title={row.contractName}>{row.contractName}</td>
+                        <td className="px-3 py-3">{row.contractCode}</td>
+                        <td className="px-3 py-3 max-w-32 truncate" title={row.projectName}>{row.projectName}</td>
+                        <td className="px-3 py-3">{row.projectCode}</td>
+                        <td className="px-3 py-3 max-w-24 truncate" title={row.customerName}>{row.customerName}</td>
+                        <td className="px-3 py-3">{row.customerCode}</td>
+                        <td className="px-3 py-3 text-right">{row.forwardAmount}</td>
+                        <td className="px-3 py-3 text-center">{row.isWarrantyProject ? "是" : "否"}</td>
+                        <td className="px-3 py-3 text-center">{row.cycle}</td>
+                        <td className="px-3 py-3 text-center">{row.startDate}</td>
+                        <td className="px-3 py-3 text-center">{row.endDate}</td>
+                        <td className="px-3 py-3 text-right">{row.selfDeliveryForwardAmount}</td>
+                        <td className="px-3 py-3 text-right">{row.selfDeliveryCostAmount}</td>
+                        <td className="px-3 py-3 text-right">{row.forwardContractSelfDeliveryAmount}</td>
+                        <td className="px-3 py-3 text-right font-medium">{row.canApplyAmount}</td>
+                        <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
+                        <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
+                        <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
+                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
+                          <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
+                            <Plus className="w-3 h-3" />申请自交付结算
+                          </Button>
+                        </td>
+                      </tr>
+                      {/* 项目型内层结算单列表 */}
+                      {expandedRows.has(row.id) && (
+                        <tr className="bg-gray-50">
+                          <td colSpan={26} className="p-0 align-top">
+                            <div className="py-3 px-4">
+                              <div className="bg-white border border-gray-200 rounded-lg">
+                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
+                                  <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                    <span className="w-1 h-4 bg-blue-500 rounded flex-shrink-0"></span>
+                                    结算单列表
+                                  </div>
+                                </div>
+                                {row.innerList.length > 0 ? (
+                                  <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
+                                    <table className="w-full text-sm">
+                                      <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                                        <tr>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
+                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-gray-100">
+                                        {row.innerList.map(item => (
+                                          <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
+                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
+                                            <td className="px-3 py-2">{item.code}</td>
+                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex flex-wrap gap-1">
+                                                {item.members.map((m, idx) => (
+                                                  <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">{m}</span>
+                                                ))}
+                                              </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
+                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
+                                            <td className="px-3 py-2">{item.applicant}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex gap-2 justify-center">
+                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
+                                                {(item.status === "已申请" || item.status === "审核中") && (
+                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
+                                                )}
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
+                                )}
                               </div>
                             </div>
-                            {row.innerList.length > 0 ? (
-                              <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
-                                <table className="w-full text-sm">
-                                  <colgroup>
-                                    <col style={{ width: "50px" }} />
-                                    <col style={{ width: "160px" }} />
-                                    <col style={{ width: "112px" }} />
-                                    <col style={{ width: "96px" }} />
-                                    <col style={{ width: "96px" }} />
-                                    <col style={{ width: "192px" }} />
-                                    <col style={{ width: "64px" }} />
-                                    <col style={{ width: "96px" }} />
-                                    <col style={{ width: "80px" }} />
-                                    <col style={{ width: "80px" }} />
-                                    <col style={{ width: "112px" }} />
-                                    <col style={{ width: "80px" }} />
-                                    <col style={{ width: "150px" }} />
-                                  </colgroup>
-                                  <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                                    <tr>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
-                                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-gray-100">
-                                    {row.innerList.map(item => (
-                                      <tr key={item.id} className="hover:bg-gray-50">
-                                        <td className="px-3 py-2">{item.id.replace("i", "")}</td>
-                                        <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
-                                        <td className="px-3 py-2">{item.code}</td>
-                                        <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
-                                        <td className="px-3 py-2 text-center">
-                                          <Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge>
-                                        </td>
-                                        <td className="px-3 py-2">
-                                          <div className="flex flex-wrap gap-1">
-                                            {item.members.map((m, idx) => (
-                                              <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">{m}</span>
-                                            ))}
-                                          </div>
-                                        </td>
-                                        <td className="px-3 py-2 text-center">{item.personDays}</td>
-                                        <td className="px-3 py-2 text-center">{item.applyDate}</td>
-                                        <td className="px-3 py-2">{item.applicant}</td>
-                                        <td className="px-3 py-2 text-center">
-                                          <Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge>
-                                        </td>
-                                        <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>
-                                          {item.voucher || "-"}
-                                        </td>
-                                        <td className="px-3 py-2 text-center">
-                                          <Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge>
-                                        </td>
-                                        <td className="px-3 py-2">
-                                          <div className="flex gap-2 justify-center">
-                                            <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}>
-                                              <Eye className="w-3 h-3 mr-1" />
-                                              查看
-                                            </Button>
-                                            {(item.status === "已申请" || item.status === "审核中") && (
-                                              <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}>
-                                                <CheckCircle className="w-3 h-3 mr-1" />
-                                                审核
-                                              </Button>
-                                            )}
-                                            {item.status === "已申请" && (
-                                              <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}>
-                                                <Edit className="w-3 h-3 mr-1" />
-                                                修改
-                                              </Button>
-                                            )}
-                                            {item.status === "已申请" && (
-                                              <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}>
-                                                <Trash2 className="w-3 h-3 mr-1" />
-                                                删除
-                                              </Button>
-                                            )}
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                  {/* 小微标品行 */}
+                  {typeTab === "小微标品" && (
+                    <>
+                      <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
+                        <td className="px-3 py-3 bg-white sticky left-0 z-10">
+                          <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
+                            {expandedRows.has(row.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+                          </button>
+                        </td>
+                        <td className="px-3 py-3">{row.index}</td>
+                        <td className="px-3 py-3">{row.branch}</td>
+                        <td className="px-3 py-3">{row.businessUnit}</td>
+                        <td className="px-3 py-3"><Badge className="bg-green-100 text-green-700">小微标品</Badge></td>
+                        <td className="px-3 py-3">{row.projectCode}</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3 max-w-24 truncate" title={row.customerName}>{row.customerName}</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3 text-right font-medium">{row.canApplyAmount}</td>
+                        <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
+                        <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
+                        <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
+                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
+                          <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
+                            <Plus className="w-3 h-3" />申请自交付结算
+                          </Button>
+                        </td>
+                      </tr>
+                      {/* 小微标品内层结算单列表 */}
+                      {expandedRows.has(row.id) && (
+                        <tr className="bg-gray-50">
+                          <td colSpan={19} className="p-0 align-top">
+                            <div className="py-3 px-4">
+                              <div className="bg-white border border-gray-200 rounded-lg">
+                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
+                                  <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                    <span className="w-1 h-4 bg-green-500 rounded flex-shrink-0"></span>
+                                    结算单列表
+                                  </div>
+                                </div>
+                                {row.innerList.length > 0 ? (
+                                  <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
+                                    <table className="w-full text-sm">
+                                      <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                                        <tr>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
+                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-gray-100">
+                                        {row.innerList.map(item => (
+                                          <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
+                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
+                                            <td className="px-3 py-2">{item.code}</td>
+                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex flex-wrap gap-1">
+                                                {item.members.map((m, idx) => (
+                                                  <span key={idx} className="px-1.5 py-0.5 bg-green-50 text-green-600 rounded text-xs">{m}</span>
+                                                ))}
+                                              </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
+                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
+                                            <td className="px-3 py-2">{item.applicant}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex gap-2 justify-center">
+                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
+                                                {(item.status === "已申请" || item.status === "审核中") && (
+                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
+                                                )}
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                  {/* 三联单行 */}
+                  {typeTab === "三联单" && (
+                    <>
+                      <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
+                        <td className="px-3 py-3 bg-white sticky left-0 z-10">
+                          <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
+                            {expandedRows.has(row.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
+                          </button>
+                        </td>
+                        <td className="px-3 py-3">{row.index}</td>
+                        <td className="px-3 py-3">{row.businessUnit}</td>
+                        <td className="px-3 py-3"><Badge className="bg-purple-100 text-purple-700">三联单</Badge></td>
+                        <td className="px-3 py-3">{row.customerName}</td>
+                        <td className="px-3 py-3">{row.customerCode}</td>
+                        <td className="px-3 py-3 text-right">{row.forwardAmount}</td>
+                        <td className="px-3 py-3 text-center">{row.endDate}</td>
+                        <td className="px-3 py-3">{row.businessUnit}</td>
+                        <td className="px-3 py-3">{row.branch}</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3 text-right">{row.selfDeliveryForwardAmount}</td>
+                        <td className="px-3 py-3 text-center">{row.startDate}</td>
+                        <td className="px-3 py-3">{row.projectCode}</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3 text-center">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3">-</td>
+                        <td className="px-3 py-3 text-right font-medium">{row.canApplyAmount}</td>
+                        <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
+                        <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
+                        <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
+                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
+                          <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
+                            <Plus className="w-3 h-3" />申请自交付结算
+                          </Button>
+                        </td>
+                      </tr>
+                      {/* 三联单内层结算单列表 */}
+                      {expandedRows.has(row.id) && (
+                        <tr className="bg-gray-50">
+                          <td colSpan={30} className="p-0 align-top">
+                            <div className="py-3 px-4">
+                              <div className="bg-white border border-gray-200 rounded-lg">
+                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
+                                  <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                    <span className="w-1 h-4 bg-purple-500 rounded flex-shrink-0"></span>
+                                    结算单列表
+                                  </div>
+                                </div>
+                                {row.innerList.length > 0 ? (
+                                  <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
+                                    <table className="w-full text-sm">
+                                      <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                                        <tr>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
+                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-gray-100">
+                                        {row.innerList.map(item => (
+                                          <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
+                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
+                                            <td className="px-3 py-2">{item.code}</td>
+                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex flex-wrap gap-1">
+                                                {item.members.map((m, idx) => (
+                                                  <span key={idx} className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded text-xs">{m}</span>
+                                                ))}
+                                              </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
+                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
+                                            <td className="px-3 py-2">{item.applicant}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
+                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex gap-2 justify-center">
+                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
+                                                {(item.status === "已申请" || item.status === "审核中") && (
+                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
+                                                )}
+                                                {item.status === "已申请" && (
+                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
+                                                )}
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </React.Fragment>
               ))}
               {filteredData.length === 0 && (
                 <tr>
-                  <td colSpan={26} className="px-3 py-8 text-center text-gray-500">
+                  <td colSpan={typeTab === "三联单" ? 30 : typeTab === "小微标品" ? 19 : 26} className="px-3 py-8 text-center text-gray-500">
                     暂无数据
                   </td>
                 </tr>
