@@ -13,7 +13,8 @@ import {
   Target,
   ChevronLeft,
   DollarSign,
-  Wallet
+  Wallet,
+  Package
 } from "lucide-react";
 
 interface MenuItem {
@@ -127,6 +128,13 @@ const menuItems: MenuItem[] = [
         id: "yecai-report-group",
         label: "业财融合报表",
         children: yecaiChildren
+      },
+      {
+        id: "revenue-expense-view",
+        label: "收支视图",
+        children: [
+          { id: "confirm-cost-list", label: "确认成本清单" },
+        ]
       }
     ]
   },
@@ -139,6 +147,11 @@ const menuItems: MenuItem[] = [
     id: "contract-payment-confirmation",
     label: "合同收付款确认",
     icon: <DollarSign className="w-4 h-4" />
+  },
+  {
+    id: "fixed-assets",
+    label: "固定资产管理",
+    icon: <Package className="w-4 h-4" />
   },
   {
     id: "settings",
@@ -158,7 +171,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem, onItemChange }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk", "task-wallet"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk", "task-wallet", "fixed-assets"]);
   const [activeItem, setActiveItem] = useState("dashboard");
   const [cascadeParent, setCascadeParent] = useState<string | null>(null);
   const [cascadePos, setCascadePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });

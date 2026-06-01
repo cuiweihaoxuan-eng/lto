@@ -50,16 +50,14 @@ export interface SendMessageOptions {
   onError: (error: Error) => void;
 }
 
-/**
- * 上传文件到星辰平台，获取 file_id
- * @param file - File 对象
- * @param apiKey - API 密钥
- * @param baseUrl - API 地址
- * @param user - 用户标识
- */
+// think 标签正则：支持全角和半角括号
+// 星辰格式：<think>...</think>
+// think 标签正则：支持多种格式
+const THINK_START_PATTERN = /<think>|<think>|<think>/i;
+const THINK_END_PATTERN = /<\/think>|<\/think>|<\/think>/i;
 export async function uploadFileToXingchen(file: File, apiKey: string, baseUrl: string, user: string): Promise<string | null> {
+
   console.log('[星辰平台] 开始上传文件到:', `${baseUrl}/files/upload`);
-  console.log('[星辰平台] 文件信息:', { name: file.name, size: file.size, type: file.type });
 
   try {
     const formData = new FormData();
@@ -259,6 +257,11 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
     let lastConversationId = conversationId || '';
     // 累积答案，用于处理分段发送
     let accumulatedAnswer = '';
+    // 累积当前的 think 内容（跨多个事件）
+    let pendingThinkContent = '';
+    let isInThinkTag = false;
+    // 标记：agent_thought 事件已经处理过 think 标签，不需要在 agent_message 中重复处理
+    let thoughtProcessedThinkTag = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -284,11 +287,13 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
           try {
             const parsed = JSON.parse(data);
+            console.log(`[Dify] 收到事件 ${parsed.event}:`, JSON.stringify(parsed));
 
             switch (parsed.event) {
               case 'agent_thought':
                 // Agent 思考过程
-                const thoughtContent = parsed.thought?.trim() || '';
+                const thoughtContent = parsed.thought || '';
+                console.log('[Dify] agent_thought thought 内容:', thoughtContent.slice(0, 500));
                 const observationContent = parsed.observation?.trim() || '';
                 const toolName = parsed.tool || '';
                 const toolInput = parsed.tool_input || '';
@@ -300,81 +305,148 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 // 判断是否是真正的工具调用：有 tool_input 字段
                 const isRealToolCall = hasToolInput;
 
-                // 判断是否包含think标签
-                const hasThinkTag = thoughtContent.includes('<think>') || thoughtContent.includes('<think');
+                // 提取所有 think 标签内容作为思考过程
+                // 支持半角和全角括号的 think 标签
+                const thinkBlocks: string[] = [];
+                let lastEndIndex = 0;
 
-                // 清理 thought 中的 think 标签
-                const cleanThought = thoughtContent
-                  .replace(/<think>[\s\S]*?<\/think>/g, '')
-                  .replace(/<think[\s\S]*?<\/think>/gi, '')
-                  .trim();
-
-                // 判断是否有可显示的内容
-                const hasVisibleContent = cleanThought.length > 0 || observationContent.length > 0;
-
-                // 只要有内容就创建思考块
-                if (!hasVisibleContent) {
-                  break;
+                // 使用全局正则提取所有 think 标签内容
+                const thinkRegex = /<think[>　]?([\s\S]*?)<\/think>/gi;
+                let match;
+                while ((match = thinkRegex.exec(thoughtContent)) !== null) {
+                  const content = match[1].trim();
+                  if (content) {
+                    thinkBlocks.push(content);
+                  }
+                  lastEndIndex = Math.max(lastEndIndex, (match.index || 0) + match[0].length);
                 }
 
-                // 决定创建什么类型的块：有 tool_input 是工具调用，否则是思考
-                const isToolCallBlock = hasToolInput;
+                // 判断是否包含think标签
+                const hasThinkTag = thinkBlocks.length > 0;
 
-                let request = undefined;
-                let response = undefined;
+                // 清理 thought：只保留最后一个 think 标签之后的内容（不包含 think 标签内的内容）
+                const cleanThought = thoughtContent.slice(lastEndIndex).trim();
 
-                // 从 tool_input 中提取请求信息（仅工具调用需要）
+                // 发送思考内容（作为思考块）
+                if (hasThinkTag && onToolCall) {
+                  console.log(`[Dify] agent_thought 发现 ${thinkBlocks.length} 个思考块，立即发送`);
+                  console.log(`[Dify] 思考块内容预览:`, thinkBlocks);
+                  // 标记：已处理过 think 标签，避免 agent_message 中重复处理
+                  thoughtProcessedThinkTag = true;
+                  for (let i = 0; i < thinkBlocks.length; i++) {
+                    const thinkContent = thinkBlocks[i];
+                    console.log(`[Dify] 发送思考块 ${i + 1}/${thinkBlocks.length}:`, thinkContent.slice(0, 100));
+                    onToolCall({
+                      id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                      toolName: '思考中',
+                      thought: thinkContent,
+                      observation: i === 0 ? 'thinking_start' : 'thinking_end',
+                      request: undefined,
+                      response: undefined,
+                      isRealToolCall: false,
+                    });
+                  }
+                }
+
+                // 如果有工具调用，创建工具调用块
                 if (hasToolInput) {
+                  let request = undefined;
+                  let response = undefined;
+
+                  // 从 tool_input 中提取请求信息
                   try {
-                    const parsedToolInput = JSON.parse(toolInput);
-                    request = parsedToolInput;
+                    request = JSON.parse(toolInput);
                   } catch {
                     request = { raw: toolInput };
                   }
-                }
 
-                // 从 observation 中提取响应（仅工具调用需要）
-                if (isToolContent) {
-                  try {
-                    const parsedObs = JSON.parse(observationContent);
-                    const toolResultKey = Object.keys(parsedObs)[0];
-                    const toolResult = parsedObs[toolResultKey];
-
-                    if (toolResult) {
-                      try {
-                        const parsedResult = JSON.parse(toolResult);
-                        response = parsedResult;
-                      } catch {
-                        response = { result: toolResult };
+                  // 从 observation 中提取响应
+                  if (isToolContent) {
+                    try {
+                      const parsedObs = JSON.parse(observationContent);
+                      const toolResultKey = Object.keys(parsedObs)[0];
+                      const toolResult = parsedObs[toolResultKey];
+                      if (toolResult) {
+                        try {
+                          response = JSON.parse(toolResult);
+                        } catch {
+                          response = { result: toolResult };
+                        }
                       }
+                    } catch {
+                      // 解析失败
                     }
-                  } catch {
-                    // 解析失败
                   }
+
+                  if (onToolCall) {
+                    onToolCall({
+                      id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                      toolName: toolName || '工具调用',
+                      thought: cleanThought || undefined,
+                      observation: undefined,
+                      request: request,
+                      response: response,
+                      isRealToolCall: true,
+                    });
+                  }
+                  break;
                 }
 
-                const toolCall: ToolCall = {
-                  id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                  toolName: isToolCallBlock ? (toolName || '工具调用') : '思考中',
-                  thought: cleanThought || undefined,
-                  observation: !isToolCallBlock ? observationContent : undefined,
-                  request: request,
-                  response: response,
-                  isRealToolCall: isToolCallBlock,
-                };
-
-                if (onToolCall) {
-                  onToolCall(toolCall);
+                // 如果有长文本内容（星辰平台的回复在 thought 中），当作消息发送
+                if (cleanThought.length > 50 && !hasThinkTag) {
+                  if (onMessage) {
+                    onMessage(cleanThought, parsed.event);
+                  }
+                  break;
                 }
+
+                // 如果有观察内容
+                if (observationContent.length > 0) {
+                  if (onToolCall) {
+                    console.log('[Dify] agent_thought 发送观察内容作为思考块:', observationContent.slice(0, 100));
+                    onToolCall({
+                      id: `tool_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                      toolName: '思考中',
+                      thought: undefined,
+                      observation: observationContent,
+                      request: undefined,
+                      response: undefined,
+                      isRealToolCall: false,
+                    });
+                  }
+                  break;
+                }
+
+                // 其他情况跳过
                 break;
 
               case 'agent_message':
               case 'message':
-                // 处理 answer 内容
+                // 处理 answer 内容 - 使用追加模式累积所有片段
                 if (parsed.answer) {
-                  // 直接累积所有内容
-                  accumulatedAnswer = parsed.answer;
-                  onMessage(accumulatedAnswer, parsed.event);
+                  const answerContent = parsed.answer;
+
+                  // 如果 agent_thought 已经处理过 think 标签，过滤掉 answer 中的 think 标签
+                  if (thoughtProcessedThinkTag) {
+                    console.log('[Dify] agent_message 检测到 thoughtProcessedThinkTag=true，准备过滤');
+                    // 从 answer 中移除 think 标签，只保留正文
+                    const cleanAnswer = answerContent
+                      .replace(/<\/think>/gi, '')  // 先移除结束标签
+                      .replace(/<think>[\s\S]*?<\/think>/gi, '')  // 移除完整的 think 块
+                      .replace(/<think>[\s\S]*$/gi, '');  // 移除可能未闭合的开始标签
+
+                    console.log('[Dify] 过滤前:', answerContent.slice(0, 50));
+                    console.log('[Dify] 过滤后:', cleanAnswer.slice(0, 50));
+
+                    if (cleanAnswer.trim()) {
+                      accumulatedAnswer += cleanAnswer;
+                      onMessage(accumulatedAnswer, parsed.event);
+                    }
+                  } else {
+                    // 正常追加答案内容
+                    accumulatedAnswer += answerContent;
+                    onMessage(accumulatedAnswer, parsed.event);
+                  }
                 }
                 break;
 
@@ -475,7 +547,7 @@ export async function getConversations(apiKey: string, baseUrl: string, userId?:
  * 获取对话详情和消息列表
  * API: GET /v1/messages?conversation_id=xxx&user=xxx&limit=20
  */
-export async function getConversationMessages(apiKey: string, baseUrl: string, conversationId: string, userId?: string): Promise<{ id: string; role: string; content: string; created_at: string }[]> {
+export async function getConversationMessages(apiKey: string, baseUrl: string, conversationId: string, userId?: string): Promise<{ id: string; role: string; content: string; created_at: string; answer?: string }[]> {
   try {
     const params = new URLSearchParams({
       conversation_id: conversationId,
@@ -499,6 +571,7 @@ export async function getConversationMessages(apiKey: string, baseUrl: string, c
     }
 
     const data = await response.json();
+    console.log('[Dify] messages API 完整返回:', JSON.stringify(data, null, 2));
 
     // 转换 Dify 消息格式为统一格式
     if (data.data && Array.isArray(data.data)) {
@@ -506,6 +579,8 @@ export async function getConversationMessages(apiKey: string, baseUrl: string, c
         id: msg.id || '',
         role: msg.answer ? 'assistant' : 'user',
         content: msg.answer || msg.query || '',
+        query: msg.query || '',  // 保留原始 query
+        answer: msg.answer || '',  // 保留原始 answer
         created_at: msg.created_at ? new Date(msg.created_at * 1000).toISOString() : new Date().toISOString(),
       }));
     }

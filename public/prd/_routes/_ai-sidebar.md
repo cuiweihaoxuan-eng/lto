@@ -245,7 +245,7 @@ px-1 py-0.5 mx-0.5 rounded bg-blue-100/70 text-blue-800 font-medium
 |--------|------|------|--------|------|----------|----------|----------|
 | 复制按钮 | button | - | - | navigator.clipboard | - | Copy图标 | 可点击 |
 | 刷新按钮 | button | - | - | 重新调用AI | - | RefreshCw图标 | 仅助手消息 |
-| 朗读按钮 | button | - | - | SpeechSynthesis | - | Volume2图标 | 仅助手消息 |
+| 朗读按钮 | button | - | - | SpeechSynthesis | - | Volume2图标(播放中Square) | 可点击切换 |
 
 #### 业务逻辑
 | 操作 | 实现方式 |
@@ -253,6 +253,19 @@ px-1 py-0.5 mx-0.5 rounded bg-blue-100/70 text-blue-800 font-medium
 | 复制 | `navigator.clipboard.writeText(message.content)` |
 | 刷新 | 保存 `userQuery`，重新调用 `sendDifyMessage` |
 | 朗读 | `new SpeechSynthesisUtterance(text)`，lang='zh-CN' |
+| 停止朗读 | `window.speechSynthesis.cancel()`，设置 `speakingMessageId` 状态 |
+
+#### 朗读状态管理
+```
+1. 使用 useState 管理 playingMessageId 状态
+2. 点击朗读按钮时：
+   - 如果正在播放该消息：停止播放，清空状态
+   - 如果不在播放：开始播放，设置状态为当前消息ID
+3. 图标切换：播放中显示 Square(停止)图标，否则显示 Volume2(播放)图标
+4. 样式切换：播放中按钮变绿色背景
+5. 播放结束/onend 或 onerror 时自动清空状态
+6. 点击其他消息会停止当前播放并开始新播放
+```
 
 ### 功能点8：对话历史
 
@@ -406,6 +419,11 @@ px-1 py-0.5 mx-0.5 rounded bg-blue-100/70 text-blue-800 font-medium
 - [x] **操作**：表格无数字列 → **预期**：不显示图表切换按钮
 
 ## 9. 更新记录
+
+### v7 - 2026-05-27
+- **修复思考模块重复显示**：agent_thought 和 agent_message 事件都发送 think 标签内容导致重复，通过 `thoughtProcessedThinkTag` 标记避免重复处理
+- **修复思考块顺序**：统一将思考块插入到 text segment 之前，确保显示在正文之前
+- **新增朗读停止功能**：点击朗读按钮可切换播放/停止状态，播放中显示停止图标
 
 ### v6 - 2026-05-26
 - **新增星辰平台对接**：支持星辰平台和星智平台的 API 调用

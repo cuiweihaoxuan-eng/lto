@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, KeyboardEvent, DragEvent } from "react";
-import { X, Send, Paperclip, Image, Sparkles, User, ChevronDown, ChevronUp, Trash2, Brain, Terminal, BarChart3, PieChart, LineChart, Download, Copy, RefreshCw, Volume2, Wrench } from "lucide-react";
+import { X, Send, Paperclip, Image, Sparkles, User, ChevronDown, ChevronUp, Trash2, Brain, Terminal, BarChart3, PieChart, LineChart, Download, Copy, RefreshCw, Volume2, Wrench, Square } from "lucide-react";
 import { sendDifyMessage, generateMessageId, type DifyMessage, type FileItem, getConversations, getConversationMessages, type ToolCall } from "../services/difyApi";
-import { DIFY_CONFIG, DIFY_CONFIG_LTO } from "../config/dify";
+import { DIFY_CONFIG, DIFY_CONFIG_LTO, DIFY_CONFIG_XINGCHEN } from "../config/dify";
 import { loadAIConfigs, getConfigByName, updateSessionCount } from "../config/aiAssistant";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, LineChart as RechartsLineChart, Line } from 'recharts';
 
-type AgentType = 'ontology' | 'lto';
+type AgentType = 'ontology' | 'lto' | 'xingchen';
 
 interface ConversationItem {
   id: string;
@@ -698,6 +698,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
 
   // 切换 Agent 时清空对话
   const handleAgentSwitch = (agent: AgentType) => {
@@ -716,9 +717,11 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
         role: "assistant",
         content: agent === 'ontology'
           ? "你好！我是本体查询助手，可以帮你查询业务数据。有什么可以帮你的吗？"
-          : "你好！我是 LTO 客服助手，可以帮你解答问题、导航页面。有什么可以帮你的吗？",
+          : agent === 'lto'
+          ? "你好！我是 LTO 客服助手，可以帮你解答问题、导航页面。有什么可以帮你的吗？"
+          : "你好！我是星辰客服助手，可以帮你解答问题。有什么可以帮你的吗？",
         timestamp: new Date(),
-        segments: [], // 初始消息没有段落
+        segments: [],
       },
     ]);
     if (agent === 'ontology') {
@@ -732,7 +735,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
   const getCurrentAgentConfig = () => {
     // 从动态配置中获取
     const configs = loadAIConfigs();
-    const configName = activeAgent === 'lto' ? 'LTO客服助手' : '本体查询助手';
+    const configName = activeAgent === 'lto' ? 'LTO客服助手' : activeAgent === 'xingchen' ? '星辰客服助手' : '本体查询助手';
     const dynamicConfig = getConfigByName(configName);
 
     if (activeAgent === 'lto') {
@@ -745,7 +748,19 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
         conversationId: conversationIdLto,
         setConversationId: setConversationIdLto,
         configId: dynamicConfig?.id,
-        platform: dynamicConfig?.platform || '星辰平台',  // 从配置获取平台类型
+        platform: dynamicConfig?.platform || '星辰平台',
+      };
+    } else if (activeAgent === 'xingchen') {
+      return {
+        config: dynamicConfig ? {
+          baseUrl: dynamicConfig.url,
+          apiKey: dynamicConfig.apiKey,
+          user: dynamicConfig.user,
+        } : DIFY_CONFIG_XINGCHEN,
+        conversationId: conversationIdLto,
+        setConversationId: setConversationIdLto,
+        configId: dynamicConfig?.id,
+        platform: dynamicConfig?.platform || '星辰平台',
       };
     }
     return {
@@ -757,7 +772,7 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       conversationId,
       setConversationId,
       configId: dynamicConfig?.id,
-      platform: dynamicConfig?.platform || '星辰平台',  // 从配置获取平台类型
+      platform: dynamicConfig?.platform || '星辰平台',
     };
   };
 
@@ -882,19 +897,60 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       onToolCall: (toolCall) => {
         console.log('[AISidebar] 收到 toolCall:', JSON.stringify(toolCall, null, 2));
 
-        // 对于工具调用，尝试合并到已存在的同类型段落
-        if (toolCall.isRealToolCall && toolCall.toolName) {
-          setMessages((prev) => {
-            return prev.map((m) => {
-              if (m.id !== aiMessageId) return m;
+        setMessages((prev) => {
+          return prev.map((m) => {
+            if (m.id !== aiMessageId) return m;
 
-              // 查找最后一个同 toolName 的工具调用段落
+            // 检查是否已存在内容完全相同的思考块，避免重复添加
+            // 只比较实际显示的 thought 内容（toolCall.thought 或 toolCall.observation）
+            const thoughtContent = toolCall.thought || toolCall.observation || '';
+            const existingSameThinking = m.segments.find(
+              s => s.type === 'thinking' &&
+                   (s.toolCall?.thought || s.toolCall?.observation || '') === thoughtContent
+            );
+            if (existingSameThinking) {
+              console.log('[AISidebar] 发现重复思考块，跳过:', thoughtContent.slice(0, 50));
+              return m;
+            }
+
+            const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+            const newSegment: MessageSegment = {
+              id: segmentId,
+              type: toolCall.isRealToolCall ? 'toolcall' : 'thinking',
+              toolCall: {
+                id: toolCall.id,
+                toolName: toolCall.isRealToolCall ? toolCall.toolName : '思考中',
+                thought: toolCall.thought || toolCall.observation || '',
+                observation: toolCall.observation,
+                request: toolCall.request,
+                response: toolCall.response,
+                isCollapsed: true,
+                isRealToolCall: toolCall.isRealToolCall,
+              },
+            };
+
+            // 找到 text segment 的位置
+            const textIndex = m.segments.findIndex(s => s.type === 'text');
+
+            // 如果已经有同内容的思考块，跳过
+            if (thoughtContent) {
+              const existingSameThinking = m.segments.find(
+                s => s.type === 'thinking' &&
+                     (s.toolCall?.thought || s.toolCall?.observation || '') === thoughtContent
+              );
+              if (existingSameThinking) {
+                console.log('[AISidebar] 发现重复思考块，跳过:', thoughtContent.slice(0, 50));
+                return m;
+              }
+            }
+
+            if (toolCall.isRealToolCall && toolCall.toolName) {
+              // 对于真正的工具调用，尝试合并到已存在的同类型段落
               const lastToolIndex = [...m.segments].reverse().findIndex(
                 s => s.type === 'toolcall' && s.toolCall?.toolName === toolCall.toolName
               );
 
               if (lastToolIndex >= 0) {
-                // 找到了，合并到已有的段落
                 const actualIndex = m.segments.length - 1 - lastToolIndex;
                 const updatedSegments = [...m.segments];
                 const existingSegment = updatedSegments[actualIndex];
@@ -908,50 +964,29 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                 };
                 return { ...m, segments: updatedSegments };
               }
+            }
 
-              // 没找到，创建新的段落
-              const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-              const newSegment: MessageSegment = {
-                id: segmentId,
-                type: 'toolcall',
-                toolCall: {
-                  id: toolCall.id,
-                  toolName: toolCall.toolName,
-                  thought: toolCall.thought || '',
-                  observation: toolCall.observation,
-                  request: toolCall.request,
-                  response: toolCall.response,
-                  isCollapsed: true,
-                  isRealToolCall: true,
-                },
-              };
-              return { ...m, segments: [...m.segments, newSegment] };
-            });
+            // 思考块统一插入到 text segment 之前（确保思考在正文之前显示）
+            if (!toolCall.isRealToolCall) {
+              if (textIndex >= 0) {
+                // 插入到 text segment 之前
+                const updatedSegments = [...m.segments];
+                updatedSegments.splice(textIndex, 0, newSegment);
+                return { ...m, segments: updatedSegments };
+              }
+              // 如果没有 text segment，放在最前面
+              return { ...m, segments: [newSegment, ...m.segments] };
+            }
+
+            // 工具调用：插入到 text segment 之前
+            if (textIndex >= 0) {
+              const updatedSegments = [...m.segments];
+              updatedSegments.splice(textIndex, 0, newSegment);
+              return { ...m, segments: updatedSegments };
+            }
+            return { ...m, segments: [newSegment, ...m.segments] };
           });
-        } else {
-          // 思考内容总是创建新段落
-          const segmentId = `seg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-          const newSegment: MessageSegment = {
-            id: segmentId,
-            type: 'thinking',
-            toolCall: {
-              id: toolCall.id,
-              toolName: '思考中',
-              thought: toolCall.thought || toolCall.observation || '',
-              observation: toolCall.observation,
-              request: undefined,
-              response: undefined,
-              isCollapsed: true,
-              isRealToolCall: false,
-            },
-          };
-          setMessages((prev) =>
-            prev.map((m) => {
-              if (m.id !== aiMessageId) return m;
-              return { ...m, segments: [...m.segments, newSegment] };
-            })
-          );
-        }
+        });
       },
       onComplete: (newConversationId) => {
         setIsTyping(false);
@@ -1051,9 +1086,11 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
         role: "assistant",
         content: activeAgent === 'ontology'
           ? "对话已清空。本体查询助手随时为你服务。"
-          : "对话已清空。LTO 客服助手随时为你服务。",
+          : activeAgent === 'lto'
+          ? "对话已清空。LTO 客服助手随时为你服务。"
+          : "对话已清空。星辰客服助手随时为你服务。",
         timestamp: new Date(),
-        thoughts: [],
+        segments: [],
       },
     ]);
   };
@@ -1133,16 +1170,66 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                     // 加载选中的对话历史
                     const agentConfig = getCurrentAgentConfig();
                     const messages = await getConversationMessages(agentConfig.config.apiKey, agentConfig.config.baseUrl, conv.id, agentConfig.config.user);
+                    console.log('[AISidebar] 历史消息原始数据:', JSON.stringify(messages, null, 2));
                     // 转换为 Message 格式并显示
                     if (messages.length > 0) {
-                      const historyMessages: Message[] = messages.map((m, idx) => ({
-                        id: `history-${idx}`,
-                        role: m.role as 'user' | 'assistant',
-                        content: m.content,
-                        timestamp: new Date(m.created_at),
-                        segments: [],  // 历史消息没有段落
-                        files: [],
-                      }));
+                      const historyMessages: Message[] = messages.map((m, idx) => {
+                        // 从 answer 中提取 think 标签内容
+                        const thinkMatches = (m.answer || '').matchAll(/<think>([\s\S]*?)<\/think>/gi);
+                        const thinkBlocks: string[] = [];
+                        for (const match of thinkMatches) {
+                          const content = match[1].trim();
+                          if (content) {
+                            thinkBlocks.push(content);
+                          }
+                        }
+
+                        // 清理正文中的 think 标签
+                        const cleanContent = (m.answer || m.content || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+                        // 构建 segments
+                        const segments: MessageSegment[] = [];
+
+                        // 助手消息：从 answer 中提取 think 标签内容
+                        if (m.role === 'assistant') {
+                          thinkBlocks.forEach((thought, tIdx) => {
+                            segments.push({
+                              id: `history-seg-${idx}-think-${tIdx}`,
+                              type: 'thinking',
+                              toolCall: {
+                                id: `think-history-${idx}-${tIdx}`,
+                                toolName: '思考中',
+                                thought: thought,
+                                isCollapsed: true,
+                                isRealToolCall: false,
+                              },
+                            });
+                          });
+                          if (cleanContent) {
+                            segments.push({
+                              id: `history-seg-${idx}-text`,
+                              type: 'text',
+                              content: cleanContent,
+                            });
+                          }
+                        } else {
+                          // 用户消息：直接显示 query 内容
+                          segments.push({
+                            id: `history-seg-${idx}-text`,
+                            type: 'text',
+                            content: m.query || m.content,
+                          });
+                        }
+
+                        return {
+                          id: `history-${idx}`,
+                          role: m.role as 'user' | 'assistant',
+                          content: m.role === 'assistant' ? cleanContent : (m.query || m.content),
+                          timestamp: new Date(m.created_at),
+                          segments: segments,
+                          files: [],
+                        };
+                      });
                       setMessages(historyMessages);
                       agentConfig.setConversationId(conv.id);
                     } else {
@@ -1419,17 +1506,36 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                     <button
                       onClick={() => {
                         if ('speechSynthesis' in window) {
-                          window.speechSynthesis.cancel();
-                          const utterance = new SpeechSynthesisUtterance(message.content);
-                          utterance.lang = 'zh-CN';
-                          utterance.rate = 1;
-                          window.speechSynthesis.speak(utterance);
+                          // 如果正在播放这条消息，取消播放
+                          if (speakingMessageId === message.id) {
+                            window.speechSynthesis.cancel();
+                            setSpeakingMessageId(null);
+                          } else {
+                            // 停止之前的播放
+                            window.speechSynthesis.cancel();
+                            const utterance = new SpeechSynthesisUtterance(message.content);
+                            utterance.lang = 'zh-CN';
+                            utterance.rate = 1;
+                            window.speechSynthesis.speak(utterance);
+                            setSpeakingMessageId(message.id);
+                            // 播放结束回调
+                            utterance.onend = () => setSpeakingMessageId(null);
+                            utterance.onerror = () => setSpeakingMessageId(null);
+                          }
                         }
                       }}
-                      className="p-1 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-600 transition-colors"
-                      title="朗读内容"
+                      className={`p-1 rounded transition-colors ${
+                        speakingMessageId === message.id
+                          ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title={speakingMessageId === message.id ? "停止朗读" : "朗读内容"}
                     >
-                      <Volume2 className="w-3 h-3" />
+                      {speakingMessageId === message.id ? (
+                        <Square className="w-3 h-3" />
+                      ) : (
+                        <Volume2 className="w-3 h-3" />
+                      )}
                     </button>
                   )}
                 </div>
@@ -1481,8 +1587,18 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
           >
             LTO 客服助手
           </button>
+          <button
+            onClick={() => handleAgentSwitch('xingchen')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              activeAgent === 'xingchen'
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            星辰客服助手
+          </button>
           <span className="text-xs text-gray-400 ml-2">
-            {activeAgent === 'ontology' ? '本体查询助手' : 'LTO 客服助手'}
+            {activeAgent === 'ontology' ? '本体查询助手' : activeAgent === 'lto' ? 'LTO 客服助手' : '星辰客服助手'}
           </span>
         </div>
 

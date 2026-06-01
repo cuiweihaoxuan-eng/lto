@@ -341,16 +341,42 @@ function StatItem({ label, count, amount, color }: StatItemProps) {
 // ============ 主组件 ============
 export function SelfDeliverySettlement() {
   // 查询条件状态
+  const [searchArea, setSearchArea] = useState("");
+  const [searchBusinessUnit, setSearchBusinessUnit] = useState("");
   const [searchType, setSearchType] = useState<string>("全部");
+  const [searchStatus, setSearchStatus] = useState<string>("全部");
+  const [searchApplyTimeStart, setSearchApplyTimeStart] = useState("");
+  const [searchApplyTimeEnd, setSearchApplyTimeEnd] = useState("");
+  const [searchCustomerName, setSearchCustomerName] = useState("");
+
+  // 项目型查询条件
   const [searchOppName, setSearchOppName] = useState("");
   const [searchOppCode, setSearchOppCode] = useState("");
   const [searchContractName, setSearchContractName] = useState("");
   const [searchContractCode, setSearchContractCode] = useState("");
   const [searchProjectName, setSearchProjectName] = useState("");
   const [searchProjectCode, setSearchProjectCode] = useState("");
-  const [searchOrderNo, setSearchOrderNo] = useState("");
-  const [searchTripleNo, setSearchTripleNo] = useState("");
-  const [searchStatus, setSearchStatus] = useState<string>("全部");
+
+  // 小微标品查询条件
+  const [searchWorkOrderNo, setSearchWorkOrderNo] = useState("");
+  const [searchMainOrderCode, setSearchMainOrderCode] = useState("");
+  const [searchOrderCode, setSearchOrderCode] = useState("");
+  const [searchSmallProductType, setSearchSmallProductType] = useState<string>("全部");
+
+  // 三联单查询条件
+  const [searchTripleOrderCode, setSearchTripleOrderCode] = useState("");
+  const [searchServiceNumber, setSearchServiceNumber] = useState("");
+  const [searchAssetCode, setSearchAssetCode] = useState("");
+  const [searchDiscountCode, setSearchDiscountCode] = useState("");
+  const [searchDiscountName, setSearchDiscountName] = useState("");
+  const [searchAcceptTimeStart, setSearchAcceptTimeStart] = useState("");
+  const [searchAcceptTimeEnd, setSearchAcceptTimeEnd] = useState("");
+
+  // 四块区域的展开/收起状态
+  const [expandedBasic, setExpandedBasic] = useState(false);
+  const [expandedProject, setExpandedProject] = useState(false);
+  const [expandedSmallProduct, setExpandedSmallProduct] = useState(false);
+  const [expandedTriple, setExpandedTriple] = useState(false);
 
   // 展开状态
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -401,16 +427,37 @@ export function SelfDeliverySettlement() {
 
   // 筛选数据
   const filteredData = mockSettlementData.filter(item => {
+    // 基本信息筛选
+    if (searchArea && !item.branch.includes(searchArea)) return false;
+    if (searchBusinessUnit && !item.businessUnit.includes(searchBusinessUnit)) return false;
     if (searchType !== "全部" && item.type !== searchType) return false;
-    if (searchOppName && !item.oppName.includes(searchOppName)) return false;
-    if (searchOppCode && !item.oppCode.includes(searchOppCode)) return false;
-    if (searchContractName && !item.contractName.includes(searchContractName)) return false;
-    if (searchContractCode && !item.contractCode.includes(searchContractCode)) return false;
-    if (searchProjectName && !item.projectName.includes(searchProjectName)) return false;
-    if (searchProjectCode && !item.projectCode.includes(searchProjectCode)) return false;
-    if (searchOrderNo && !item.projectCode.includes(searchOrderNo)) return false;
-    if (searchTripleNo && !item.projectCode.includes(searchTripleNo)) return false;
     if (searchStatus !== "全部" && item.status !== searchStatus) return false;
+    if (searchCustomerName && !item.customerName.includes(searchCustomerName)) return false;
+
+    // 项目型筛选
+    if (item.type === "项目型" || searchType === "全部") {
+      if (searchOppName && !item.oppName.includes(searchOppName)) return false;
+      if (searchOppCode && !item.oppCode.includes(searchOppCode)) return false;
+      if (searchContractName && !item.contractName.includes(searchContractName)) return false;
+      if (searchContractCode && !item.contractCode.includes(searchContractCode)) return false;
+      if (searchProjectName && !item.projectName.includes(searchProjectName)) return false;
+      if (searchProjectCode && !item.projectCode.includes(searchProjectCode)) return false;
+    }
+
+    // 小微标品筛选
+    if (item.type === "小微标品") {
+      if (searchWorkOrderNo && !item.projectCode.includes(searchWorkOrderNo)) return false;
+      if (searchMainOrderCode && !item.projectCode.includes(searchMainOrderCode)) return false;
+      if (searchOrderCode && !item.projectCode.includes(searchOrderCode)) return false;
+    }
+
+    // 三联单筛选
+    if (item.type === "三联单") {
+      if (searchTripleOrderCode && !item.projectCode.includes(searchTripleOrderCode)) return false;
+      if (searchServiceNumber && !item.projectCode.includes(searchServiceNumber)) return false;
+      if (searchAssetCode && !item.projectCode.includes(searchAssetCode)) return false;
+    }
+
     return true;
   });
 
@@ -512,76 +559,216 @@ export function SelfDeliverySettlement() {
       {/* 查询条件区域 */}
       <div className="px-6 mt-4 flex-shrink-0">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="grid grid-cols-4 gap-x-6 gap-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
-              <Select value={searchType} onValueChange={setSearchType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="全部">全部</SelectItem>
-                  <SelectItem value="项目型">项目型</SelectItem>
-                  <SelectItem value="小微标品">小微标品</SelectItem>
-                  <SelectItem value="三联单">三联单</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* 基本信息 */}
+          <div className="mb-4">
+            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">区域</label>
+                <Input placeholder="请输入" value={searchArea} onChange={e => setSearchArea(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">经营单元</label>
+                <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
+                <Select value={searchType} onValueChange={setSearchType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="项目型">项目型</SelectItem>
+                    <SelectItem value="小微标品">小微标品</SelectItem>
+                    <SelectItem value="三联单">三联单</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                <Select value={searchStatus} onValueChange={setSearchStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="未发">未发</SelectItem>
+                    <SelectItem value="已申请">已申请</SelectItem>
+                    <SelectItem value="审核中">审核中</SelectItem>
+                    <SelectItem value="审核通过">审核通过</SelectItem>
+                    <SelectItem value="发放完成">发放完成</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">商机名称</label>
-              <Input placeholder="请输入" value={searchOppName} onChange={e => setSearchOppName(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">商机编码</label>
-              <Input placeholder="请输入" value={searchOppCode} onChange={e => setSearchOppCode(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">合同名称</label>
-              <Input placeholder="请输入" value={searchContractName} onChange={e => setSearchContractName(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">合同编码</label>
-              <Input placeholder="请输入" value={searchContractCode} onChange={e => setSearchContractCode(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
-              <Input placeholder="请输入" value={searchProjectName} onChange={e => setSearchProjectName(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
-              <Input placeholder="请输入" value={searchProjectCode} onChange={e => setSearchProjectCode(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
-              <Select value={searchStatus} onValueChange={setSearchStatus}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="全部">全部</SelectItem>
-                  <SelectItem value="未发">未发</SelectItem>
-                  <SelectItem value="已申请">已申请</SelectItem>
-                  <SelectItem value="审核中">审核中</SelectItem>
-                  <SelectItem value="审核通过">审核通过</SelectItem>
-                  <SelectItem value="发放完成">发放完成</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
 
-            {/* 查询条件 - 始终展开显示所有字段 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">小微标品工单编号</label>
-              <Input placeholder="请输入" value={searchOrderNo} onChange={e => setSearchOrderNo(e.target.value)} />
+          {/* 基本信息-更多 */}
+          {expandedBasic && (
+            <div className="mb-4 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">申请时间起</label>
+                  <Input type="date" value={searchApplyTimeStart} onChange={e => setSearchApplyTimeStart(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">申请时间止</label>
+                  <Input type="date" value={searchApplyTimeEnd} onChange={e => setSearchApplyTimeEnd(e.target.value)} />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">客户名称</label>
+                  <Input placeholder="请输入" value={searchCustomerName} onChange={e => setSearchCustomerName(e.target.value)} />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">三联单号</label>
-              <Input placeholder="请输入" value={searchTripleNo} onChange={e => setSearchTripleNo(e.target.value)} />
-            </div>
+          )}
 
-            <div className="flex items-end gap-2">
-              <Button className="gap-1">
-                <Search className="w-4 h-4" />
-                查询
-              </Button>
+          {/* 项目型 */}
+          <div className="mb-4 pt-4 border-t border-gray-100">
+            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
+              <span className="w-1 h-4 bg-blue-500 rounded mr-2"></span>
+              项目型
+            </div>
+            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机名称</label>
+                <Input placeholder="请输入" value={searchOppName} onChange={e => setSearchOppName(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">商机编码</label>
+                <Input placeholder="请输入" value={searchOppCode} onChange={e => setSearchOppCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">合同名称</label>
+                <Input placeholder="请输入" value={searchContractName} onChange={e => setSearchContractName(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">合同编码</label>
+                <Input placeholder="请输入" value={searchContractCode} onChange={e => setSearchContractCode(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* 项目型-更多 */}
+          {expandedProject && (
+            <div className="mb-4 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                  <Input placeholder="请输入" value={searchProjectName} onChange={e => setSearchProjectName(e.target.value)} />
+                </div>
+                <div className="col-span-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目编码</label>
+                  <Input placeholder="请输入" value={searchProjectCode} onChange={e => setSearchProjectCode(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 小微标品 */}
+          <div className="mb-4 pt-4 border-t border-gray-100">
+            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
+              <span className="w-1 h-4 bg-green-500 rounded mr-2"></span>
+              小微标品
+            </div>
+            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">工单编号</label>
+                <Input placeholder="请输入" value={searchWorkOrderNo} onChange={e => setSearchWorkOrderNo(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">主定单编码</label>
+                <Input placeholder="请输入" value={searchMainOrderCode} onChange={e => setSearchMainOrderCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
+                <Input placeholder="请输入" value={searchOrderCode} onChange={e => setSearchOrderCode(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* 小微标品-更多 */}
+          {expandedSmallProduct && (
+            <div className="mb-4 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                <div className="col-span-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">小微标品类型</label>
+                  <Select value={searchSmallProductType} onValueChange={setSearchSmallProductType}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="全部">全部</SelectItem>
+                      <SelectItem value="视联网">视联网</SelectItem>
+                      <SelectItem value="机房整治">机房整治</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 三联单 */}
+          <div className="mb-4 pt-4 border-t border-gray-100">
+            <div className="text-sm font-medium text-gray-800 mb-3 flex items-center">
+              <span className="w-1 h-4 bg-purple-500 rounded mr-2"></span>
+              三联单
+            </div>
+            <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">订单编码</label>
+                <Input placeholder="请输入" value={searchTripleOrderCode} onChange={e => setSearchTripleOrderCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">受理的业务号码</label>
+                <Input placeholder="请输入" value={searchServiceNumber} onChange={e => setSearchServiceNumber(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">资产唯一编码</label>
+                <Input placeholder="请输入" value={searchAssetCode} onChange={e => setSearchAssetCode(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">优惠编码</label>
+                <Input placeholder="请输入" value={searchDiscountCode} onChange={e => setSearchDiscountCode(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* 三联单-更多 */}
+          {expandedTriple && (
+            <div className="mb-4 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">优惠名称</label>
+                  <Input placeholder="请输入" value={searchDiscountName} onChange={e => setSearchDiscountName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">受理时间起</label>
+                  <Input type="date" value={searchAcceptTimeStart} onChange={e => setSearchAcceptTimeStart(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">受理时间止</label>
+                  <Input type="date" value={searchAcceptTimeEnd} onChange={e => setSearchAcceptTimeEnd(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 更多按钮和操作 */}
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <button
+              onClick={() => {
+                setExpandedBasic(!expandedBasic);
+                setExpandedProject(!expandedProject);
+                setExpandedSmallProduct(!expandedSmallProduct);
+                setExpandedTriple(!expandedTriple);
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              {expandedBasic || expandedProject || expandedSmallProduct || expandedTriple ? "收起更多条件" : "展开更多条件"}
+            </button>
+            <div className="flex gap-2">
               <Button variant="outline" className="gap-1">
                 <RefreshCw className="w-4 h-4" />
                 重置
+              </Button>
+              <Button className="gap-1">
+                <Search className="w-4 h-4" />
+                查询
               </Button>
             </div>
           </div>
@@ -655,19 +842,15 @@ export function SelfDeliverySettlement() {
             <tbody className="divide-y divide-gray-100">
               {filteredData.map(row => (
                 <React.Fragment key={row.id}>
-                  <tr className="hover:bg-gray-50">
+                  <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
                     <td className="px-3 py-3 bg-white sticky left-0 z-10">
-                      {row.innerList.length > 0 ? (
-                        <button onClick={() => toggleRowExpand(row.id)} className="p-1 hover:bg-gray-100 rounded">
-                          {expandedRows.has(row.id) ? (
-                            <ChevronDown className="w-4 h-4 text-gray-500" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-gray-500" />
-                          )}
-                        </button>
-                      ) : (
-                        <span className="w-4 inline-block"></span>
-                      )}
+                      <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
+                        {expandedRows.has(row.id) ? (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        )}
+                      </button>
                     </td>
                     <td className="px-3 py-3">{row.index}</td>
                     <td className="px-3 py-3">{row.businessUnit}</td>
@@ -741,23 +924,38 @@ export function SelfDeliverySettlement() {
                               </div>
                             </div>
                             {row.innerList.length > 0 ? (
-                              <div className="overflow-x-auto" style={{ maxHeight: "300px" }}>
+                              <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
                                 <table className="w-full text-sm">
+                                  <colgroup>
+                                    <col style={{ width: "50px" }} />
+                                    <col style={{ width: "160px" }} />
+                                    <col style={{ width: "112px" }} />
+                                    <col style={{ width: "96px" }} />
+                                    <col style={{ width: "96px" }} />
+                                    <col style={{ width: "192px" }} />
+                                    <col style={{ width: "64px" }} />
+                                    <col style={{ width: "96px" }} />
+                                    <col style={{ width: "80px" }} />
+                                    <col style={{ width: "80px" }} />
+                                    <col style={{ width: "112px" }} />
+                                    <col style={{ width: "80px" }} />
+                                    <col style={{ width: "150px" }} />
+                                  </colgroup>
                                   <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                                     <tr>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-12">序号</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-40">结算单名称</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-28">结算单号</th>
-                                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 w-24">申请金额</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">结算类型</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-48">人数（姓名）</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-16">人天</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">申请日期</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-28">发放凭证</th>
-                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">类型</th>
-                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32 bg-gray-100 sticky right-0 z-10">操作</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
+                                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
+                                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
+                                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
@@ -789,8 +987,8 @@ export function SelfDeliverySettlement() {
                                         <td className="px-3 py-2 text-center">
                                           <Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge>
                                         </td>
-                                        <td className="px-3 py-2 bg-gray-50 sticky right-0 z-10">
-                                          <div className="flex gap-2">
+                                        <td className="px-3 py-2">
+                                          <div className="flex gap-2 justify-center">
                                             <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}>
                                               <Eye className="w-3 h-3 mr-1" />
                                               查看

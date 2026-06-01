@@ -22,6 +22,7 @@ const IctGrossProfitReport = lazy(() => import("./components/IctGrossProfitRepor
 const IctBudgetDetail = lazy(() => import("./components/IctBudgetDetail").then(m => ({ default: m.IctBudgetDetail })));
 const ConstructNotFixedNoExpense = lazy(() => import("./components/ConstructNotFixedNoExpense").then(m => ({ default: m.ConstructNotFixedNoExpense })));
 const CostEstimateReport = lazy(() => import("./components/CostEstimateReport").then(m => ({ default: m.CostEstimateReport })));
+const ConfirmCostList = lazy(() => import("./components/ConfirmCostList").then(m => ({ default: m.ConfirmCostList })));
 const BusinessInfoManagement = lazy(() => import("./components/BusinessInfoManagement").then(m => ({ default: m.BusinessInfoManagement })));
 const LeadAcquisition = lazy(() => import("./components/LeadAcquisition").then(m => ({ default: m.LeadAcquisition })));
 const LeadPoolManagement = lazy(() => import("./components/LeadPoolManagement").then(m => ({ default: m.LeadPoolManagement })));
@@ -48,6 +49,7 @@ const MyWallet = lazy(() => import("./components/MyWallet").then(m => ({ default
 const LargeBusinessOpportunityAward = lazy(() => import("./components/LargeBusinessOpportunityAward").then(m => ({ default: m.LargeBusinessOpportunityAward })));
 const ProjectCommissionAward = lazy(() => import("./components/ProjectCommissionAward").then(m => ({ default: m.ProjectCommissionAward })));
 const AIAssistantConfig = lazy(() => import("./components/AIAssistantConfig").then(m => ({ default: m.AIAssistantConfig })));
+const FixedAssets = lazy(() => import("./components/FixedAssets").then(m => ({ default: m.FixedAssets })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -86,6 +88,7 @@ const ROUTE_TO_COMPONENT: Record<string, string> = {
   'ict-budget-detail': 'IctBudgetDetail',
   'construct-not-fixed-no-expense': 'ConstructNotFixedNoExpense',
   'cost-estimate-report': 'CostEstimateReport',
+  'confirm-cost-list': 'ConfirmCostList',
   'my-wallet': 'MyWallet',
   'project-list': 'ProjectList',
   'effective-business-opportunity-award': 'EffectiveBusinessOpportunityAward',
@@ -99,6 +102,7 @@ const ROUTE_TO_COMPONENT: Record<string, string> = {
   'effective-business-opportunity': 'EffectiveBusinessOpportunity',
   'large-business-opportunit': 'LargeBusinessOpportunit',
   'commission-distribution-report': 'CommissionDistributionReport',
+  'fixed-assets': 'FixedAssets',
   'settings': 'settings',
   'ai-assistant-config': 'AIAssistantConfig',
 };
@@ -169,6 +173,7 @@ useEffect(() => {
         'IctBudgetDetail': 'ict-budget-detail',
         'ConstructNotFixedNoExpense': 'construct-not-fixed',
         'CostEstimateReport': 'cost-estimate',
+        'ConfirmCostList': 'confirm-cost-list',
         'BusinessInfoManagement': 'business-info',
         'LeadAcquisition': 'lead-acquisition',
         'LeadPoolManagement': 'lead-pool',
@@ -180,6 +185,7 @@ useEffect(() => {
         'ContractPaymentConfirmation': 'contract-payment-confirmation',
         'RiskManagement': 'risk-dispatch',
         'AIAssistantConfig': 'ai-assistant-config',
+        'FixedAssets': 'fixed-assets',
       };
 
       const sidebarItem = componentMap[componentName];
@@ -267,6 +273,8 @@ useEffect(() => {
       return <Suspense fallback={<LoadingSpinner />}><ExpertReportPage /></Suspense>;
     }
 
+    if (activeSidebarItem === "confirm-cost-list") return <Suspense fallback={<LoadingSpinner />}><ConfirmCostList /></Suspense>;
+
     // 业财融合报表
     if (activeSidebarItem === "full-flow-table") return <Suspense fallback={<LoadingSpinner />}><FullFlowTable /></Suspense>;
     if (activeSidebarItem === "low-margin-report") return <Suspense fallback={<LoadingSpinner />}><LowMarginReport /></Suspense>;
@@ -320,6 +328,11 @@ useEffect(() => {
     // AI助手配置页面
     if (activeSidebarItem === "ai-assistant-config") {
       return <Suspense fallback={<LoadingSpinner />}><AIAssistantConfig /></Suspense>;
+    }
+
+    // 固定资产管理页面
+    if (activeSidebarItem === "fixed-assets") {
+      return <Suspense fallback={<LoadingSpinner />}><FixedAssets /></Suspense>;
     }
 
     // 未匹配到任何页面时显示首页

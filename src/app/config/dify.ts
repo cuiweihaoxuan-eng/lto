@@ -26,4 +26,16 @@ export const DIFY_CONFIG_LTO = {
   user: 'lto-user',
 };
 
+// 星辰客服助手 Agent
+export const DIFY_CONFIG_XINGCHEN = {
+  // API 地址
+  baseUrl: 'https://agent.teleai.com.cn/v1',
+
+  // API 密钥
+  apiKey: 'app-FoKqiQQnCtWl0Tq3mmQG9vve',
+
+  // 用户标识
+  user: 'lto-user',
+};
+
 export default DIFY_CONFIG;
