@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
 
 // 模拟数据
 const mockData = [
@@ -93,6 +93,9 @@ export function CommissionDistributionReport() {
                 <Button onClick={handleSearch}>查询</Button>
                 <Button variant="outline" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="outline" onClick={() => console.log("导出项目提成奖发放统计报表")}>
+                  <Download className="w-4 h-4 mr-1" />导出
                 </Button>
               </div>
             </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
-import { RotateCcw, X, Check, User, Plus } from "lucide-react";
+import { RotateCcw, X, Check, User, Plus, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
@@ -490,6 +490,9 @@ export function ProjectCommissionAward() {
               <Button onClick={handleSearch}>查询</Button>
               <Button variant="outline" className="ml-2" onClick={handleReset}>
                 <RotateCcw className="w-4 h-4 mr-1" />重置
+              </Button>
+              <Button variant="outline" className="ml-2" onClick={() => console.log("导出项目提成奖")}>
+                <Download className="w-4 h-4 mr-1" />导出
               </Button>
             </div>
           </div>

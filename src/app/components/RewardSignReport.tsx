@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { EIPSignOffDetail } from "./EIPSignOffDetail";
 
@@ -185,6 +185,9 @@ export function RewardSignReport() {
                 <Button onClick={handleRewardQuery}>查询</Button>
                 <Button variant="outline" onClick={handleRewardReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="outline" onClick={() => console.log("导出奖励签报清单")}>
+                  <Download className="w-4 h-4 mr-1" />导出
                 </Button>
               </div>
             </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
-import { RotateCcw, Upload, FileText, X } from "lucide-react";
+import { RotateCcw, Upload, FileText, X, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 
 // 模拟数据 - 奖金池（完整字段）
@@ -194,6 +194,9 @@ export function BonusPool() {
                 <Button onClick={handleBonusQuery}>查询</Button>
                 <Button variant="outline" onClick={handleBonusReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="outline" onClick={() => console.log("导出奖金池")}>
+                  <Download className="w-4 h-4 mr-1" />导出
                 </Button>
               </div>
             </div>

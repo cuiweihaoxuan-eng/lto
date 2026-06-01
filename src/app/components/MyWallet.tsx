@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
 import { TabNav } from "./ui/tab-nav";
-import { RotateCcw, X, Check, User, Plus } from "lucide-react";
+import { RotateCcw, X, Check, User, Plus, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
@@ -341,6 +341,7 @@ export function MyWallet() {
                 <div className="flex items-end">
                   <Button onClick={handleValidOppSearch}>查询</Button>
                   <Button variant="outline" className="ml-2" onClick={handleValidOppReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+                  <Button variant="outline" className="ml-2" onClick={() => console.log("导出有效商机奖")}><Download className="w-4 h-4 mr-1" />导出</Button>
                 </div>
               </div>
             </div>
@@ -435,6 +436,7 @@ export function MyWallet() {
                 <div className="flex items-end">
                   <Button onClick={handleBigOppSearch}>查询</Button>
                   <Button variant="outline" className="ml-2" onClick={handleBigOppReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+                  <Button variant="outline" className="ml-2" onClick={() => console.log("导出大额商机奖")}><Download className="w-4 h-4 mr-1" />导出</Button>
                 </div>
               </div>
             </div>
@@ -553,6 +555,7 @@ export function MyWallet() {
               <div className="flex justify-end mt-4">
                 <Button onClick={handleCommissionSearch}>查询</Button>
                 <Button variant="outline" className="ml-2" onClick={handleCommissionReset}><RotateCcw className="w-4 h-4 mr-1" />重置</Button>
+                <Button variant="outline" className="ml-2" onClick={() => console.log("导出项目提成奖")}><Download className="w-4 h-4 mr-1" />导出</Button>
               </div>
             </div>
 

@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
 import { TabNav } from "./ui/tab-nav";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 
@@ -228,6 +228,9 @@ export function EffectiveBusinessOpportunityAward() {
                 <Button variant="outline" className="ml-2" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
                 </Button>
+                <Button variant="outline" className="ml-2" onClick={() => console.log("导出有效商机奖")}>
+                  <Download className="w-4 h-4 mr-1" />导出
+                </Button>
               </div>
             </div>
           </div>
@@ -347,6 +350,9 @@ export function EffectiveBusinessOpportunityAward() {
                 <Button onClick={handleNoAuditSearch}>查询</Button>
                 <Button variant="outline" className="ml-2" onClick={handleNoAuditReset}>
                   <RotateCcw className="w-4 h-4 mr-1" />重置
+                </Button>
+                <Button variant="outline" className="ml-2" onClick={() => console.log("导出免审核设置")}>
+                  <Download className="w-4 h-4 mr-1" />导出
                 </Button>
               </div>
             </div>

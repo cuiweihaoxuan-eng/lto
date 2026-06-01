@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Button } from "./ui/button";
 import { TabNav } from "./ui/tab-nav";
-import { RotateCcw, GripVertical, Upload, FileText, X, Eye } from "lucide-react";
+import { RotateCcw, GripVertical, Upload, FileText, X, Eye, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { EIPSignOffDetail } from "./EIPSignOffDetail";
 
@@ -686,6 +686,9 @@ export function TaskWalletList() {
                   <Button variant="outline" onClick={handleProjectReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
+                  <Button variant="outline" onClick={() => console.log("导出项目清单")}>
+                    <Download className="w-4 h-4 mr-1" />导出
+                  </Button>
                 </div>
               </div>
             </div>
@@ -915,6 +918,9 @@ export function TaskWalletList() {
                   <Button variant="outline" onClick={handleRewardReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
                   </Button>
+                  <Button variant="outline" onClick={() => console.log("导出奖励签报清单")}>
+                    <Download className="w-4 h-4 mr-1" />导出
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1059,6 +1065,9 @@ export function TaskWalletList() {
                   <Button onClick={handleBonusQuery}>查询</Button>
                   <Button variant="outline" onClick={handleBonusReset}>
                     <RotateCcw className="w-4 h-4 mr-1" />重置
+                  </Button>
+                  <Button variant="outline" onClick={() => console.log("导出奖金池")}>
+                    <Download className="w-4 h-4 mr-1" />导出
                   </Button>
                 </div>
               </div>
