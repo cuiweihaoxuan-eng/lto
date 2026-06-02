@@ -242,12 +242,27 @@ const mockTripleOptions: TripleOption[] = [
 ];
 
 // 默认附件配置（带mock数据）- 三种类型附件统一
-const getDefaultAttachments = (): AttachmentItem[] => {
-  const manualAttachments: AttachmentItem[] = [
+const getDefaultAttachments = (projectType: ProjectType): AttachmentItem[] => {
+  // 手工上传附件（所有类型共有：交付清单、设计图、实施过程照片）
+  const baseManualAttachments: AttachmentItem[] = [
     { id: "a1", name: "交付清单", required: true, source: "manual", type: "交付清单", status: "uploaded", files: [{ name: "交付清单_20260514.pdf" }] },
     { id: "a2", name: "设计图", required: false, source: "manual", type: "设计图", status: "pending", files: [] },
     { id: "a3", name: "实施过程照片", required: true, source: "manual", type: "实施照片", status: "uploaded", files: [{ name: "实施照片_现场01.jpg" }, { name: "实施照片_现场02.jpg" }] }
   ];
+
+  // 小微/三联单额外增加的附件：录收订单、验收报告、收款记录
+  const extraManualAttachments: AttachmentItem[] = projectType === "项目型" ? [] : [
+    { id: "m1", name: "录收订单", required: true, source: "manual", type: "录收订单", status: "uploaded", files: [{ name: "录收订单_LS202604001.pdf" }] },
+    { id: "m2", name: "验收报告", required: true, source: "manual", type: "验收报告", status: "uploaded", files: [{ name: "验收报告_YS202604001.pdf" }] },
+    { id: "m3", name: "收款记录", required: false, source: "manual", type: "收款记录", status: "pending", files: [] }
+  ];
+
+  const manualAttachments = [...baseManualAttachments, ...extraManualAttachments];
+
+  // 小微/三联单无自动带出附件
+  if (projectType !== "项目型") {
+    return manualAttachments;
+  }
 
   return [
     { id: "a4", name: "模式会纪要", required: true, source: "auto", type: "模式会纪要", status: "uploaded", files: [{ name: "模式会纪要_2026年第1期.pdf" }] },
@@ -887,6 +902,8 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
       // 根据类型设置项目数据
       const type = rowData.type;
       setProjectType(type);
+      // 切换类型时重新设置附件配置
+      setAttachments(getDefaultAttachments(type));
 
       if (type === "项目型") {
         setSelectedProject({
@@ -1010,7 +1027,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
   const [description, setDescription] = useState("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
 
   // 附件状态（带mock数据）- 三种类型统一
-  const [attachments, setAttachments] = useState<AttachmentItem[]>(getDefaultAttachments());
+  const [attachments, setAttachments] = useState<AttachmentItem[]>(getDefaultAttachments(projectType));
 
   // 审批信息状态
   const [mainRecipients, setMainRecipients] = useState<PersonItemData[]>([]);
@@ -1028,7 +1045,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     setVisionForm({ nvrCount: "10", cameraCount: "50", startDate: "2026-01-01", endDate: "2026-12-31" });
     setRoomForm({ cabinet9u: "2", cabinet22u: "3", cabinet42u: "1", cabinet1u: "5", infoPoints: "20" });
     setDescription("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
-    setAttachments(getDefaultAttachments());
+    setAttachments(getDefaultAttachments(projectType));
     setIsCycleMaintenance("否");
     setProjectStartDate("");
     setProjectEndDate("");
@@ -1448,7 +1465,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                       {(["项目型", "小微标品", "三联单"] as ProjectType[]).map(type => (
                         <button
                           key={type}
-                          onClick={() => setProjectType(type)}
+                          onClick={() => { setProjectType(type); setAttachments(getDefaultAttachments(type)); }}
                           className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                             projectType === type
                               ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -1598,25 +1615,6 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                               <div className="text-sm font-medium text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
-                          {selectedProject.appliedProfit === "5%" && (
-                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                              <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
-                                <AlertTriangle className="w-4 h-4" />
-                                <span>模式会毛利15%，申请金额毛利为5%，严重低于模式会阶段毛利</span>
-                              </div>
-                              <div className="mb-3">
-                                <label className="block text-xs text-gray-500 mb-1">原因说明</label>
-                                <textarea className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500" rows={2} placeholder="请说明毛利率低于模式会的原因..." />
-                              </div>
-                              <div>
-                                <label className="block text-xs text-gray-500 mb-1">附件</label>
-                                <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
-                                  <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
-                                  <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
@@ -2203,6 +2201,26 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                   />
+                  {/* 项目型低毛利说明 */}
+                  {projectType === "项目型" && selectedProject && parseFloat(selectedProject.appliedProfit) < 15 && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>模式会毛利15%，申请金额毛利为{selectedProject.appliedProfit}%，严重低于模式会阶段毛利</span>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-xs text-gray-500 mb-1">原因说明</label>
+                        <textarea className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500" rows={2} placeholder="请说明毛利率低于模式会的原因..." />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">附件</label>
+                        <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
+                          <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                          <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -2217,8 +2235,9 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
               {isViewMode ? (
                 /* 查看模式：只读展示附件 */
                 <div className="space-y-4">
-                  {/* 自动带出区域 */}
-                  <div className="bg-blue-50 rounded-lg p-4">
+                  {/* 自动带出区域 - 仅项目型显示 */}
+                  {projectType === "项目型" && (
+                    <div className="bg-blue-50 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
@@ -2248,12 +2267,9 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                       ))}
                     </div>
                   </div>
+                  )}
                   {/* 手工上传区域 */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Upload className="w-5 h-5 text-gray-500" />
-                      <h5 className="font-medium text-gray-700">手工上传附件</h5>
-                    </div>
+                  <div>
                     <div className="grid grid-cols-3 gap-3">
                       {attachments.filter(a => a.source === "manual").map(item => (
                         <div key={item.id} className="bg-white rounded border border-gray-200 p-3">
@@ -2285,8 +2301,9 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
               ) : (
                 /* 新增/修改模式 */
                 <div className="space-y-4">
-                  {/* 自动带出区域 */}
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                  {/* 自动带出区域 - 仅项目型显示 */}
+                  {projectType === "项目型" && (
+                    <div className="bg-blue-50 rounded-lg p-4 mb-4">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
@@ -2344,13 +2361,10 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                       )}
                     </div>
                   </div>
+                  )}
 
                   {/* 手工上传区域 */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Upload className="w-5 h-5 text-gray-500" />
-                      <h5 className="font-medium text-gray-700">手工上传附件</h5>
-                    </div>
+                  <div>
                     <div className="grid grid-cols-3 gap-3">
                       {attachments.filter(a => a.source === "manual").map(item => (
                         <div key={item.id} className="bg-white rounded border border-gray-200 p-3">
