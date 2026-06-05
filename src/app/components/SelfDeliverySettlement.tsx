@@ -789,10 +789,6 @@ export function SelfDeliverySettlement() {
             <Download className="w-4 h-4" />
             导出
           </Button>
-          <Button className="gap-1" onClick={() => { setSelectedRowData(null); setApplyDialogOpen(true); }}>
-            <Plus className="w-4 h-4" />
-            申请自交付结算
-          </Button>
         </div>
       </div>
 

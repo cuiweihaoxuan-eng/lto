@@ -149,6 +149,15 @@ interface AttachmentItem {
   files: { name: string; url?: string }[]; // 支持多文件
 }
 
+// 结算section（支持平铺添加多个451定额/350人天）
+interface SettlementSection {
+  id: string;
+  method: SettlementMethod;
+  totalLaborCost: string;   // 451定额：总人工费；350人天：人员金额合计
+  settlementAmount: string; // 结算金额（可手动修改）
+  personList: PersonItem[];
+}
+
 interface SettlementRecord {
   id: string;
   index: number;
@@ -256,6 +265,11 @@ const getDefaultAttachments = (projectType: ProjectType): AttachmentItem[] => {
     { id: "m2", name: "验收报告", required: true, source: "manual", type: "验收报告", status: "uploaded", files: [{ name: "验收报告_YS202604001.pdf" }] },
     { id: "m3", name: "收款记录", required: false, source: "manual", type: "收款记录", status: "pending", files: [] }
   ];
+
+  // 小微标品额外的451结算表
+  if (projectType === "小微标品") {
+    extraManualAttachments.push({ id: "m4", name: "451结算表", required: true, source: "manual", type: "451结算表", status: "pending", files: [] });
+  }
 
   const manualAttachments = [...baseManualAttachments, ...extraManualAttachments];
 
@@ -990,29 +1004,12 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     }
   }, [rowData]);
 
-  // 结算信息状态
-  const [settlementMethod, setSettlementMethod] = useState<SettlementMethod>("451定额");
-  const [totalLaborCost, setTotalLaborCost] = useState("");
-  const [smallProductSubType, setSmallProductSubType] = useState<SmallProductSubType>("视联网");
-  const [personList, setPersonList] = useState<PersonItem[]>([
+  // 结算信息状态 - 支持平铺添加多个section
+  const [settlementSections, setSettlementSections] = useState<SettlementSection[]>([]);
+  const [smallProductPersonList, setSmallProductPersonList] = useState<PersonItem[]>([
     { id: "1", name: "张三", code: "EMP001", amount: "5,000" }
   ]);
-
-  // 视联网/机房整治表单状态
-  const [visionForm, setVisionForm] = useState({
-    nvrCount: "10",
-    cameraCount: "50",
-    startDate: "2026-01-01",
-    endDate: "2026-12-31"
-  });
-
-  const [roomForm, setRoomForm] = useState({
-    cabinet9u: "2",
-    cabinet22u: "3",
-    cabinet42u: "1",
-    cabinet1u: "5",
-    infoPoints: "20"
-  });
+  const [smallProductSettlementAmount, setSmallProductSettlementAmount] = useState("");
 
   // 项目维保信息状态
   const [isCycleMaintenance, setIsCycleMaintenance] = useState<"是" | "否">("否");
@@ -1025,6 +1022,10 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 基本情况描述
   const [description, setDescription] = useState("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
+
+  // 超额提示
+  const [overAmountReason, setOverAmountReason] = useState("");
+  const [overAmountAttachments, setOverAmountAttachments] = useState<{ name: string }[]>([]);
 
   // 附件状态（带mock数据）- 三种类型统一
   const [attachments, setAttachments] = useState<AttachmentItem[]>(getDefaultAttachments(projectType));
@@ -1039,11 +1040,9 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     setSelectedProject(null);
     setSelectedOrder(null);
     setSelectedTriple(null);
-    setSettlementMethod("451定额");
-    setSmallProductSubType("视联网");
-    setPersonList([{ id: "1", name: "张三", code: "EMP001", amount: "5,000" }]);
-    setVisionForm({ nvrCount: "10", cameraCount: "50", startDate: "2026-01-01", endDate: "2026-12-31" });
-    setRoomForm({ cabinet9u: "2", cabinet22u: "3", cabinet42u: "1", cabinet1u: "5", infoPoints: "20" });
+    setSettlementSections([]);
+    setSmallProductPersonList([{ id: "1", name: "张三", code: "EMP001", amount: "5,000" }]);
+    setSmallProductSettlementAmount("");
     setDescription("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
     setAttachments(getDefaultAttachments(projectType));
     setIsCycleMaintenance("否");
@@ -1054,6 +1053,8 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     setMainRecipients([]);
     setCountersignUsers([]);
     setCcUsers([]);
+    setOverAmountReason("");
+    setOverAmountAttachments([]);
   };
 
   // 关闭弹窗
@@ -1062,44 +1063,137 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     onClose();
   };
 
-  // 添加人员
-  const addPerson = () => {
-    setPersonList([...personList, { id: Date.now().toString(), name: "", code: "", amount: "" }]);
+  // ============ 结算Section管理 ============
+  // 添加section
+  const addSettlementSection = (method: SettlementMethod) => {
+    const newSection: SettlementSection = {
+      id: Date.now().toString(),
+      method,
+      totalLaborCost: "",
+      settlementAmount: "",
+      personList: [{ id: Date.now().toString() + "_1", name: "", code: "", amount: "" }]
+    };
+    setSettlementSections([...settlementSections, newSection]);
   };
 
-  // 删除人员
-  const removePerson = (id: string) => {
-    if (personList.length > 1) {
-      setPersonList(personList.filter(p => p.id !== id));
+  // 删除section
+  const removeSettlementSection = (sectionId: string) => {
+    setSettlementSections(settlementSections.filter(s => s.id !== sectionId));
+  };
+
+  // 更新section基本信息
+  const updateSettlementSection = (sectionId: string, field: keyof SettlementSection, value: string) => {
+    setSettlementSections(settlementSections.map(s => s.id === sectionId ? { ...s, [field]: value } : s));
+  };
+
+  // 添加人员到section
+  const addPersonToSection = (sectionId: string) => {
+    setSettlementSections(settlementSections.map(s => {
+      if (s.id === sectionId) {
+        return { ...s, personList: [...s.personList, { id: Date.now().toString(), name: "", code: "", amount: "" }] };
+      }
+      return s;
+    }));
+  };
+
+  // 从section删除人员
+  const removePersonFromSection = (sectionId: string, personId: string) => {
+    setSettlementSections(settlementSections.map(s => {
+      if (s.id === sectionId) {
+        if (s.personList.length <= 1) return s;
+        return { ...s, personList: s.personList.filter(p => p.id !== personId) };
+      }
+      return s;
+    }));
+  };
+
+  // 更新section中人员
+  const updatePersonInSection = (sectionId: string, personId: string, field: keyof PersonItem, value: string | number) => {
+    setSettlementSections(settlementSections.map(s => {
+      if (s.id === sectionId) {
+        return {
+          ...s,
+          personList: s.personList.map(p => p.id === personId ? { ...p, [field]: value } : p)
+        };
+      }
+      return s;
+    }));
+  };
+
+  // 计算section的结算金额
+  const calculateSectionAmount = (section: SettlementSection): string => {
+    if (section.method === "451定额") {
+      // 451定额：总人工费 × 0.4
+      const labor = parseFloat(section.totalLaborCost.replace(/,/g, '')) || 0;
+      return (labor * 0.4).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      // 350人天：人员列表人天 × 350 之和
+      const total = section.personList.reduce((sum, p) => {
+        return sum + (p.personDays || 0) * 350;
+      }, 0);
+      return total.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
   };
 
-  // 更新人员信息
-  const updatePerson = (id: string, field: keyof PersonItem, value: string | number) => {
-    setPersonList(personList.map(p => p.id === id ? { ...p, [field]: value } : p));
+  // 自动更新section的结算金额
+  const autoUpdateSectionAmount = (sectionId: string) => {
+    setSettlementSections(settlementSections.map(s => {
+      if (s.id === sectionId) {
+        const newAmount = calculateSectionAmount(s);
+        return { ...s, settlementAmount: newAmount };
+      }
+      return s;
+    }));
   };
 
-  // 计算视联网金额
-  const calculateVisionAmount = () => {
-    const nvr = parseInt(visionForm.nvrCount) || 0;
-    const camera = parseInt(visionForm.cameraCount) || 0;
-    const start = visionForm.startDate ? new Date(visionForm.startDate) : null;
-    const end = visionForm.endDate ? new Date(visionForm.endDate) : null;
-    let months = 1;
-    if (start && end) {
-      months = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (30 * 24 * 60 * 60 * 1000)));
+  // ============ 小微标品人员管理 ============
+  const addSmallProductPerson = () => {
+    setSmallProductPersonList([...smallProductPersonList, { id: Date.now().toString(), name: "", code: "", amount: "" }]);
+  };
+  const removeSmallProductPerson = (id: string) => {
+    if (smallProductPersonList.length > 1) {
+      setSmallProductPersonList(smallProductPersonList.filter(p => p.id !== id));
     }
-    return nvr * 100 + camera * 100 + months * 3;
+  };
+  const updateSmallProductPerson = (id: string, field: keyof PersonItem, value: string | number) => {
+    setSmallProductPersonList(smallProductPersonList.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
-  // 计算机房整治金额
-  const calculateRoomAmount = () => {
-    const cabinet9u = parseInt(roomForm.cabinet9u) || 0;
-    const cabinet22u = parseInt(roomForm.cabinet22u) || 0;
-    const cabinet42u = parseInt(roomForm.cabinet42u) || 0;
-    const cabinet1u = parseInt(roomForm.cabinet1u) || 0;
-    const infoPoints = parseInt(roomForm.infoPoints) || 0;
-    return cabinet9u * 200 + cabinet22u * 400 + cabinet42u * 800 + cabinet1u * 80 + infoPoints * 25;
+  // 计算所有section总额
+  const getTotalSettlementAmount = (): number => {
+    return settlementSections.reduce((sum, s) => {
+      return sum + (parseFloat(s.settlementAmount.replace(/,/g, '')) || 0);
+    }, 0);
+  };
+
+  // 判断是否超额
+  const isOverAmount = (): boolean => {
+    if (!selectedProject?.forwardContractAmount) return false;
+    const limit = parseFloat(selectedProject.forwardContractAmount.replace(/,/g, '')) * 0.7;
+    return getTotalSettlementAmount() > limit;
+  };
+
+  // 获取前向合同自交付金额（去掉逗号）
+  const getForwardContractAmount = (): number => {
+    if (!selectedProject?.forwardContractAmount) return 0;
+    return parseFloat(selectedProject.forwardContractAmount.replace(/,/g, '')) || 0;
+  };
+
+  // 校验单section结算金额（强制不超过前向合同自交付金额）
+  const validateSectionAmount = (value: string): string => {
+    const num = parseFloat(value.replace(/,/g, '')) || 0;
+    const limit = getForwardContractAmount();
+    if (limit > 0 && num > limit) {
+      return limit.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return value;
+  };
+
+  // 判断section金额是否超过前向合同自交付金额×0.7
+  const isSectionOverLimit = (value: string): boolean => {
+    const num = parseFloat(value.replace(/,/g, '')) || 0;
+    const limit = getForwardContractAmount() * 0.7;
+    return limit > 0 && num > limit;
   };
 
   // 上传附件（模拟）- 支持多文件
@@ -1135,6 +1229,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
   if (!open) return null;
 
   return (
+    <>
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-[1000px] max-h-[90vh] flex flex-col">
         {/* 头部 */}
@@ -1458,26 +1553,6 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
               ) : (
                 /* 新增模式：可编辑表单 */
                 <div className="space-y-4">
-                  {/* 项目类型选择 */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">申请类型</label>
-                    <div className="flex gap-4">
-                      {(["项目型", "小微标品", "三联单"] as ProjectType[]).map(type => (
-                        <button
-                          key={type}
-                          onClick={() => { setProjectType(type); setAttachments(getDefaultAttachments(type)); }}
-                          className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                            projectType === type
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* 选择项目按钮和已选展示 */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
@@ -1827,324 +1902,107 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
               </h4>
 
               {isViewMode ? (
-                /* 查看模式：只读展示结算信息 */
+                /* 查看模式：只读展示所有section */
+                <div className="space-y-4">
+                  {settlementSections.length === 0 ? (
+                    <div className="text-center text-gray-400 text-sm py-4">暂无结算信息</div>
+                  ) : settlementSections.map((section, idx) => (
+                    <div key={section.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-gray-700">结算 {idx + 1} - {section.method}</span>
+                        <Badge className="bg-blue-100 text-blue-700">{section.method}</Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">总人工费</label>
+                          <div className="text-lg font-medium text-green-600">¥{section.totalLaborCost || "0.00"}</div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">结算金额</label>
+                          <div className="text-lg font-bold text-blue-600">¥{section.settlementAmount || "0.00"}</div>
+                        </div>
+                      </div>
+                      <table className="w-full text-sm">
+                        <thead className="bg-white">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人力编码</th>
+                            {section.method === "350人天" ? (
+                              <>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人天</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额</th>
+                              </>
+                            ) : (
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额</th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                          {section.personList.map(p => (
+                            <tr key={p.id}>
+                              <td className="px-3 py-2">{p.name || "-"}</td>
+                              <td className="px-3 py-2">{p.code || "-"}</td>
+                              {section.method === "350人天" ? (
+                                <>
+                                  <td className="px-3 py-2">{p.personDays || 0}</td>
+                                  <td className="px-3 py-2 text-green-600">¥{((p.personDays || 0) * 350).toLocaleString()}</td>
+                                </>
+                              ) : (
+                                <td className="px-3 py-2 text-green-600">¥{p.amount || "0"}</td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              ) : projectType === "小微标品" ? (
+                /* 小微标品：人员列表 + 交付总人工费 = 结算金额 */
                 <div className="space-y-4">
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-4 gap-4">
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">结算类型</label>
-                        <Badge className="bg-blue-100 text-blue-700">{settlementMethod}</Badge>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">总人工费</label>
-                        <div className="text-lg font-medium text-green-600">¥8,000.00</div>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">结算金额</label>
-                        <div className="text-lg font-bold text-blue-600">¥3,200.00</div>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">结算单号</label>
-                        <div className="text-sm">JSD202605001</div>
-                      </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-medium text-gray-700">人员列表</span>
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={addSmallProductPerson}>
+                        <Plus className="w-4 h-4" />
+                        添加人
+                      </Button>
                     </div>
-                  </div>
-                  <div className="bg-white rounded border border-gray-200 p-4">
-                    <div className="text-sm font-medium text-gray-700 mb-3">人员列表</div>
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-100">
+                      <thead className="bg-white">
                         <tr>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人力编码</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额</th>
+                          <th className="px-3 py-2 w-12"></th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        <tr>
-                          <td className="px-3 py-2">孙八</td>
-                          <td className="px-3 py-2">EMP005</td>
-                          <td className="px-3 py-2 text-green-600">¥4,500.00</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                /* 新增/修改模式 */
-                <div className="space-y-4">
-                  {/* 小微标品子类型选择 */}
-                  {projectType === "小微标品" && (
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">小微标品类型</label>
-                      <div className="flex gap-4">
-                        {(["视联网", "机房整治"] as SmallProductSubType[]).map(subType => (
-                          <button
-                            key={subType}
-                            onClick={() => setSmallProductSubType(subType)}
-                            className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                              smallProductSubType === subType
-                                ? "border-blue-500 bg-blue-50 text-blue-700"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                          >
-                            {subType}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 视联网表单 */}
-                  {projectType === "小微标品" && smallProductSubType === "视联网" && (
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <div className="grid grid-cols-4 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">NVR数量（台）</label>
-                          <Input type="number" value={visionForm.nvrCount} onChange={e => setVisionForm({...visionForm, nvrCount: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">摄像头点位数量（个）</label>
-                          <Input type="number" value={visionForm.cameraCount} onChange={e => setVisionForm({...visionForm, cameraCount: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">维护开始时间</label>
-                          <Input type="date" value={visionForm.startDate} onChange={e => setVisionForm({...visionForm, startDate: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">维护结束时间</label>
-                          <Input type="date" value={visionForm.endDate} onChange={e => setVisionForm({...visionForm, endDate: e.target.value})} />
-                        </div>
-                      </div>
-                      {/* 视联网计算结果 */}
-                      <div className="mt-3 p-3 bg-white rounded border border-gray-200">
-                        <div className="text-xs text-gray-500 mb-2">计算说明：交付总人工费 = NVR数量×100元 + 摄像头数量×100元；后期维护费 = 摄像头数量×3元/月；结算金额 = 总人工费×0.4</div>
-                        <div className="flex items-center gap-6">
-                          <div>
-                            <span className="text-xs text-gray-500">交付总人工费：</span>
-                            <span className="ml-1 font-bold text-blue-600">¥{(parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100).toLocaleString()}</span>
-                          </div>
-                          <div>
-                            <span className="text-xs text-gray-500">后期维护费/月：</span>
-                            <span className="ml-1 font-bold text-green-600">¥{(parseInt(visionForm.cameraCount || "0") * 3).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 机房整治表单 */}
-                  {projectType === "小微标品" && smallProductSubType === "机房整治" && (
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <div className="grid grid-cols-5 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">9U机柜（个）</label>
-                          <Input type="number" value={roomForm.cabinet9u} onChange={e => setRoomForm({...roomForm, cabinet9u: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">22U机柜（个）</label>
-                          <Input type="number" value={roomForm.cabinet22u} onChange={e => setRoomForm({...roomForm, cabinet22u: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">42U机柜（个）</label>
-                          <Input type="number" value={roomForm.cabinet42u} onChange={e => setRoomForm({...roomForm, cabinet42u: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">1U机柜整治（个）</label>
-                          <Input type="number" value={roomForm.cabinet1u} onChange={e => setRoomForm({...roomForm, cabinet1u: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">信息点集成（个）</label>
-                          <Input type="number" value={roomForm.infoPoints} onChange={e => setRoomForm({...roomForm, infoPoints: e.target.value})} />
-                        </div>
-                      </div>
-                      {/* 机房整治计算结果 */}
-                      <div className="mt-3 p-3 bg-white rounded border border-gray-200">
-                        <div className="text-xs text-gray-500 mb-2">计算说明：交付总人工费 = 9U机柜×200元 + 22U机柜×400元 + 42U机柜×800元 + 1U整治×80元 + 信息点×25元；22U、42U轻量版按50%执行</div>
-                        <div className="flex items-center gap-6">
-                          <div>
-                            <span className="text-xs text-gray-500">交付总人工费：</span>
-                            <span className="ml-1 font-bold text-blue-600">¥{(
-                              parseInt(roomForm.cabinet9u || "0") * 200 +
-                              parseInt(roomForm.cabinet22u || "0") * 200 +
-                              parseInt(roomForm.cabinet42u || "0") * 400 +
-                              parseInt(roomForm.cabinet1u || "0") * 80 +
-                              parseInt(roomForm.infoPoints || "0") * 25
-                            ).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 提示信息 */}
-                  <div className="bg-blue-50 rounded-lg p-3 mb-4 text-xs text-gray-500">
-                    {projectType === "项目型" && "项目型提示：451定额=总人工费×0.4，350人天=人天×350"}
-                    {projectType === "小微标品" && smallProductSubType === "视联网" && "视联网提示：451定额=总人工费×0.4，350人天=人天×350"}
-                    {projectType === "小微标品" && smallProductSubType === "机房整治" && "机房整治提示：451定额=总人工费×0.4，350人天=人天×350"}
-                    {projectType === "三联单" && "三联单提示：451定额=总人工费×0.4，350人天=人天×350"}
-                  </div>
-
-                  {/* 结算类型选择 */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">结算类型</label>
-                    <div className="flex gap-4">
-                      {(["451定额", "350人天"] as SettlementMethod[]).map(method => (
-                        <button
-                          key={method}
-                          onClick={() => setSettlementMethod(method)}
-                          className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                            settlementMethod === method
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          {method}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 451定额表单 */}
-                  {settlementMethod === "451定额" && (
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-700">451定额结算</span>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <Upload className="w-4 h-4" />
-                          上传451预算表
-                        </Button>
-                      </div>
-                      <div className="bg-white rounded border border-gray-200 p-4">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">总人工费</label>
-                            {projectType === "小微标品" && smallProductSubType === "视联网" ? (
-                              <div className="text-lg font-bold text-blue-600">
-                                ¥{(parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100).toLocaleString()}
-                              </div>
-                            ) : projectType === "小微标品" && smallProductSubType === "机房整治" ? (
-                              <div className="text-lg font-bold text-blue-600">
-                                ¥{(
-                                  parseInt(roomForm.cabinet9u || "0") * 200 +
-                                  parseInt(roomForm.cabinet22u || "0") * 200 +
-                                  parseInt(roomForm.cabinet42u || "0") * 400 +
-                                  parseInt(roomForm.cabinet1u || "0") * 80 +
-                                  parseInt(roomForm.infoPoints || "0") * 25
-                                ).toLocaleString()}
-                              </div>
-                            ) : (
-                              <div className="text-lg font-bold text-blue-600">
-                                ¥{totalLaborCost ? parseFloat(totalLaborCost).toLocaleString() : "0"}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">结算金额</label>
-                            {projectType === "小微标品" && smallProductSubType === "视联网" ? (
-                              <div className="text-lg font-bold text-green-600">
-                                ¥{((parseInt(visionForm.nvrCount || "0") * 100 + parseInt(visionForm.cameraCount || "0") * 100) * 0.4).toLocaleString()}
-                              </div>
-                            ) : projectType === "小微标品" && smallProductSubType === "机房整治" ? (
-                              <div className="text-lg font-bold text-green-600">
-                                ¥{(
-                                  (parseInt(roomForm.cabinet9u || "0") * 200 +
-                                  parseInt(roomForm.cabinet22u || "0") * 200 +
-                                  parseInt(roomForm.cabinet42u || "0") * 400 +
-                                  parseInt(roomForm.cabinet1u || "0") * 80 +
-                                  parseInt(roomForm.infoPoints || "0") * 25) * 0.4
-                                ).toLocaleString()}
-                              </div>
-                            ) : (
-                              <div className="text-lg font-bold text-green-600">
-                                ¥{totalLaborCost ? (parseFloat(totalLaborCost) * 0.4).toLocaleString() : "0"}（总人工费×0.4）
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="border-t border-gray-200 pt-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-medium text-gray-700">人员列表</span>
-                            <Button variant="ghost" size="sm" className="gap-1" onClick={addPerson}>
-                              <Plus className="w-4 h-4" />
-                              添加人
-                            </Button>
-                          </div>
-                          <table className="w-full text-sm">
-                            <thead className="bg-gray-100">
-                              <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人力编码</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额</th>
-                                <th className="px-3 py-2 w-12"></th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                              {personList.map(person => (
-                                <tr key={person.id}>
-                                  <td className="px-3 py-2">
-                                    <Input size="sm" placeholder="姓名" value={person.name} onChange={e => updatePerson(person.id, "name", e.target.value)} />
-                                  </td>
-                                  <td className="px-3 py-2">
-                                    <Input size="sm" placeholder="编码" value={person.code} onChange={e => updatePerson(person.id, "code", e.target.value)} />
-                                  </td>
-                                  <td className="px-3 py-2">
-                                    <Input size="sm" placeholder="金额" value={person.amount} onChange={e => updatePerson(person.id, "amount", e.target.value)} />
-                                  </td>
-                                  <td className="px-3 py-2">
-                                    <Button variant="ghost" size="sm" className="text-red-600" onClick={() => removePerson(person.id)}>
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 350人天表单 */}
-                  {settlementMethod === "350人天" && (
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                      <span className="font-medium text-gray-700">350人天结算</span>
-                      <div className="bg-white rounded border border-gray-200 p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-gray-700">人员列表</span>
-                          <Button variant="ghost" size="sm" className="gap-1" onClick={addPerson}>
-                            <Plus className="w-4 h-4" />
-                            添加人
-                          </Button>
-                        </div>
-                        <table className="w-full text-sm">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人力编码</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人天</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额（自动计算）</th>
-                              <th className="px-3 py-2 w-12"></th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                        {personList.map(person => (
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {smallProductPersonList.map(person => (
                           <tr key={person.id}>
                             <td className="px-3 py-2">
-                              <Input size="sm" placeholder="姓名" value={person.name} onChange={e => updatePerson(person.id, "name", e.target.value)} />
+                              <Input size="sm" placeholder="姓名" value={person.name} onChange={e => updateSmallProductPerson(person.id, "name", e.target.value)} />
                             </td>
                             <td className="px-3 py-2">
-                              <Input size="sm" placeholder="编码" value={person.code} onChange={e => updatePerson(person.id, "code", e.target.value)} />
+                              <Input size="sm" placeholder="编码" value={person.code} onChange={e => updateSmallProductPerson(person.id, "code", e.target.value)} />
                             </td>
                             <td className="px-3 py-2">
-                              <Input size="sm" placeholder="人天" type="number" value={person.personDays || ""} onChange={e => updatePerson(person.id, "personDays", parseInt(e.target.value) || 0)} />
+                              <Input size="sm" placeholder="金额" value={person.amount} onChange={e => {
+                                updateSmallProductPerson(person.id, "amount", e.target.value);
+                                // 自动求和
+                                setTimeout(() => {
+                                  const total = smallProductPersonList.reduce((sum, p) => {
+                                    if (p.id === person.id) {
+                                      return sum + (parseFloat(e.target.value) || 0);
+                                    }
+                                    return sum + (parseFloat(p.amount || "0") || 0);
+                                  }, 0);
+                                  setSmallProductSettlementAmount(total.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                }, 0);
+                              }} />
                             </td>
                             <td className="px-3 py-2">
-                              <div className="text-green-600 font-medium">
-                                ¥{((person.personDays || 0) * 350).toLocaleString()}
-                              </div>
-                            </td>
-                            <td className="px-3 py-2">
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => removePerson(person.id)}>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => removeSmallProductPerson(person.id)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </td>
@@ -2152,11 +2010,202 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         ))}
                       </tbody>
                     </table>
+                    <div className="mt-4 grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">交付总人工费</label>
+                        <div className="text-lg font-bold text-blue-600">
+                          ¥{smallProductPersonList.reduce((sum, p) => sum + (parseFloat(p.amount || "0") || 0), 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">结算金额（=交付总人工费）</label>
+                        <Input
+                          value={smallProductSettlementAmount}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const num = parseFloat(val.replace(/,/g, '')) || 0;
+                            const limit = getForwardContractAmount();
+                            if (limit > 0 && num > limit) {
+                              setSmallProductSettlementAmount(limit.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                            } else {
+                              setSmallProductSettlementAmount(val);
+                            }
+                          }}
+                          placeholder="请输入结算金额"
+                        />
+                        {isSectionOverLimit(smallProductSettlementAmount) && (
+                          <div className="text-xs text-orange-500 mt-1">已超过规范要求金额</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                </div>
+              ) : (
+                /* 项目型/三联单：支持平铺添加多个451/350 section */
+                <div className="space-y-4">
+                  {settlementSections.length > 0 && (
+                    <div className="text-sm font-medium text-gray-700">
+                      已添加 {settlementSections.length} 个结算段
+                    </div>
+                  )}
+
+                  {settlementSections.map((section, idx) => (
+                    <div key={section.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-700">结算 {idx + 1}</span>
+                          <Badge className="bg-blue-100 text-blue-700">{section.method}</Badge>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-red-600 gap-1" onClick={() => removeSettlementSection(section.id)}>
+                          <Trash2 className="w-4 h-4" />
+                          删除
+                        </Button>
+                      </div>
+
+                      {section.method === "451定额" ? (
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">总人工费</label>
+                            <Input
+                              value={section.totalLaborCost}
+                              onChange={e => {
+                                updateSettlementSection(section.id, "totalLaborCost", e.target.value);
+                                // 同步更新结算金额
+                                setTimeout(() => {
+                                  const labor = parseFloat(e.target.value.replace(/,/g, '')) || 0;
+                                  const newAmount = (labor * 0.4).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                  updateSettlementSection(section.id, "settlementAmount", newAmount);
+                                }, 0);
+                              }}
+                              placeholder="请输入总人工费"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">结算金额（自动=人工费×0.4，可修改）</label>
+                            <Input
+                              value={section.settlementAmount}
+                              onChange={e => {
+                                const val = e.target.value;
+                                const num = parseFloat(val.replace(/,/g, '')) || 0;
+                                const limit = getForwardContractAmount();
+                                if (limit > 0 && num > limit) {
+                                  updateSettlementSection(section.id, "settlementAmount", limit.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                } else {
+                                  updateSettlementSection(section.id, "settlementAmount", val);
+                                }
+                              }}
+                              placeholder="请输入结算金额"
+                            />
+                            {isSectionOverLimit(section.settlementAmount) && (
+                              <div className="text-xs text-orange-500 mt-1">已超过规范要求金额</div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">结算金额（自动=人天×350之和，可修改）</label>
+                          <Input
+                            value={section.settlementAmount}
+                            onChange={e => {
+                              const val = e.target.value;
+                              const num = parseFloat(val.replace(/,/g, '')) || 0;
+                              const limit = getForwardContractAmount();
+                              if (limit > 0 && num > limit) {
+                                updateSettlementSection(section.id, "settlementAmount", limit.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                              } else {
+                                updateSettlementSection(section.id, "settlementAmount", val);
+                              }
+                            }}
+                            placeholder="请输入结算金额"
+                          />
+                          {isSectionOverLimit(section.settlementAmount) && (
+                            <div className="text-xs text-orange-500 mt-1">已超过规范要求金额</div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="border-t border-gray-200 pt-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-700">人员列表</span>
+                          <Button variant="ghost" size="sm" className="gap-1" onClick={() => addPersonToSection(section.id)}>
+                            <Plus className="w-4 h-4" />
+                            添加人
+                          </Button>
+                        </div>
+                        <table className="w-full text-sm">
+                          <thead className="bg-white">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人力编码</th>
+                              {section.method === "350人天" ? (
+                                <>
+                                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">人天</th>
+                                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额（=人天×350）</th>
+                                </>
+                              ) : (
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">金额</th>
+                              )}
+                              <th className="px-3 py-2 w-12"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {section.personList.map(person => (
+                              <tr key={person.id}>
+                                <td className="px-3 py-2">
+                                  <Input size="sm" placeholder="姓名" value={person.name} onChange={e => updatePersonInSection(section.id, person.id, "name", e.target.value)} />
+                                </td>
+                                <td className="px-3 py-2">
+                                  <Input size="sm" placeholder="编码" value={person.code} onChange={e => updatePersonInSection(section.id, person.id, "code", e.target.value)} />
+                                </td>
+                                {section.method === "350人天" ? (
+                                  <>
+                                    <td className="px-3 py-2">
+                                      <Input size="sm" type="number" placeholder="人天" value={person.personDays || ""} onChange={e => {
+                                        updatePersonInSection(section.id, person.id, "personDays", parseInt(e.target.value) || 0);
+                                        // 同步更新section结算金额
+                                        setTimeout(() => autoUpdateSectionAmount(section.id), 0);
+                                      }} />
+                                    </td>
+                                    <td className="px-3 py-2 text-green-600">¥{((person.personDays || 0) * 350).toLocaleString()}</td>
+                                  </>
+                                ) : (
+                                  <td className="px-3 py-2">
+                                    <Input size="sm" placeholder="金额" value={person.amount} onChange={e => updatePersonInSection(section.id, person.id, "amount", e.target.value)} />
+                                  </td>
+                                )}
+                                <td className="px-3 py-2">
+                                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => removePersonFromSection(section.id, person.id)}>
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex gap-3 pt-2">
+                    <Button variant="outline" className="gap-1" onClick={() => addSettlementSection("451定额")}>
+                      <Plus className="w-4 h-4" />
+                      添加451定额
+                    </Button>
+                    <Button variant="outline" className="gap-1" onClick={() => addSettlementSection("350人天")}>
+                      <Plus className="w-4 h-4" />
+                      添加350人天
+                    </Button>
+                  </div>
+
+                  {settlementSections.length > 0 && (
+                    <div className="bg-blue-50 rounded-lg p-3 text-sm">
+                      <span className="text-gray-500">结算金额合计：</span>
+                      <span className="ml-2 font-bold text-blue-600 text-lg">¥{getTotalSettlementAmount().toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
 
             {/* ============ 第三部分：基本情况描述 ============ */}
             <div className="border border-gray-200 rounded-lg p-4">
@@ -2211,6 +2260,75 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                       <div className="mb-3">
                         <label className="block text-xs text-gray-500 mb-1">原因说明</label>
                         <textarea className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500" rows={2} placeholder="请说明毛利率低于模式会的原因..." />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">附件</label>
+                        <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
+                          <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                          <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 自交付结算金额超额提示（项目型/三联单） */}
+                  {isOverAmount() && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>自交付结算金额大于前向合同自交付金额×0.7，请提交说明</span>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-3">
+                        结算金额合计：¥{getTotalSettlementAmount().toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} /
+                        限额：¥{(getForwardContractAmount() * 0.7).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        （前向合同自交付金额 ¥{selectedProject?.forwardContractAmount || "0.00"}）
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-xs text-gray-500 mb-1">原因说明</label>
+                        <textarea
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+                          rows={2}
+                          placeholder="请说明结算金额超额的原因..."
+                          value={overAmountReason}
+                          onChange={e => setOverAmountReason(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">附件</label>
+                        <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center hover:border-red-400 cursor-pointer">
+                          <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                          <span className="text-xs text-gray-500">点击或拖拽上传附件（jpg/png/pdf）</span>
+                        </div>
+                        {overAmountAttachments.length > 0 && (
+                          <div className="mt-2 text-xs text-gray-600">
+                            已上传 {overAmountAttachments.length} 个文件
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 自交付结算金额超额提示（小微标品） */}
+                  {projectType === "小微标品" && isSectionOverLimit(smallProductSettlementAmount) && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>自交付结算金额大于前向合同自交付金额×0.7，请提交说明</span>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-3">
+                        结算金额：¥{smallProductSettlementAmount} /
+                        限额：¥{(getForwardContractAmount() * 0.7).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        （前向合同自交付金额 ¥{selectedProject?.forwardContractAmount || "0.00"}）
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-xs text-gray-500 mb-1">原因说明</label>
+                        <textarea
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+                          rows={2}
+                          placeholder="请说明结算金额超额的原因..."
+                          value={overAmountReason}
+                          onChange={e => setOverAmountReason(e.target.value)}
+                        />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">附件</label>
@@ -2753,6 +2871,6 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
         onSelect={(persons) => setCcUsers(persons)}
         selectedPersons={ccUsers}
       />
-    </div>
+    </>
   );
 }
