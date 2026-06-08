@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Badge } from "./ui/badge";
 import { TabNav } from "./ui/tab-nav";
 import { SelfDeliveryApplyDialog } from "./SelfDeliveryApplyDialog";
+import { exportToXlsx, SheetData } from "../utils/excelExport";
 
 // ============ 类型定义 ============
 type SettlementType = "项目型" | "小微标品" | "三联单";
@@ -14,14 +15,17 @@ type InnerStatus = "已申请" | "审核中" | "审核驳回" | "审核通过" |
 type SettlementMethod = "451定额" | "350元人天";
 type RecordType = "自动生成" | "手动生成";
 
+interface SettlementMethodItem {
+  method: SettlementMethod; // 451定额 / 350人天
+  applyAmount: string;       // 该类型申请金额
+  personList: { name: string; amount?: string; personDays?: number }[];
+}
+
 interface InnerRecord {
   id: string;
   name: string;
   code: string;
-  applyAmount: string;
-  settlementMethod: SettlementMethod;
-  members: string[];
-  personDays: number;
+  settlementMethods: SettlementMethodItem[]; // 支持多个结算类型
   applyDate: string;
   applicant: string;
   status: InnerStatus;
@@ -85,8 +89,8 @@ const mockSettlementData: SettlementRecord[] = [
     selfDeliveryCostAmount: "35,000.00",
     forwardContractSelfDeliveryAmount: "15,000.00",
     canApplyAmount: "15,000.00",
-    appliedAmount: "8,000.00",
-    approvedAmount: "5,000.00",
+    appliedAmount: "2,000.00",
+    approvedAmount: "800.00",
     actualPaidAmount: "0.00",
     status: "审核中",
     appliedProfitPercent: "5%",
@@ -95,10 +99,13 @@ const mockSettlementData: SettlementRecord[] = [
         id: "i1",
         name: "2026年4月自交付结算",
         code: "JSD202604001",
-        applyAmount: "8,000.00",
-        settlementMethod: "451定额",
-        members: ["张三", "李四", "王五"],
-        personDays: 15,
+        settlementMethods: [
+          { method: "451定额", applyAmount: "8,000.00", personList: [
+            { name: "张三", amount: "2,500" },
+            { name: "李四", amount: "2,800" },
+            { name: "王五", amount: "2,700" }
+          ]}
+        ],
         applyDate: "2026-04-15",
         applicant: "张明",
         status: "审核中",
@@ -109,10 +116,15 @@ const mockSettlementData: SettlementRecord[] = [
         id: "i2",
         name: "2026年3月自交付结算",
         code: "JSD202603001",
-        applyAmount: "5,000.00",
-        settlementMethod: "350元人天",
-        members: ["张三", "李四"],
-        personDays: 14,
+        settlementMethods: [
+          { method: "451定额", applyAmount: "2,500.00", personList: [
+            { name: "张三", amount: "1,200" },
+            { name: "李四", amount: "1,300" }
+          ]},
+          { method: "350人天", applyAmount: "2,500.00", personList: [
+            { name: "王五", personDays: 7 }
+          ]}
+        ],
         applyDate: "2026-03-15",
         applicant: "张明",
         status: "审核通过",
@@ -154,10 +166,12 @@ const mockSettlementData: SettlementRecord[] = [
         id: "i3",
         name: "2026年4月自交付结算",
         code: "JSD202604002",
-        applyAmount: "6,000.00",
-        settlementMethod: "451定额",
-        members: ["赵六", "钱七"],
-        personDays: 20,
+        settlementMethods: [
+          { method: "451定额", applyAmount: "6,000.00", personList: [
+            { name: "赵六", amount: "3,000" },
+            { name: "钱七", amount: "3,000" }
+          ]}
+        ],
         applyDate: "2026-04-10",
         applicant: "李华",
         status: "已发放",
@@ -259,10 +273,11 @@ const mockSettlementData: SettlementRecord[] = [
         id: "i4",
         name: "2026年5月自交付结算",
         code: "JSD202605001",
-        applyAmount: "4,500.00",
-        settlementMethod: "350元人天",
-        members: ["孙八"],
-        personDays: 13,
+        settlementMethods: [
+          { method: "350人天", applyAmount: "4,500.00", personList: [
+            { name: "孙八", personDays: 13 }
+          ]}
+        ],
         applyDate: "2026-05-10",
         applicant: "王九",
         status: "已申请",
@@ -303,10 +318,13 @@ const mockSettlementData: SettlementRecord[] = [
         id: "i5",
         name: "2026年4月自交付结算",
         code: "JSD202604003",
-        applyAmount: "12,000.00",
-        settlementMethod: "451定额",
-        members: ["周十", "吴一", "郑二"],
-        personDays: 30,
+        settlementMethods: [
+          { method: "451定额", applyAmount: "12,000.00", personList: [
+            { name: "周十", amount: "4,000" },
+            { name: "吴一", amount: "4,000" },
+            { name: "郑二", amount: "4,000" }
+          ]}
+        ],
         applyDate: "2026-04-20",
         applicant: "刘十一",
         status: "审核通过",
@@ -404,6 +422,111 @@ export function SelfDeliverySettlement() {
     });
   };
 
+  // 导出Excel - 3个Sheet
+  const handleExport = () => {
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+
+    // Sheet1: 外层列表（按当前Tab类型生成对应表头）
+    const outerHeaders: Record<string, string[]> = {
+      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "是否维保", "周期", "开始时间", "结束时间", "前向合同自交付金额", "可申请", "已申请", "可发放", "实际发放", "状态"],
+      "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "状态"],
+      "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "状态"]
+    };
+
+    const buildOuterRow = (row: typeof mockSettlementData[number]): (string | number)[] => {
+      if (typeTab === "项目型") {
+        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.isWarrantyProject ? "是" : "否", row.cycle, row.startDate, row.endDate, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+      } else if (typeTab === "小微标品") {
+        return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+      } else {
+        return [row.index, row.businessUnit, row.type, row.customerName, row.customerCode, row.forwardAmount, row.endDate, row.businessUnit, row.branch, "-", "-", row.selfDeliveryForwardAmount, row.startDate, row.projectCode, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+      }
+    };
+
+    const outerRows = filteredData.map(buildOuterRow);
+    const sheets: SheetData[] = [];
+
+    // 按业务类型分别输出
+    ["项目型", "小微标品", "三联单"].forEach(bizType => {
+      const bizData = mockSettlementData.filter(r => r.type === bizType);
+      if (bizData.length > 0) {
+        sheets.push({
+          name: `外层列表-${bizType}`,
+          headers: outerHeaders[bizType],
+          rows: bizData.map(buildOuterRow)
+        });
+      }
+    });
+
+    // Sheet2: 内层列表（按业务类型分组，每组独立表头）
+    const innerHeaders = ["业务类型", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "申请日期", "申请人", "状态", "发放凭证"];
+    const innerRows: (string | number)[][] = [];
+    mockSettlementData.forEach(row => {
+      row.innerList.forEach(item => {
+        item.settlementMethods.forEach(sm => {
+          innerRows.push([
+            row.type,
+            item.id.replace("i", ""),
+            item.name,
+            item.code,
+            sm.method,
+            sm.applyAmount,
+            sm.personList.map(p => `${p.name}${p.amount ? " ¥" + p.amount : ""}${p.personDays ? " " + p.personDays + "人天" : ""}`).join("、"),
+            item.applyDate,
+            item.applicant,
+            item.status,
+            item.voucher || "-"
+          ]);
+        });
+      });
+    });
+    if (innerRows.length > 0) {
+      sheets.push({
+        name: "内层结算单",
+        headers: innerHeaders,
+        rows: innerRows
+      });
+    }
+
+    // Sheet3: 人员自交付结算清单（基于内层人员明细展开）
+    const personHeaders = ["序号", "经营单元", "支局", "业务类型", "结算单名称", "结算单号", "结算单编码", "人员姓名", "金额", "人天", "结算状态", "申请人", "申请时间"];
+    const personRows: (string | number)[][] = [];
+    let pIdx = 0;
+    mockSettlementData.forEach(row => {
+      row.innerList.forEach(item => {
+        item.settlementMethods.forEach(sm => {
+          sm.personList.forEach(p => {
+            pIdx++;
+            personRows.push([
+              pIdx,
+              row.businessUnit,
+              row.branch,
+              row.type,
+              item.name,
+              item.code,
+              item.code,
+              p.name,
+              p.amount || (p.personDays ? (p.personDays * 350).toFixed(2) : "0.00"),
+              p.personDays || "-",
+              item.status,
+              item.applicant,
+              item.applyDate
+            ]);
+          });
+        });
+      });
+    });
+    if (personRows.length > 0) {
+      sheets.push({
+        name: "人员结算清单",
+        headers: personHeaders,
+        rows: personRows
+      });
+    }
+
+    exportToXlsx(sheets, `自交付结算数据_${today}.xlsx`);
+  };
+
   // 获取状态徽章样式
   const getStatusBadge = (status: SettlementStatus) => {
     const styles: Record<SettlementStatus, string> = {
@@ -426,6 +549,89 @@ export function SelfDeliverySettlement() {
     };
     return styles[status];
   };
+
+  // 渲染内层结算单列表（统一支持多结算类型）
+  const renderInnerList = (row: SettlementRecord, themeColor: string) => (
+    <div className="bg-white border border-gray-200 rounded-lg">
+      <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
+        <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          <span className={`w-1 h-4 ${themeColor} rounded flex-shrink-0`}></span>
+          结算单列表
+        </div>
+      </div>
+      {row.innerList.length > 0 ? (
+        <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算类型 / 申请金额 / 人员</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {row.innerList.map(item => (
+                <React.Fragment key={item.id}>
+                  {item.settlementMethods.map((sm, smIdx) => (
+                    <tr key={`${item.id}-${smIdx}`} className="hover:bg-gray-50">
+                      <td className="px-3 py-2">
+                        {smIdx === 0 && <span className="text-xs text-gray-400">{item.id.replace("i", "")}.</span>}
+                      </td>
+                      <td className="px-3 py-2 max-w-32 truncate" title={item.name}>{smIdx === 0 ? item.name : ""}</td>
+                      <td className="px-3 py-2">{smIdx === 0 ? item.code : ""}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={sm.method === "451定额" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}>{sm.method}</Badge>
+                          <span className="text-green-600 font-medium">¥{sm.applyAmount}</span>
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {sm.personList.map((p, idx) => (
+                            <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
+                              {p.name}{p.amount ? ` ¥${p.amount}` : ""}{p.personDays ? ` ${p.personDays}人天` : ""}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      {smIdx === 0 && (
+                        <>
+                          <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
+                          <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
+                          <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                          <td className="px-3 py-2 max-w-28 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
+                          <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>
+                            <div className="flex flex-col gap-1">
+                              <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
+                              {(item.status === "已申请" || item.status === "审核中") && (
+                                <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                              )}
+                              {item.status === "已申请" && (
+                                <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
+                              )}
+                              {item.status === "已申请" && (
+                                <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
+                              )}
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
+      )}
+    </div>
+  );
 
   // 筛选数据
   const filteredData = mockSettlementData.filter(item => {
@@ -785,7 +991,7 @@ export function SelfDeliverySettlement() {
             <Upload className="w-4 h-4" />
             导入已发放凭证
           </Button>
-          <Button variant="outline" className="gap-1">
+          <Button variant="outline" className="gap-1" onClick={handleExport}>
             <Download className="w-4 h-4" />
             导出
           </Button>
@@ -955,52 +1161,59 @@ export function SelfDeliverySettlement() {
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
                                           <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算类型 / 人数（姓名）</th>
+                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
                                         {row.innerList.map(item => (
-                                          <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
-                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
-                                            <td className="px-3 py-2">{item.code}</td>
-                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex flex-wrap gap-1">
-                                                {item.members.map((m, idx) => (
-                                                  <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">{m}</span>
-                                                ))}
-                                              </div>
-                                            </td>
-                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
-                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
-                                            <td className="px-3 py-2">{item.applicant}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
-                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex gap-2 justify-center">
-                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
-                                                {(item.status === "已申请" || item.status === "审核中") && (
-                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                          <React.Fragment key={item.id}>
+                                            {item.settlementMethods.map((sm, smIdx) => (
+                                              <tr key={`${item.id}-${smIdx}`} className="hover:bg-gray-50">
+                                                <td className="px-3 py-2">
+                                                  {smIdx === 0 && <span className="text-xs text-gray-400 mr-1">{item.id.replace("i", "")}.</span>}
+                                                  {smIdx > 0 && <span className="text-xs text-gray-300 mr-1">└</span>}
+                                                  <Badge className={sm.method === "451定额" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}>{sm.method}</Badge>
+                                                  <span className="ml-2 text-green-600 font-medium">¥{sm.applyAmount}</span>
+                                                  <div className="mt-1 flex flex-wrap gap-1">
+                                                    {sm.personList.map((p, idx) => (
+                                                      <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
+                                                        {p.name}{p.amount ? ` ¥${p.amount}` : ""}{p.personDays ? ` ${p.personDays}人天` : ""}
+                                                      </span>
+                                                    ))}
+                                                  </div>
+                                                </td>
+                                                <td className="px-3 py-2 text-right text-green-600 font-medium">¥{sm.applyAmount}</td>
+                                                {smIdx === 0 && (
+                                                  <>
+                                                    <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
+                                                    <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
+                                                    <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                                    <td className="px-3 py-2 max-w-28 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
+                                                    <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>
+                                                      <div className="flex flex-col gap-1">
+                                                        <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
+                                                        {(item.status === "已申请" || item.status === "审核中") && (
+                                                          <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                                        )}
+                                                        {item.status === "已申请" && (
+                                                          <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
+                                                        )}
+                                                        {item.status === "已申请" && (
+                                                          <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
+                                                        )}
+                                                      </div>
+                                                    </td>
+                                                  </>
                                                 )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
-                                                )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
-                                                )}
-                                              </div>
-                                            </td>
-                                          </tr>
+                                              </tr>
+                                            ))}
+                                          </React.Fragment>
                                         ))}
                                       </tbody>
                                     </table>
@@ -1053,75 +1266,7 @@ export function SelfDeliverySettlement() {
                           <td colSpan={19} className="p-0 align-top">
                             <div className="py-3 px-4">
                               <div className="bg-white border border-gray-200 rounded-lg">
-                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
-                                  <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                    <span className="w-1 h-4 bg-green-500 rounded flex-shrink-0"></span>
-                                    结算单列表
-                                  </div>
-                                </div>
-                                {row.innerList.length > 0 ? (
-                                  <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
-                                    <table className="w-full text-sm">
-                                      <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                                        <tr>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
-                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-100">
-                                        {row.innerList.map(item => (
-                                          <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
-                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
-                                            <td className="px-3 py-2">{item.code}</td>
-                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex flex-wrap gap-1">
-                                                {item.members.map((m, idx) => (
-                                                  <span key={idx} className="px-1.5 py-0.5 bg-green-50 text-green-600 rounded text-xs">{m}</span>
-                                                ))}
-                                              </div>
-                                            </td>
-                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
-                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
-                                            <td className="px-3 py-2">{item.applicant}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
-                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex gap-2 justify-center">
-                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
-                                                {(item.status === "已申请" || item.status === "审核中") && (
-                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
-                                                )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
-                                                )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
-                                                )}
-                                              </div>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                ) : (
-                                  <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
-                                )}
+                                {renderInnerList(row, "bg-green-500")}
                               </div>
                             </div>
                           </td>
@@ -1178,77 +1323,7 @@ export function SelfDeliverySettlement() {
                         <tr className="bg-gray-50">
                           <td colSpan={30} className="p-0 align-top">
                             <div className="py-3 px-4">
-                              <div className="bg-white border border-gray-200 rounded-lg">
-                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
-                                  <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                    <span className="w-1 h-4 bg-purple-500 rounded flex-shrink-0"></span>
-                                    结算单列表
-                                  </div>
-                                </div>
-                                {row.innerList.length > 0 ? (
-                                  <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
-                                    <table className="w-full text-sm">
-                                      <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                                        <tr>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
-                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">人数（姓名）</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">人天</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">类型</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-100">
-                                        {row.innerList.map(item => (
-                                          <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-2">{item.id.replace("i", "")}</td>
-                                            <td className="px-3 py-2 max-w-40 truncate" title={item.name}>{item.name}</td>
-                                            <td className="px-3 py-2">{item.code}</td>
-                                            <td className="px-3 py-2 text-right font-medium text-green-600">{item.applyAmount}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-700">{item.settlementMethod}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex flex-wrap gap-1">
-                                                {item.members.map((m, idx) => (
-                                                  <span key={idx} className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded text-xs">{m}</span>
-                                                ))}
-                                              </div>
-                                            </td>
-                                            <td className="px-3 py-2 text-center">{item.personDays}</td>
-                                            <td className="px-3 py-2 text-center">{item.applyDate}</td>
-                                            <td className="px-3 py-2">{item.applicant}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
-                                            <td className="px-3 py-2 max-w-28 truncate" title={item.voucher}>{item.voucher || "-"}</td>
-                                            <td className="px-3 py-2 text-center"><Badge className="bg-gray-100 text-gray-600">{item.recordType}</Badge></td>
-                                            <td className="px-3 py-2">
-                                              <div className="flex gap-2 justify-center">
-                                                <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
-                                                {(item.status === "已申请" || item.status === "审核中") && (
-                                                  <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
-                                                )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
-                                                )}
-                                                {item.status === "已申请" && (
-                                                  <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
-                                                )}
-                                              </div>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                ) : (
-                                  <div className="px-4 py-6 text-center text-sm text-gray-400">暂无结算单数据</div>
-                                )}
-                              </div>
+                              {renderInnerList(row, "bg-purple-500")}
                             </div>
                           </td>
                         </tr>

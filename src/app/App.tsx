@@ -35,6 +35,10 @@ const ContractPaymentConfirmation = lazy(() => import("./components/ContractPaym
 const RiskManagement = lazy(() => import("./components/RiskManagement").then(m => ({ default: m.default })));
 const RevenueManagement = lazy(() => import("./components/RevenueManagement").then(m => ({ default: m.RevenueManagement })));
 const SelfDeliverySettlement = lazy(() => import("./components/SelfDeliverySettlement").then(m => ({ default: m.SelfDeliverySettlement })));
+const SelfDeliverySettlementList = lazy(() => import("./components/SelfDeliverySettlementList").then(m => ({ default: m.SelfDeliverySettlementList })));
+const SelfDeliverySettlementStats = lazy(() => import("./components/SelfDeliverySettlementStats").then(m => ({ default: m.SelfDeliverySettlementStats })));
+const PersonSettlementList = lazy(() => import("./components/PersonSettlementList").then(m => ({ default: m.PersonSettlementList })));
+const PersonSettlementStats = lazy(() => import("./components/PersonSettlementStats").then(m => ({ default: m.PersonSettlementStats })));
 const TaskWalletList = lazy(() => import("./components/TaskWalletList").then(m => ({ default: m.TaskWalletList })));
 const ProjectList = lazy(() => import("./components/ProjectList").then(m => ({ default: m.ProjectList })));
 const RewardSignReport = lazy(() => import("./components/RewardSignReport").then(m => ({ default: m.RewardSignReport })));
@@ -50,6 +54,7 @@ const LargeBusinessOpportunityAward = lazy(() => import("./components/LargeBusin
 const ProjectCommissionAward = lazy(() => import("./components/ProjectCommissionAward").then(m => ({ default: m.ProjectCommissionAward })));
 const AIAssistantConfig = lazy(() => import("./components/AIAssistantConfig").then(m => ({ default: m.AIAssistantConfig })));
 const FixedAssets = lazy(() => import("./components/FixedAssets").then(m => ({ default: m.FixedAssets })));
+const BusinessPreDemolitionList = lazy(() => import("./components/BusinessPreDemolitionList").then(m => ({ default: m.BusinessPreDemolitionList })));
 
 // 加载中组件
 function LoadingSpinner() {
@@ -75,6 +80,10 @@ const ROUTE_TO_COMPONENT: Record<string, string> = {
   'six-positioning': 'SixPositioning',
   'revenue-management': 'RevenueManagement',
   'self-delivery-settlement': 'SelfDeliverySettlement',
+  'self-delivery-settlement-list': 'SelfDeliverySettlementList',
+  'self-delivery-settlement-stats': 'SelfDeliverySettlementStats',
+  'person-settlement-list': 'PersonSettlementList',
+  'person-settlement-stats': 'PersonSettlementStats',
   'progress-management': 'ProgressManagement',
   'contract-payment-confirmation': 'ContractPaymentConfirmation',
   'expert-report': 'ExpertReportPage',
@@ -103,6 +112,7 @@ const ROUTE_TO_COMPONENT: Record<string, string> = {
   'large-business-opportunit': 'LargeBusinessOpportunit',
   'commission-distribution-report': 'CommissionDistributionReport',
   'fixed-assets': 'FixedAssets',
+  'business-pre-demolition': 'BusinessPreDemolitionList',
   'settings': 'settings',
   'ai-assistant-config': 'AIAssistantConfig',
 };
@@ -149,6 +159,10 @@ useEffect(() => {
         'SixPositioning': 'six-positioning',
         'RevenueManagement': 'revenue-management',
         'SelfDeliverySettlement': 'self-delivery-settlement',
+        'SelfDeliverySettlementList': 'self-delivery-settlement-list',
+        'SelfDeliverySettlementStats': 'self-delivery-settlement-stats',
+        'PersonSettlementList': 'person-settlement-list',
+        'PersonSettlementStats': 'person-settlement-stats',
         'TaskWalletList': 'task-wallet-list',
         'ProjectList': 'project-list',
         'RewardSignReport': 'reward-sign-report',
@@ -186,6 +200,7 @@ useEffect(() => {
         'RiskManagement': 'risk-dispatch',
         'AIAssistantConfig': 'ai-assistant-config',
         'FixedAssets': 'fixed-assets',
+        'BusinessPreDemolitionList': 'business-pre-demolition',
       };
 
       const sidebarItem = componentMap[componentName];
@@ -225,6 +240,18 @@ useEffect(() => {
     // 自交付结算管理
     if (activeSidebarItem === "self-delivery-settlement") {
       return <Suspense fallback={<LoadingSpinner />}><SelfDeliverySettlement /></Suspense>;
+    }
+    if (activeSidebarItem === "self-delivery-settlement-list") {
+      return <Suspense fallback={<LoadingSpinner />}><SelfDeliverySettlementList /></Suspense>;
+    }
+    if (activeSidebarItem === "self-delivery-settlement-stats") {
+      return <Suspense fallback={<LoadingSpinner />}><SelfDeliverySettlementStats /></Suspense>;
+    }
+    if (activeSidebarItem === "person-settlement-list") {
+      return <Suspense fallback={<LoadingSpinner />}><PersonSettlementList /></Suspense>;
+    }
+    if (activeSidebarItem === "person-settlement-stats") {
+      return <Suspense fallback={<LoadingSpinner />}><PersonSettlementStats /></Suspense>;
     }
 
     // 钱包列表（宁波产数钱包）
@@ -333,6 +360,11 @@ useEffect(() => {
     // 固定资产管理页面
     if (activeSidebarItem === "fixed-assets") {
       return <Suspense fallback={<LoadingSpinner />}><FixedAssets /></Suspense>;
+    }
+
+    // 业务预解构
+    if (activeSidebarItem === "business-pre-demolition") {
+      return <Suspense fallback={<LoadingSpinner />}><BusinessPreDemolitionList /></Suspense>;
     }
 
     // 未匹配到任何页面时显示首页

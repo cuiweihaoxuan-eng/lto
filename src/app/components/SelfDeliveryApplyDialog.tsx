@@ -156,6 +156,7 @@ interface SettlementSection {
   totalLaborCost: string;   // 451定额：总人工费；350人天：人员金额合计
   settlementAmount: string; // 结算金额（可手动修改）
   personList: PersonItem[];
+  uploadedFileName?: string; // 451定额上传的文件名
 }
 
 interface SettlementRecord {
@@ -938,7 +939,13 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
           forwardContractAmount: rowData.forwardContractSelfDeliveryAmount,
           maxApplyAmount: rowData.canApplyAmount,
           appliedAmount: rowData.appliedAmount,
-          appliedProfit: rowData.approvedAmount
+          // 申请实际毛利 = 已申请金额 / 前向合同自交付金额 * 100%
+          appliedProfit: (() => {
+            const applied = parseFloat((rowData.appliedAmount || "0").replace(/,/g, ''));
+            const forward = parseFloat((rowData.forwardContractSelfDeliveryAmount || "0").replace(/,/g, ''));
+            if (forward <= 0) return "0";
+            return ((applied / forward) * 100).toFixed(0);
+          })()
         });
       } else if (type === "小微标品") {
         setSelectedOrder({
@@ -1071,9 +1078,10 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
       method,
       totalLaborCost: "",
       settlementAmount: "",
-      personList: [{ id: Date.now().toString() + "_1", name: "", code: "", amount: "" }]
+      personList: [{ id: Date.now().toString() + "_1", name: "", code: "", amount: "" }],
+      uploadedFileName: undefined
     };
-    setSettlementSections([...settlementSections, newSection]);
+    setSettlementSections(prev => [...prev, newSection]);
   };
 
   // 删除section
@@ -1083,12 +1091,12 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 更新section基本信息
   const updateSettlementSection = (sectionId: string, field: keyof SettlementSection, value: string) => {
-    setSettlementSections(settlementSections.map(s => s.id === sectionId ? { ...s, [field]: value } : s));
+    setSettlementSections(prev => prev.map(s => s.id === sectionId ? { ...s, [field]: value } : s));
   };
 
   // 添加人员到section
   const addPersonToSection = (sectionId: string) => {
-    setSettlementSections(settlementSections.map(s => {
+    setSettlementSections(prev => prev.map(s => {
       if (s.id === sectionId) {
         return { ...s, personList: [...s.personList, { id: Date.now().toString(), name: "", code: "", amount: "" }] };
       }
@@ -1098,7 +1106,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 从section删除人员
   const removePersonFromSection = (sectionId: string, personId: string) => {
-    setSettlementSections(settlementSections.map(s => {
+    setSettlementSections(prev => prev.map(s => {
       if (s.id === sectionId) {
         if (s.personList.length <= 1) return s;
         return { ...s, personList: s.personList.filter(p => p.id !== personId) };
@@ -1109,7 +1117,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 更新section中人员
   const updatePersonInSection = (sectionId: string, personId: string, field: keyof PersonItem, value: string | number) => {
-    setSettlementSections(settlementSections.map(s => {
+    setSettlementSections(prev => prev.map(s => {
       if (s.id === sectionId) {
         return {
           ...s,
@@ -1137,7 +1145,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 自动更新section的结算金额
   const autoUpdateSectionAmount = (sectionId: string) => {
-    setSettlementSections(settlementSections.map(s => {
+    setSettlementSections(prev => prev.map(s => {
       if (s.id === sectionId) {
         const newAmount = calculateSectionAmount(s);
         return { ...s, settlementAmount: newAmount };
@@ -1148,15 +1156,13 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // ============ 小微标品人员管理 ============
   const addSmallProductPerson = () => {
-    setSmallProductPersonList([...smallProductPersonList, { id: Date.now().toString(), name: "", code: "", amount: "" }]);
+    setSmallProductPersonList(prev => [...prev, { id: Date.now().toString(), name: "", code: "", amount: "" }]);
   };
   const removeSmallProductPerson = (id: string) => {
-    if (smallProductPersonList.length > 1) {
-      setSmallProductPersonList(smallProductPersonList.filter(p => p.id !== id));
-    }
+    setSmallProductPersonList(prev => prev.length > 1 ? prev.filter(p => p.id !== id) : prev);
   };
   const updateSmallProductPerson = (id: string, field: keyof PersonItem, value: string | number) => {
-    setSmallProductPersonList(smallProductPersonList.map(p => p.id === id ? { ...p, [field]: value } : p));
+    setSmallProductPersonList(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
   // 计算所有section总额
@@ -1336,7 +1342,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                               <div className="text-sm font-medium text-red-600">{selectedProject.appliedProfit}%</div>
                             </div>
                           </div>
-                          {selectedProject.appliedProfit === "5%" && (
+                          {parseFloat(selectedProject.appliedProfit) < 15 && (
                             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                               <div className="flex items-center gap-2 text-red-600 font-medium mb-3">
                                 <AlertTriangle className="w-4 h-4" />
@@ -1987,18 +1993,14 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                               <Input size="sm" placeholder="编码" value={person.code} onChange={e => updateSmallProductPerson(person.id, "code", e.target.value)} />
                             </td>
                             <td className="px-3 py-2">
-                              <Input size="sm" placeholder="金额" value={person.amount} onChange={e => {
-                                updateSmallProductPerson(person.id, "amount", e.target.value);
-                                // 自动求和
-                                setTimeout(() => {
-                                  const total = smallProductPersonList.reduce((sum, p) => {
-                                    if (p.id === person.id) {
-                                      return sum + (parseFloat(e.target.value) || 0);
-                                    }
-                                    return sum + (parseFloat(p.amount || "0") || 0);
-                                  }, 0);
+                              <Input size="sm" placeholder="金额" value={person.amount ?? ""} onChange={e => {
+                                const val = e.target.value;
+                                setSmallProductPersonList(prev => {
+                                  const next = prev.map(p => p.id === person.id ? { ...p, amount: val } : p);
+                                  const total = next.reduce((sum, p) => sum + (parseFloat(p.amount || "0") || 0), 0);
                                   setSmallProductSettlementAmount(total.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-                                }, 0);
+                                  return next;
+                                });
                               }} />
                             </td>
                             <td className="px-3 py-2">
@@ -2056,10 +2058,40 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                           <span className="font-medium text-gray-700">结算 {idx + 1}</span>
                           <Badge className="bg-blue-100 text-blue-700">{section.method}</Badge>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-red-600 gap-1" onClick={() => removeSettlementSection(section.id)}>
-                          <Trash2 className="w-4 h-4" />
-                          删除
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {section.method === "451定额" && (
+                            <div className="flex items-center gap-2">
+                              {section.uploadedFileName ? (
+                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                  <FileText className="w-3 h-3 text-blue-500" />
+                                  {section.uploadedFileName}
+                                </span>
+                              ) : null}
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => {
+                                // 模拟文件选择和解析
+                                const input = document.createElement("input");
+                                input.type = "file";
+                                input.accept = ".xlsx,.xls,.pdf,.doc,.docx";
+                                input.onchange = (e: any) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  // 模拟解析：随机生成一个总人工费
+                                  const mockLabor = Math.floor(20000 + Math.random() * 80000);
+                                  const newAmount = (mockLabor * 0.4).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                  setSettlementSections(prev => prev.map(s => s.id === section.id ? { ...s, uploadedFileName: file.name, totalLaborCost: mockLabor.toString(), settlementAmount: newAmount } : s));
+                                };
+                                input.click();
+                              }}>
+                                <Upload className="w-3 h-3" />
+                                {section.uploadedFileName ? "重新上传" : "上传451文件"}
+                              </Button>
+                            </div>
+                          )}
+                          <Button variant="ghost" size="sm" className="text-red-600 gap-1" onClick={() => removeSettlementSection(section.id)}>
+                            <Trash2 className="w-4 h-4" />
+                            删除
+                          </Button>
+                        </div>
                       </div>
 
                       {section.method === "451定额" ? (
@@ -2069,13 +2101,10 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                             <Input
                               value={section.totalLaborCost}
                               onChange={e => {
-                                updateSettlementSection(section.id, "totalLaborCost", e.target.value);
-                                // 同步更新结算金额
-                                setTimeout(() => {
-                                  const labor = parseFloat(e.target.value.replace(/,/g, '')) || 0;
-                                  const newAmount = (labor * 0.4).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                  updateSettlementSection(section.id, "settlementAmount", newAmount);
-                                }, 0);
+                                const val = e.target.value;
+                                const labor = parseFloat(val.replace(/,/g, '')) || 0;
+                                const newAmount = (labor * 0.4).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                setSettlementSections(prev => prev.map(s => s.id === section.id ? { ...s, totalLaborCost: val, settlementAmount: newAmount } : s));
                               }}
                               placeholder="请输入总人工费"
                             />
@@ -2160,10 +2189,19 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                                 {section.method === "350人天" ? (
                                   <>
                                     <td className="px-3 py-2">
-                                      <Input size="sm" type="number" placeholder="人天" value={person.personDays || ""} onChange={e => {
-                                        updatePersonInSection(section.id, person.id, "personDays", parseInt(e.target.value) || 0);
-                                        // 同步更新section结算金额
-                                        setTimeout(() => autoUpdateSectionAmount(section.id), 0);
+                                      <Input size="sm" type="number" placeholder="人天" value={person.personDays ?? ""} onChange={e => {
+                                        const days = parseInt(e.target.value) || 0;
+                                        setSettlementSections(prev => {
+                                          const updated = prev.map(s => {
+                                            if (s.id !== section.id) return s;
+                                            return {
+                                              ...s,
+                                              personList: s.personList.map(p => p.id === person.id ? { ...p, personDays: days } : p)
+                                            };
+                                          });
+                                          // 同步计算新section金额
+                                          return updated.map(s => s.id === section.id ? { ...s, settlementAmount: calculateSectionAmount(s) } : s);
+                                        });
                                       }} />
                                     </td>
                                     <td className="px-3 py-2 text-green-600">¥{((person.personDays || 0) * 350).toLocaleString()}</td>
@@ -2198,10 +2236,53 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                   </div>
 
                   {settlementSections.length > 0 && (
+                    <>
                     <div className="bg-blue-50 rounded-lg p-3 text-sm">
                       <span className="text-gray-500">结算金额合计：</span>
                       <span className="ml-2 font-bold text-blue-600 text-lg">¥{getTotalSettlementAmount().toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
+
+                    {/* 周期型维保项目 - 自动拆分发放清单 */}
+                    {isCycleMaintenance === "是" && cycle && projectStartDate && projectEndDate && (() => {
+                      // 解析"12个月"格式的数字
+                      const cycleMatch = cycle.match(/(\d+)/);
+                      const months = cycleMatch ? parseInt(cycleMatch[1]) : 0;
+                      if (months <= 0) return null;
+                      const totalAmount = getTotalSettlementAmount();
+                      const perMonth = totalAmount / months;
+                      // 当前是2026-06，6月之前的"可发放"
+                      const currentMonth = new Date().getMonth() + 1; // 6
+                      const items = Array.from({ length: months }, (_, i) => {
+                        const monthIndex = i + 1;
+                        const isAvailable = monthIndex <= currentMonth;
+                        const monthDate = new Date(projectStartDate);
+                        monthDate.setMonth(monthDate.getMonth() + i);
+                        return {
+                          month: monthIndex,
+                          date: monthDate.toISOString().slice(0, 10),
+                          amount: perMonth,
+                          status: isAvailable ? "可发放" : "待发放"
+                        };
+                      });
+                      return (
+                        <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                          <div className="text-sm font-medium text-orange-700 mb-2">
+                            维保发放清单（共 {months} 期，{perMonth.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 元/期）
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {items.map(item => (
+                              <div key={item.month} className={`px-3 py-2 rounded text-xs ${item.status === "可发放" ? "bg-green-100 text-green-700 border border-green-300" : "bg-gray-100 text-gray-600 border border-gray-300"}`}>
+                                <div className="font-medium">第 {item.month} 期</div>
+                                <div>{item.date}</div>
+                                <div>¥{item.amount.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className="mt-1 font-medium">{item.status}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    </>
                   )}
                 </div>
               )}

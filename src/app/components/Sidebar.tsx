@@ -65,6 +65,11 @@ const menuItems: MenuItem[] = [
     icon: <ShoppingCart className="w-4 h-4" />
   },
   {
+    id: "business-pre-demolition",
+    label: "业务预解构",
+    icon: <FileText className="w-4 h-4" />
+  },
+  {
     id: "process-config",
     label: "流程节点配置",
     icon: <TrendingUp className="w-4 h-4" />
@@ -88,9 +93,16 @@ const menuItems: MenuItem[] = [
     icon: <DollarSign className="w-4 h-4" />
   },
   {
-    id: "self-delivery-settlement",
+    id: "self-delivery-settlement-group",
     label: "自交付结算管理",
-    icon: <DollarSign className="w-4 h-4" />
+    icon: <DollarSign className="w-4 h-4" />,
+    children: [
+      { id: "self-delivery-settlement", label: "自交付结算管理" },
+      { id: "self-delivery-settlement-list", label: "自交付结算清单" },
+      { id: "self-delivery-settlement-stats", label: "自交付结算统计" },
+      { id: "person-settlement-list", label: "人员自交付结算清单" },
+      { id: "person-settlement-stats", label: "人员自交付结算统计" }
+    ]
   },
   {
     id: "task-wallet",
