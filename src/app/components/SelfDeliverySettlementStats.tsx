@@ -122,17 +122,18 @@ export function SelfDeliverySettlementStats() {
     return true;
   });
 
-  // 渲染二级表头单元格（数量+金额两行）
-  const renderStatsCell = (stats: SubStats) => (
-    <td className="px-2 py-3">
-      <div className="text-xs space-y-1">
-        <div className="font-medium text-gray-900">数量: <span className="text-blue-600">{stats.count}</span></div>
-        <div className="text-gray-500">可申请: {stats.canApplyCount}单 / <span className="text-gray-700">¥{stats.canApplyAmount}</span></div>
-        <div className="text-blue-600">已申请: {stats.appliedCount}单 / ¥{stats.appliedAmount}</div>
-        <div className="text-green-600">审核通过: {stats.approvedCount}单 / ¥{stats.approvedAmount}</div>
-        <div className="text-emerald-600">实际发放: {stats.actualPaidCount}单 / ¥{stats.actualPaidAmount}</div>
-      </div>
-    </td>
+  // 渲染二级表头单元格（独立列）
+  const renderNumberCell = (value: number, color: string = "text-blue-600") => (
+    <td className={`px-2 py-3 text-center text-sm font-medium ${color}`}>{value}</td>
+  );
+  const renderAmountCell = (value: string, color: string = "text-gray-700") => (
+    <td className={`px-2 py-3 text-right text-xs ${color}`}>¥{value}</td>
+  );
+  const renderCountAndAmountCells = (count: number, amount: string, color: string = "text-gray-700") => (
+    <>
+      {renderNumberCell(count, color)}
+      {renderAmountCell(amount, color)}
+    </>
   );
 
   return (
@@ -209,27 +210,27 @@ export function SelfDeliverySettlementStats() {
                 <th rowSpan={2} className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24 border-r border-gray-200">
                   {viewMode === "district" ? "区县" : "支局"}
                 </th>
-                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-blue-700 bg-blue-50 border-r border-gray-200">项目型</th>
-                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-green-700 bg-green-50 border-r border-gray-200">小微标品</th>
-                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-purple-700 bg-purple-50">三联单</th>
+                <th colSpan={9} className="px-3 py-2 text-center text-xs font-medium text-blue-700 bg-blue-50 border-r border-gray-200">项目型</th>
+                <th colSpan={9} className="px-3 py-2 text-center text-xs font-medium text-green-700 bg-green-50 border-r border-gray-200">小微标品</th>
+                <th colSpan={9} className="px-3 py-2 text-center text-xs font-medium text-purple-700 bg-purple-50">三联单</th>
               </tr>
               {/* 二级表头 */}
               <tr>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-24">项目型数量</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">可申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">已申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">审核通过<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">实际发放<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-24">小微标品订单数量</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">可申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">已申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">审核通过<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">实际发放<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-24">三联单数量</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">可申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">已申请<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">审核通过<br/>(数量/金额)</th>
-                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">实际发放<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-20">项目型数量</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">可申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">已申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">审核通过（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">实际发放（数量/金额）</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-20">小微标品订单数量</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">可申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">已申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">审核通过（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">实际发放（数量/金额）</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-20">三联单数量</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">可申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">已申请（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">审核通过（数量/金额）</th>
+                <th colSpan={2} className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">实际发放（数量/金额）</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -241,14 +242,28 @@ export function SelfDeliverySettlementStats() {
                       <td className="px-3 py-3">{row.accountingPeriod}</td>
                       <td className="px-3 py-3">{row.businessUnit}</td>
                       <td className="px-3 py-3 font-medium text-blue-600 underline">{row.district}</td>
-                      <td className="px-2 py-3 text-center text-blue-600 font-medium">{row.project.count}</td>
-                      {renderStatsCell(row.project)}
-                      {renderStatsCell(row.smallProduct)}
-                      {renderStatsCell(row.triple)}
+                      {/* 项目型5列：数量 / 可申请数量 / 可申请金额 / 已申请数量 / 已申请金额 / 审核通过数量 / 审核通过金额 / 实际发放数量 / 实际发放金额 */}
+                      {renderNumberCell(row.project.count, "text-blue-600 font-medium")}
+                      {renderCountAndAmountCells(row.project.canApplyCount, row.project.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.project.appliedCount, row.project.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.project.approvedCount, row.project.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.project.actualPaidCount, row.project.actualPaidAmount, "text-emerald-600")}
+                      {/* 小微标品5列 */}
+                      {renderNumberCell(row.smallProduct.count, "text-green-600 font-medium")}
+                      {renderCountAndAmountCells(row.smallProduct.canApplyCount, row.smallProduct.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.smallProduct.appliedCount, row.smallProduct.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.smallProduct.approvedCount, row.smallProduct.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.smallProduct.actualPaidCount, row.smallProduct.actualPaidAmount, "text-emerald-600")}
+                      {/* 三联单5列 */}
+                      {renderNumberCell(row.triple.count, "text-purple-600 font-medium")}
+                      {renderCountAndAmountCells(row.triple.canApplyCount, row.triple.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.triple.appliedCount, row.triple.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.triple.approvedCount, row.triple.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.triple.actualPaidCount, row.triple.actualPaidAmount, "text-emerald-600")}
                     </tr>
                   ))}
                   {filteredDistrictData.length === 0 && (
-                    <tr><td colSpan={19} className="px-3 py-8 text-center text-gray-500">暂无数据</td></tr>
+                    <tr><td colSpan={31} className="px-3 py-8 text-center text-gray-500">暂无数据</td></tr>
                   )}
                 </>
               ) : (
@@ -259,14 +274,25 @@ export function SelfDeliverySettlementStats() {
                       <td className="px-3 py-3">{row.accountingPeriod}</td>
                       <td className="px-3 py-3">{row.businessUnit}</td>
                       <td className="px-3 py-3 font-medium">{row.branch}</td>
-                      <td className="px-2 py-3 text-center text-blue-600 font-medium">{row.project.count}</td>
-                      {renderStatsCell(row.project)}
-                      {renderStatsCell(row.smallProduct)}
-                      {renderStatsCell(row.triple)}
+                      {renderNumberCell(row.project.count, "text-blue-600 font-medium")}
+                      {renderCountAndAmountCells(row.project.canApplyCount, row.project.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.project.appliedCount, row.project.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.project.approvedCount, row.project.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.project.actualPaidCount, row.project.actualPaidAmount, "text-emerald-600")}
+                      {renderNumberCell(row.smallProduct.count, "text-green-600 font-medium")}
+                      {renderCountAndAmountCells(row.smallProduct.canApplyCount, row.smallProduct.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.smallProduct.appliedCount, row.smallProduct.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.smallProduct.approvedCount, row.smallProduct.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.smallProduct.actualPaidCount, row.smallProduct.actualPaidAmount, "text-emerald-600")}
+                      {renderNumberCell(row.triple.count, "text-purple-600 font-medium")}
+                      {renderCountAndAmountCells(row.triple.canApplyCount, row.triple.canApplyAmount, "text-gray-700")}
+                      {renderCountAndAmountCells(row.triple.appliedCount, row.triple.appliedAmount, "text-blue-600")}
+                      {renderCountAndAmountCells(row.triple.approvedCount, row.triple.approvedAmount, "text-green-600")}
+                      {renderCountAndAmountCells(row.triple.actualPaidCount, row.triple.actualPaidAmount, "text-emerald-600")}
                     </tr>
                   ))}
                   {filteredBranchData.length === 0 && (
-                    <tr><td colSpan={19} className="px-3 py-8 text-center text-gray-500">暂无数据，点击区县返回查看</td></tr>
+                    <tr><td colSpan={31} className="px-3 py-8 text-center text-gray-500">暂无数据，点击区县返回查看</td></tr>
                   )}
                 </>
               )}
