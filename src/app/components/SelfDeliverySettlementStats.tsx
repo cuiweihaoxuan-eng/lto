@@ -1,15 +1,18 @@
-import React, { useState } from "react";
-import { Search, RefreshCw, Download, ChevronRight, ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, RefreshCw, Download, ArrowLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface SubStats {
-  count: number;
-  canApplyAmount: string;
-  appliedAmount: string;
-  approvedAmount: string;
-  actualPaidAmount: string;
+  count: number;            // 数量
+  canApplyCount: number;    // 可申请数量
+  canApplyAmount: string;   // 可申请金额
+  appliedCount: number;     // 已申请数量
+  appliedAmount: string;    // 已申请金额
+  approvedCount: number;    // 审核通过数量
+  approvedAmount: string;   // 审核通过金额
+  actualPaidCount: number;  // 实际发放数量
+  actualPaidAmount: string; // 实际发放金额
 }
 
 interface DistrictStats {
@@ -20,70 +23,114 @@ interface DistrictStats {
   project: SubStats;
   smallProduct: SubStats;
   triple: SubStats;
-  children?: DistrictStats[];
+}
+
+interface BranchStats {
+  id: string;
+  accountingPeriod: string;
+  businessUnit: string;
+  district: string;
+  branch: string;
+  project: SubStats;
+  smallProduct: SubStats;
+  triple: SubStats;
 }
 
 const mockStats: DistrictStats[] = [
   {
     id: "1", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "西湖区",
-    project: { count: 3, canApplyAmount: "120,000.00", appliedAmount: "60,000.00", approvedAmount: "45,000.00", actualPaidAmount: "20,000.00" },
-    smallProduct: { count: 5, canApplyAmount: "50,000.00", appliedAmount: "25,000.00", approvedAmount: "20,000.00", actualPaidAmount: "10,000.00" },
-    triple: { count: 8, canApplyAmount: "200,000.00", appliedAmount: "100,000.00", approvedAmount: "80,000.00", actualPaidAmount: "40,000.00" },
-    children: [
-      { id: "1-1", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "西湖区", project: { count: 2, canApplyAmount: "80,000.00", appliedAmount: "40,000.00", approvedAmount: "30,000.00", actualPaidAmount: "15,000.00" }, smallProduct: { count: 3, canApplyAmount: "30,000.00", appliedAmount: "15,000.00", approvedAmount: "12,000.00", actualPaidAmount: "6,000.00" }, triple: { count: 5, canApplyAmount: "120,000.00", appliedAmount: "60,000.00", approvedAmount: "50,000.00", actualPaidAmount: "25,000.00" } },
-      { id: "1-2", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "西湖区", project: { count: 1, canApplyAmount: "40,000.00", appliedAmount: "20,000.00", approvedAmount: "15,000.00", actualPaidAmount: "5,000.00" }, smallProduct: { count: 2, canApplyAmount: "20,000.00", appliedAmount: "10,000.00", approvedAmount: "8,000.00", actualPaidAmount: "4,000.00" }, triple: { count: 3, canApplyAmount: "80,000.00", appliedAmount: "40,000.00", approvedAmount: "30,000.00", actualPaidAmount: "15,000.00" } },
-    ]
+    project: { count: 3, canApplyCount: 3, canApplyAmount: "120,000.00", appliedCount: 2, appliedAmount: "60,000.00", approvedCount: 2, approvedAmount: "45,000.00", actualPaidCount: 1, actualPaidAmount: "20,000.00" },
+    smallProduct: { count: 5, canApplyCount: 5, canApplyAmount: "50,000.00", appliedCount: 3, appliedAmount: "25,000.00", approvedCount: 2, approvedAmount: "20,000.00", actualPaidCount: 1, actualPaidAmount: "10,000.00" },
+    triple: { count: 8, canApplyCount: 8, canApplyAmount: "200,000.00", appliedCount: 5, appliedAmount: "100,000.00", approvedCount: 4, approvedAmount: "80,000.00", actualPaidCount: 2, actualPaidAmount: "40,000.00" }
   },
   {
     id: "2", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "滨江区",
-    project: { count: 2, canApplyAmount: "80,000.00", appliedAmount: "30,000.00", approvedAmount: "20,000.00", actualPaidAmount: "10,000.00" },
-    smallProduct: { count: 3, canApplyAmount: "30,000.00", appliedAmount: "15,000.00", approvedAmount: "12,000.00", actualPaidAmount: "6,000.00" },
-    triple: { count: 4, canApplyAmount: "100,000.00", appliedAmount: "50,000.00", approvedAmount: "40,000.00", actualPaidAmount: "20,000.00" },
-    children: [
-      { id: "2-1", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "滨江区", project: { count: 1, canApplyAmount: "50,000.00", appliedAmount: "20,000.00", approvedAmount: "15,000.00", actualPaidAmount: "8,000.00" }, smallProduct: { count: 2, canApplyAmount: "20,000.00", appliedAmount: "10,000.00", approvedAmount: "8,000.00", actualPaidAmount: "4,000.00" }, triple: { count: 2, canApplyAmount: "60,000.00", appliedAmount: "30,000.00", approvedAmount: "25,000.00", actualPaidAmount: "12,000.00" } },
-      { id: "2-2", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "滨江区", project: { count: 1, canApplyAmount: "30,000.00", appliedAmount: "10,000.00", approvedAmount: "5,000.00", actualPaidAmount: "2,000.00" }, smallProduct: { count: 1, canApplyAmount: "10,000.00", appliedAmount: "5,000.00", approvedAmount: "4,000.00", actualPaidAmount: "2,000.00" }, triple: { count: 2, canApplyAmount: "40,000.00", appliedAmount: "20,000.00", approvedAmount: "15,000.00", actualPaidAmount: "8,000.00" } },
-    ]
+    project: { count: 2, canApplyCount: 2, canApplyAmount: "80,000.00", appliedCount: 1, appliedAmount: "30,000.00", approvedCount: 1, approvedAmount: "20,000.00", actualPaidCount: 1, actualPaidAmount: "10,000.00" },
+    smallProduct: { count: 3, canApplyCount: 3, canApplyAmount: "30,000.00", appliedCount: 2, appliedAmount: "15,000.00", approvedCount: 1, approvedAmount: "12,000.00", actualPaidCount: 1, actualPaidAmount: "6,000.00" },
+    triple: { count: 4, canApplyCount: 4, canApplyAmount: "100,000.00", appliedCount: 2, appliedAmount: "50,000.00", approvedCount: 2, approvedAmount: "40,000.00", actualPaidCount: 1, actualPaidAmount: "20,000.00" }
   },
   {
     id: "3", accountingPeriod: "2026-04", businessUnit: "宁波分公司", district: "鄞州区",
-    project: { count: 1, canApplyAmount: "30,000.00", appliedAmount: "15,000.00", approvedAmount: "10,000.00", actualPaidAmount: "5,000.00" },
-    smallProduct: { count: 4, canApplyAmount: "40,000.00", appliedAmount: "20,000.00", approvedAmount: "15,000.00", actualPaidAmount: "8,000.00" },
-    triple: { count: 2, canApplyAmount: "50,000.00", appliedAmount: "25,000.00", approvedAmount: "20,000.00", actualPaidAmount: "10,000.00" },
-    children: [
-      { id: "3-1", accountingPeriod: "2026-04", businessUnit: "宁波分公司", district: "鄞州区", project: { count: 1, canApplyAmount: "30,000.00", appliedAmount: "15,000.00", approvedAmount: "10,000.00", actualPaidAmount: "5,000.00" }, smallProduct: { count: 4, canApplyAmount: "40,000.00", appliedAmount: "20,000.00", approvedAmount: "15,000.00", actualPaidAmount: "8,000.00" }, triple: { count: 2, canApplyAmount: "50,000.00", appliedAmount: "25,000.00", approvedAmount: "20,000.00", actualPaidAmount: "10,000.00" } },
-    ]
+    project: { count: 1, canApplyCount: 1, canApplyAmount: "30,000.00", appliedCount: 1, appliedAmount: "15,000.00", approvedCount: 1, approvedAmount: "10,000.00", actualPaidCount: 1, actualPaidAmount: "5,000.00" },
+    smallProduct: { count: 4, canApplyCount: 4, canApplyAmount: "40,000.00", appliedCount: 2, appliedAmount: "20,000.00", approvedCount: 2, approvedAmount: "15,000.00", actualPaidCount: 1, actualPaidAmount: "8,000.00" },
+    triple: { count: 2, canApplyCount: 2, canApplyAmount: "50,000.00", appliedCount: 1, appliedAmount: "25,000.00", approvedCount: 1, approvedAmount: "20,000.00", actualPaidCount: 1, actualPaidAmount: "10,000.00" }
   },
+];
+
+// 支局级mock数据（按区县分组）
+const mockBranchData: BranchStats[] = [
+  // 西湖区
+  { id: "b1-1", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "西湖区", branch: "西湖支局", project: { count: 2, canApplyCount: 2, canApplyAmount: "80,000.00", appliedCount: 1, appliedAmount: "40,000.00", approvedCount: 1, approvedAmount: "30,000.00", actualPaidCount: 1, actualPaidAmount: "15,000.00" }, smallProduct: { count: 3, canApplyCount: 3, canApplyAmount: "30,000.00", appliedCount: 2, appliedAmount: "15,000.00", approvedCount: 1, approvedAmount: "12,000.00", actualPaidCount: 1, actualPaidAmount: "6,000.00" }, triple: { count: 5, canApplyCount: 5, canApplyAmount: "120,000.00", appliedCount: 3, appliedAmount: "60,000.00", approvedCount: 2, approvedAmount: "50,000.00", actualPaidCount: 1, actualPaidAmount: "25,000.00" } },
+  { id: "b1-2", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "西湖区", branch: "留下支局", project: { count: 1, canApplyCount: 1, canApplyAmount: "40,000.00", appliedCount: 1, appliedAmount: "20,000.00", approvedCount: 1, approvedAmount: "15,000.00", actualPaidCount: 0, actualPaidAmount: "0.00" }, smallProduct: { count: 2, canApplyCount: 2, canApplyAmount: "20,000.00", appliedCount: 1, appliedAmount: "10,000.00", approvedCount: 1, approvedAmount: "8,000.00", actualPaidCount: 0, actualPaidAmount: "0.00" }, triple: { count: 3, canApplyCount: 3, canApplyAmount: "80,000.00", appliedCount: 2, appliedAmount: "40,000.00", approvedCount: 2, approvedAmount: "30,000.00", actualPaidCount: 1, actualPaidAmount: "15,000.00" } },
+  // 滨江区
+  { id: "b2-1", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "滨江区", branch: "滨江支局", project: { count: 1, canApplyCount: 1, canApplyAmount: "50,000.00", appliedCount: 1, appliedAmount: "20,000.00", approvedCount: 1, approvedAmount: "15,000.00", actualPaidCount: 1, actualPaidAmount: "8,000.00" }, smallProduct: { count: 2, canApplyCount: 2, canApplyAmount: "20,000.00", appliedCount: 1, appliedAmount: "10,000.00", approvedCount: 1, approvedAmount: "8,000.00", actualPaidCount: 1, actualPaidAmount: "4,000.00" }, triple: { count: 2, canApplyCount: 2, canApplyAmount: "60,000.00", appliedCount: 1, appliedAmount: "30,000.00", approvedCount: 1, approvedAmount: "25,000.00", actualPaidCount: 1, actualPaidAmount: "12,000.00" } },
+  { id: "b2-2", accountingPeriod: "2026-04", businessUnit: "杭州分公司", district: "滨江区", branch: "长河支局", project: { count: 1, canApplyCount: 1, canApplyAmount: "30,000.00", appliedCount: 0, appliedAmount: "0.00", approvedCount: 0, approvedAmount: "0.00", actualPaidCount: 0, actualPaidAmount: "0.00" }, smallProduct: { count: 1, canApplyCount: 1, canApplyAmount: "10,000.00", appliedCount: 1, appliedAmount: "5,000.00", approvedCount: 0, approvedAmount: "0.00", actualPaidCount: 0, actualPaidAmount: "0.00" }, triple: { count: 2, canApplyCount: 2, canApplyAmount: "40,000.00", appliedCount: 1, appliedAmount: "20,000.00", approvedCount: 1, approvedAmount: "15,000.00", actualPaidCount: 0, actualPaidAmount: "0.00" } },
+  // 鄞州区
+  { id: "b3-1", accountingPeriod: "2026-04", businessUnit: "宁波分公司", district: "鄞州区", branch: "鄞州支局", project: { count: 1, canApplyCount: 1, canApplyAmount: "30,000.00", appliedCount: 1, appliedAmount: "15,000.00", approvedCount: 1, approvedAmount: "10,000.00", actualPaidCount: 1, actualPaidAmount: "5,000.00" }, smallProduct: { count: 4, canApplyCount: 4, canApplyAmount: "40,000.00", appliedCount: 2, appliedAmount: "20,000.00", approvedCount: 2, approvedAmount: "15,000.00", actualPaidCount: 1, actualPaidAmount: "8,000.00" }, triple: { count: 2, canApplyCount: 2, canApplyAmount: "50,000.00", appliedCount: 1, appliedAmount: "25,000.00", approvedCount: 1, approvedAmount: "20,000.00", actualPaidCount: 1, actualPaidAmount: "10,000.00" } },
 ];
 
 export function SelfDeliverySettlementStats() {
   const [searchPeriod, setSearchPeriod] = useState("2026-04");
   const [searchBusinessUnit, setSearchBusinessUnit] = useState("");
   const [searchDistrict, setSearchDistrict] = useState("");
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const filteredData = mockStats.filter(item => {
+  // 视图状态：district(区县视图) | branch(支局视图)
+  const [viewMode, setViewMode] = useState<"district" | "branch">("district");
+  const [urlDistrict, setUrlDistrict] = useState("");
+  const [urlBusinessUnit, setUrlBusinessUnit] = useState("");
+  const [urlPeriod, setUrlPeriod] = useState("");
+
+  // 读取URL参数
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const district = params.get("district");
+    if (district) {
+      setViewMode("branch");
+      setUrlDistrict(district);
+      setUrlBusinessUnit(params.get("businessUnit") || "");
+      setUrlPeriod(params.get("period") || "2026-04");
+      setSearchPeriod(params.get("period") || "2026-04");
+      setSearchBusinessUnit(params.get("businessUnit") || "");
+    }
+  }, []);
+
+  // 点击区县行 → URL跳转
+  const handleDistrictClick = (row: DistrictStats) => {
+    const params = new URLSearchParams({
+      district: row.district,
+      period: searchPeriod,
+      businessUnit: row.businessUnit
+    });
+    window.location.search = params.toString();
+  };
+
+  // 返回区县视图
+  const handleBackToDistrict = () => {
+    window.location.search = "";
+  };
+
+  // 当前视图数据
+  const filteredDistrictData = mockStats.filter(item => {
     if (searchBusinessUnit && !item.businessUnit.includes(searchBusinessUnit)) return false;
     if (searchDistrict && !item.district.includes(searchDistrict)) return false;
     return true;
   });
 
-  const toggleExpand = (id: string) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const filteredBranchData = mockBranchData.filter(item => {
+    if (item.district !== urlDistrict) return false;
+    if (urlBusinessUnit && !item.businessUnit.includes(urlBusinessUnit)) return false;
+    return true;
+  });
 
-  const renderSubStats = (stats: SubStats) => (
+  // 渲染二级表头单元格（数量+金额两行）
+  const renderStatsCell = (stats: SubStats) => (
     <td className="px-2 py-3">
-      <div className="text-xs">
-        <div className="font-medium">{stats.count} 个</div>
-        <div className="text-gray-500">可申请: {stats.canApplyAmount}</div>
-        <div className="text-blue-600">已申请: {stats.appliedAmount}</div>
-        <div className="text-green-600">审核通过: {stats.approvedAmount}</div>
-        <div className="text-emerald-600">实际发放: {stats.actualPaidAmount}</div>
+      <div className="text-xs space-y-1">
+        <div className="font-medium text-gray-900">数量: <span className="text-blue-600">{stats.count}</span></div>
+        <div className="text-gray-500">可申请: {stats.canApplyCount}单 / <span className="text-gray-700">¥{stats.canApplyAmount}</span></div>
+        <div className="text-blue-600">已申请: {stats.appliedCount}单 / ¥{stats.appliedAmount}</div>
+        <div className="text-green-600">审核通过: {stats.approvedCount}单 / ¥{stats.approvedAmount}</div>
+        <div className="text-emerald-600">实际发放: {stats.actualPaidCount}单 / ¥{stats.actualPaidAmount}</div>
       </div>
     </td>
   );
@@ -91,8 +138,21 @@ export function SelfDeliverySettlementStats() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="px-6 pt-6 pb-0 flex-shrink-0">
-        <h2 className="text-lg font-medium text-gray-900">自交付结算统计</h2>
-        <p className="text-sm text-gray-500 mt-1">按经营单元、区县、支局维度统计自交付结算情况</p>
+        <div className="flex items-center gap-3">
+          {viewMode === "branch" && (
+            <Button variant="outline" size="sm" className="gap-1" onClick={handleBackToDistrict}>
+              <ArrowLeft className="w-4 h-4" />返回上一级
+            </Button>
+          )}
+          <div>
+            <h2 className="text-lg font-medium text-gray-900">
+              {viewMode === "branch" ? `自交付结算统计 - ${urlDistrict}（支局明细）` : "自交付结算统计"}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {viewMode === "branch" ? `当前区县：${urlDistrict}，点击区县返回查看其他区县` : "按经营单元、区县、支局维度统计自交付结算情况"}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* 查询条件 */}
@@ -107,10 +167,12 @@ export function SelfDeliverySettlementStats() {
               <label className="block text-sm font-medium text-gray-700 mb-1">经营单元</label>
               <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">区县</label>
-              <Input placeholder="请输入" value={searchDistrict} onChange={e => setSearchDistrict(e.target.value)} />
-            </div>
+            {viewMode === "district" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">区县</label>
+                <Input placeholder="请输入" value={searchDistrict} onChange={e => setSearchDistrict(e.target.value)} />
+              </div>
+            )}
           </div>
           <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
             <Button variant="outline" className="gap-1" onClick={() => {
@@ -125,12 +187,13 @@ export function SelfDeliverySettlementStats() {
 
       {/* 操作栏 */}
       <div className="px-6 py-3 flex-shrink-0 flex justify-between items-center">
-        <div className="text-sm text-gray-500">账期：<span className="font-medium text-gray-900">{searchPeriod}</span></div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-1" onClick={() => console.log("导出")}>
-            <Download className="w-4 h-4" />导出
-          </Button>
+        <div className="text-sm text-gray-500">
+          账期：<span className="font-medium text-gray-900">{viewMode === "branch" ? urlPeriod : searchPeriod}</span>
+          {viewMode === "branch" && <span className="ml-3">区县：<span className="font-medium text-blue-600">{urlDistrict}</span></span>}
         </div>
+        <Button variant="outline" className="gap-1" onClick={() => console.log("导出")}>
+          <Download className="w-4 h-4" />导出
+        </Button>
       </div>
 
       {/* 列表 */}
@@ -138,47 +201,74 @@ export function SelfDeliverySettlementStats() {
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+              {/* 一级表头 */}
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10">展开</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">账期</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">区县</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 min-w-48">项目型</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 min-w-48">小微标品</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 min-w-48">三联单</th>
+                <th rowSpan={2} className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-12 border-r border-gray-200">序号</th>
+                <th rowSpan={2} className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24 border-r border-gray-200">账期</th>
+                <th rowSpan={2} className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24 border-r border-gray-200">经营单元</th>
+                <th rowSpan={2} className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24 border-r border-gray-200">
+                  {viewMode === "district" ? "区县" : "支局"}
+                </th>
+                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-blue-700 bg-blue-50 border-r border-gray-200">项目型</th>
+                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-green-700 bg-green-50 border-r border-gray-200">小微标品</th>
+                <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-purple-700 bg-purple-50">三联单</th>
+              </tr>
+              {/* 二级表头 */}
+              <tr>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-24">项目型数量</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">可申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">已申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">审核通过<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-blue-50/50 border-r border-gray-200 min-w-32">实际发放<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-24">小微标品订单数量</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">可申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">已申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">审核通过<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-green-50/50 border-r border-gray-200 min-w-32">实际发放<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-24">三联单数量</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">可申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">已申请<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">审核通过<br/>(数量/金额)</th>
+                <th className="px-2 py-2 text-center text-xs font-medium text-gray-600 bg-purple-50/50 min-w-32">实际发放<br/>(数量/金额)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredData.map(row => (
-                <React.Fragment key={row.id}>
-                  <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleExpand(row.id)}>
-                    <td className="px-3 py-3">
-                      <button className="p-1 hover:bg-gray-200 rounded">
-                        {expandedRows.has(row.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-                      </button>
-                    </td>
-                    <td className="px-3 py-3">{row.accountingPeriod}</td>
-                    <td className="px-3 py-3">{row.businessUnit}</td>
-                    <td className="px-3 py-3 font-medium">{row.district}</td>
-                    {renderSubStats(row.project)}
-                    {renderSubStats(row.smallProduct)}
-                    {renderSubStats(row.triple)}
-                  </tr>
-                  {expandedRows.has(row.id) && row.children?.map(child => (
-                    <tr key={child.id} className="bg-blue-50/50">
-                      <td className="px-3 py-3"></td>
-                      <td className="px-3 py-3 text-xs text-gray-500">↳</td>
-                      <td className="px-3 py-3 text-xs">{child.businessUnit}</td>
-                      <td className="px-3 py-3 text-xs">支局级-{child.id.split('-')[1]}</td>
-                      {renderSubStats(child.project)}
-                      {renderSubStats(child.smallProduct)}
-                      {renderSubStats(child.triple)}
+              {viewMode === "district" ? (
+                <>
+                  {filteredDistrictData.map((row, idx) => (
+                    <tr key={row.id} className="hover:bg-blue-50/30 cursor-pointer" onClick={() => handleDistrictClick(row)}>
+                      <td className="px-3 py-3 text-center">{idx + 1}</td>
+                      <td className="px-3 py-3">{row.accountingPeriod}</td>
+                      <td className="px-3 py-3">{row.businessUnit}</td>
+                      <td className="px-3 py-3 font-medium text-blue-600 underline">{row.district}</td>
+                      <td className="px-2 py-3 text-center text-blue-600 font-medium">{row.project.count}</td>
+                      {renderStatsCell(row.project)}
+                      {renderStatsCell(row.smallProduct)}
+                      {renderStatsCell(row.triple)}
                     </tr>
                   ))}
-                </React.Fragment>
-              ))}
-              {filteredData.length === 0 && (
-                <tr><td colSpan={7} className="px-3 py-8 text-center text-gray-500">暂无数据</td></tr>
+                  {filteredDistrictData.length === 0 && (
+                    <tr><td colSpan={19} className="px-3 py-8 text-center text-gray-500">暂无数据</td></tr>
+                  )}
+                </>
+              ) : (
+                <>
+                  {filteredBranchData.map((row, idx) => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-3 text-center">{idx + 1}</td>
+                      <td className="px-3 py-3">{row.accountingPeriod}</td>
+                      <td className="px-3 py-3">{row.businessUnit}</td>
+                      <td className="px-3 py-3 font-medium">{row.branch}</td>
+                      <td className="px-2 py-3 text-center text-blue-600 font-medium">{row.project.count}</td>
+                      {renderStatsCell(row.project)}
+                      {renderStatsCell(row.smallProduct)}
+                      {renderStatsCell(row.triple)}
+                    </tr>
+                  ))}
+                  {filteredBranchData.length === 0 && (
+                    <tr><td colSpan={19} className="px-3 py-8 text-center text-gray-500">暂无数据，点击区县返回查看</td></tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>
