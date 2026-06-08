@@ -459,13 +459,20 @@ export function SelfDeliverySettlement() {
     });
 
     // Sheet2: 内层列表（按业务类型分组，每组独立表头）
-    const innerHeaders = ["业务类型", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "申请日期", "申请人", "状态", "发放凭证"];
+    const innerHeaders = ["业务类型", "合同/小微工单/三联单编码", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "申请日期", "申请人", "状态", "发放凭证"];
     const innerRows: (string | number)[][] = [];
     mockSettlementData.forEach(row => {
+      // 根据业务类型取对应编码
+      let businessCode = "";
+      if (row.type === "项目型") businessCode = row.contractCode;       // 合同编码
+      else if (row.type === "小微标品") businessCode = row.projectCode; // 工单编号
+      else if (row.type === "三联单") businessCode = row.projectCode;   // 三联单编码
+
       row.innerList.forEach(item => {
         item.settlementMethods.forEach(sm => {
           innerRows.push([
             row.type,
+            businessCode,
             item.id.replace("i", ""),
             item.name,
             item.code,
@@ -489,10 +496,15 @@ export function SelfDeliverySettlement() {
     }
 
     // Sheet3: 人员自交付结算清单（基于内层人员明细展开）
-    const personHeaders = ["序号", "经营单元", "支局", "业务类型", "结算单名称", "结算单号", "结算单编码", "人员姓名", "金额", "人天", "结算状态", "申请人", "申请时间"];
+    const personHeaders = ["序号", "经营单元", "支局", "业务类型", "合同/小微工单/三联单编码", "结算单名称", "结算单号", "人员姓名", "金额", "人天", "结算状态", "申请人", "申请时间"];
     const personRows: (string | number)[][] = [];
     let pIdx = 0;
     mockSettlementData.forEach(row => {
+      let businessCode = "";
+      if (row.type === "项目型") businessCode = row.contractCode;
+      else if (row.type === "小微标品") businessCode = row.projectCode;
+      else if (row.type === "三联单") businessCode = row.projectCode;
+
       row.innerList.forEach(item => {
         item.settlementMethods.forEach(sm => {
           sm.personList.forEach(p => {
@@ -502,8 +514,8 @@ export function SelfDeliverySettlement() {
               row.businessUnit,
               row.branch,
               row.type,
+              businessCode,
               item.name,
-              item.code,
               item.code,
               p.name,
               p.amount || (p.personDays ? (p.personDays * 350).toFixed(2) : "0.00"),
