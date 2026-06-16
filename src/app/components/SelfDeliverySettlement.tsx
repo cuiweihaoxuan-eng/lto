@@ -592,12 +592,12 @@ export function SelfDeliverySettlement() {
                 <React.Fragment key={item.id}>
                   {item.settlementMethods.map((sm, smIdx) => (
                     <tr key={`${item.id}-${smIdx}`} className="hover:bg-gray-50">
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 w-12">
                         {smIdx === 0 && <span className="text-xs text-gray-400">{item.id.replace("i", "")}.</span>}
                       </td>
-                      <td className="px-3 py-2 max-w-32 truncate" title={item.name}>{smIdx === 0 ? item.name : ""}</td>
-                      <td className="px-3 py-2">{smIdx === 0 ? item.code : ""}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 w-40 max-w-40 truncate" title={item.name}>{smIdx === 0 ? item.name : ""}</td>
+                      <td className="px-3 py-2 w-32">{smIdx === 0 ? item.code : ""}</td>
+                      <td className="px-3 py-2 min-w-48">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={sm.method === "451定额" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}>{sm.method}</Badge>
                           <span className="text-green-600 font-medium">¥{sm.applyAmount}</span>
@@ -612,10 +612,10 @@ export function SelfDeliverySettlement() {
                       </td>
                       {smIdx === 0 && (
                         <>
-                          <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
-                          <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
-                          <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
-                          <td className="px-3 py-2 max-w-28 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
+                          <td className="px-3 py-2 text-center w-24" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
+                          <td className="px-3 py-2 w-20" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
+                          <td className="px-3 py-2 text-center w-20" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                          <td className="px-3 py-2 w-32 max-w-32 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
                           <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>
                             <div className="flex flex-col gap-1">
                               <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
