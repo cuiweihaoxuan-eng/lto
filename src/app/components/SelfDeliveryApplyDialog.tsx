@@ -1024,8 +1024,95 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
   const [projectEndDate, setProjectEndDate] = useState("");
   const [cycle, setCycle] = useState("");
 
-  // 描述类型状态
-  const [descriptionType, setDescriptionType] = useState("");
+  // 描述类型状态（两级级联）
+  const [descriptionCategory, setDescriptionCategory] = useState("");
+  const [descriptionSubType, setDescriptionSubType] = useState("");
+
+  // 描述类型级联数据（一级分类 + 二级选项 + 详细描述）
+  const descriptionOptions: { value: string; label: string; children: { value: string; label: string; description: string }[] }[] = [
+    {
+      value: "视联网收编", label: "视联网收编",
+      children: [
+        { value: "AI能力叠加", label: "AI 能力叠加", description: "给客户视联网系统添加 AI 功能，提升智能化，高效管理视频监控、减少人工成本。" },
+        { value: "NVR_CVR调试", label: "NVR/CVR 调试", description: "调试监控录像存储设备，确保录像正常录制、回放、导出，保障录像可用可追溯。" }
+      ]
+    },
+    {
+      value: "服务器", label: "服务器",
+      children: [
+        { value: "私有云电脑部署", label: "私有云电脑部署", description: "部署专属云桌面，支持员工远程办公，保障数据安全，提升办公灵活性。" },
+        { value: "网管平台部署", label: "网管平台部署", description: "安装调试网管平台，方便客户实时查看网络状态，快速排查网络故障。" },
+        { value: "超融合部署", label: "超融合部署", description: "整合服务器、存储、网络资源，简化机房布局，提升资源利用率，降低维护成本。" },
+        { value: "底层系统安装", label: "底层系统安装", description: "给服务器安装调试操作系统，确保服务器稳定运行。" },
+        { value: "AI私有化部署", label: "AI 私有化部署", description: "将 AI 功能部署在客户本地设备，不依赖外部平台，满足 AI 需求且保障数据隐私。" }
+      ]
+    },
+    {
+      value: "网络传输", label: "网络传输（路由/交换/无线/FTTR-B）",
+      children: [
+        { value: "组网方案撰写", label: "组网方案撰写", description: "根据客户需求，撰写专属网络组网方案，明确设备和线路布局，提供实施依据。" },
+        { value: "优化方案撰写", label: "优化方案撰写", description: "针对客户网络痛点，撰写优化方案，提出改进措施，提升网络性能。" },
+        { value: "设备调试", label: "设备调试", description: "调试路由器、交换机等设备，确保设备正常工作，保障网络稳定连通。" },
+        { value: "设备版本升级", label: "设备版本升级", description: "升级网络设备系统版本，提升设备性能和安全性，避免版本老旧引起的故障风险。" },
+        { value: "业务割接", label: "业务割接", description: "网络升级、设备更换时，平稳切换原有业务至新设备/网络。" },
+        { value: "网络排障", label: "网络排障", description: "快速排查网络故障（断网、卡顿等），及时修复，减少对客户办公的影响。" },
+        { value: "网络维保", label: "网络维保", description: "定期维护网络系统，排查潜在隐患，确保网络长期稳定运行。" }
+      ]
+    },
+    {
+      value: "网络安全", label: "网络安全",
+      children: [
+        { value: "边界防护与访问控制", label: "边界防护与访问控制（防火墙-安全大脑）", description: "调试防火墙，控制内部上网权限，保障网络和数据安全。" },
+        { value: "上网行为管理", label: "上网行为管理", description: "规范员工上网行为，限制不良网站访问、控制下载速度，避免网络卡顿和安全风险。" },
+        { value: "定期扫描与风险评估", label: "定期扫描与风险评估（漏洞扫描）", description: "扫描网络、设备漏洞，评估风险并给出修复建议，防范安全事故。" },
+        { value: "互联网VPN组网", label: "互联网 VPN 组网（非电信VPN）", description: "部署加密 VPN，支持员工远程安全访问公司内网，实现远程办公。" },
+        { value: "认证服务器接入", label: "认证服务器接入", description: "接入认证服务器，设置会议访问权限，保障会议内容不泄露、不被干扰。" },
+        { value: "国际网络接入", label: "国际网络接入（需审批）", description: "协助客户申请部署国际网络，保障国际视频会议、跨国业务顺畅。" }
+      ]
+    },
+    {
+      value: "会议保障", label: "会议保障",
+      children: [
+        { value: "重保方案撰写", label: "重保方案撰写", description: "为重要会议撰写网络保障方案，明确应急措施，确保会议网络稳定。" },
+        { value: "会场无线调优", label: "会场无线调优", description: "优化会议现场 WiFi，避开干扰，避免卡顿断连，保障参会人员正常使用。" },
+        { value: "5G信号保障车租赁", label: "5G 信号保障车租赁", description: "会议现场信号不佳时，租赁 5G 保障车，提供稳定高速网络。" },
+        { value: "应急电源车租赁", label: "应急电源车租赁", description: "为重要会议提供应急供电，避免停电导致会议中断。" }
+      ]
+    },
+    {
+      value: "综合布线", label: "综合布线",
+      children: [
+        { value: "光缆布放熔接", label: "光缆布放熔接", description: "布放并熔接光缆，保障大带宽、远距离数据传输，适用于园区、办公楼内部互联。" },
+        { value: "固话线路布放", label: "固话线路布放", description: "布放调试固话线路，确保固话正常通讯，满足办公联系需求。" },
+        { value: "有线点位布放", label: "有线点位布放", description: "安装有线网络接口、布放网线，保障电脑、打印机等设备稳定联网。" },
+        { value: "AP点位勘测", label: "AP 点位勘测与无线覆盖", description: "勘测 AP 安装位置，调试无线设备，实现办公区、园区稳定 WiFi 覆盖。" },
+        { value: "门禁系统部署", label: "门禁系统部署", description: "安装调试门禁设备，设置访问权限，保障客户区域安全。" },
+        { value: "监控系统部署", label: "监控系统部署", description: "安装调试监控设备，实现实时监控、录像回放，起到安全防范和追溯作用。" },
+        { value: "道闸安装", label: "道闸安装", description: "安装道闸，调试道闸服务器，调通道闸网络，实现车辆、行人自动识别放行，方便管理。" },
+        { value: "智能家居安装", label: "智能家居安装", description: "安装调试智能设备，实现便捷控制，提升办公舒适度。" }
+      ]
+    },
+    {
+      value: "机房搬迁", label: "机房搬迁",
+      children: [
+        { value: "服务器搬迁", label: "服务器搬迁", description: "安全拆卸、搬运、安装调试服务器，确保数据不丢失、业务不中断。" },
+        { value: "网络设备搬迁", label: "网络设备搬迁", description: "搬迁调试路由器、交换机等设备，保障网络正常连通。" },
+        { value: "安全设备搬迁", label: "安全设备搬迁", description: "搬迁调试防火墙等设备，确保网络安全防护不中断。" },
+        { value: "UPS搬迁", label: "UPS 搬迁", description: "搬迁 UPS 电源，确保停电时保护设备，避免业务中断。" },
+        { value: "线路整理", label: "线路整理", description: "整理机房杂乱线路，规范捆绑、做好标识，方便后续维护排查。" },
+        { value: "拓扑绘制", label: "拓扑绘制", description: "摸排网络设备部署情况，绘制机房网络拓扑示意图，排查设备所有接口及配置。" },
+        { value: "线路信息表", label: "线路信息表", description: "整理线路详细信息做成表格，方便查询和维护。" }
+      ]
+    },
+    {
+      value: "硬件巡检", label: "硬件巡检",
+      children: [
+        { value: "设备告警状态巡检", label: "设备告警状态巡检", description: "检查硬件设备状态，排查有无异常告警，避免设备故障中断业务。" },
+        { value: "设备维保周期核查", label: "设备维保周期核查", description: "核对主流品牌设备维保期限，提醒客户续期，避免过保损失。" },
+        { value: "评估报告输出", label: "评估报告输出", description: "巡检后出具报告，明确设备状态、隐患及改进建议，方便客户规划维护。" }
+      ]
+    }
+  ];
 
   // 基本情况描述
   const [description, setDescription] = useState("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
@@ -1056,7 +1143,8 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
     setProjectStartDate("");
     setProjectEndDate("");
     setCycle("");
-    setDescriptionType("");
+    setDescriptionCategory("");
+    setDescriptionSubType("");
     setMainRecipients([]);
     setCountersignUsers([]);
     setCcUsers([]);
@@ -2299,38 +2387,76 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">描述类型</label>
-                    <Badge className="bg-blue-100 text-blue-700">网络维护</Badge>
+                    <div className="flex gap-2">
+                      <Badge className="bg-blue-100 text-blue-700">{descriptionCategory || "-"}</Badge>
+                      <Badge className="bg-green-100 text-green-700">{descriptionSubType || "-"}</Badge>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">情况描述</label>
-                    <div className="bg-gray-50 rounded border border-gray-200 p-3 text-sm text-gray-700">
-                      根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。
+                    <div className="bg-gray-50 rounded border border-gray-200 p-3 text-sm text-gray-700 whitespace-pre-wrap">
+                      {description || "（暂无描述）"}
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">描述类型</label>
-                    <Select value={descriptionType} onValueChange={setDescriptionType}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="请选择描述类型" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="机房整治">机房整治</SelectItem>
-                        <SelectItem value="网络维护">网络维护</SelectItem>
-                        <SelectItem value="设备安装">设备安装</SelectItem>
-                        <SelectItem value="系统集成">系统集成</SelectItem>
-                        <SelectItem value="其他">其他</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="mb-4 grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">描述类型（一级）</label>
+                      <Select
+                        value={descriptionCategory}
+                        onValueChange={v => {
+                          setDescriptionCategory(v);
+                          setDescriptionSubType("");
+                          setDescription("");
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="请选择一级分类" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {descriptionOptions.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">描述类型（二级）</label>
+                      <Select
+                        value={descriptionSubType}
+                        onValueChange={v => {
+                          setDescriptionSubType(v);
+                          // 自动填充详细描述
+                          const cat = descriptionOptions.find(c => c.value === descriptionCategory);
+                          const sub = cat?.children.find(s => s.value === v);
+                          if (sub) {
+                            setDescription(sub.description);
+                          }
+                        }}
+                        disabled={!descriptionCategory}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={descriptionCategory ? "请选择二级选项" : "请先选择一级分类"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(descriptionOptions.find(c => c.value === descriptionCategory)?.children || []).map(sub => (
+                            <SelectItem key={sub.value} value={sub.value}>{sub.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <textarea
-                    className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="请输入自交付基本情况描述..."
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">详细描述</label>
+                    <textarea
+                      className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="请输入自交付基本情况描述..."
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                    />
+                  </div>
                   {/* 项目型低毛利说明 */}
                   {projectType === "项目型" && selectedProject && parseFloat(selectedProject.appliedProfit) < 15 && (
                     <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
