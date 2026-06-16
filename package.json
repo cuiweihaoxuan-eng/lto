@@ -68,5 +68,10 @@
     "tailwindcss": "^4.2.3",
     "terser": "^5.46.2",
     "vite": "6.3.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
