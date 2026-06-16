@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Plus, Trash2, Search, Upload, FileText, Image, Check, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "./ui/select";
 import { Badge } from "./ui/badge";
 
 // ============ 类型定义 ============
@@ -2393,7 +2393,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">情况描述</label>
+                    <label className="block text-xs text-gray-500 mb-1">详细描述</label>
                     <div className="bg-gray-50 rounded border border-gray-200 p-3 text-sm text-gray-700 whitespace-pre-wrap">
                       {description || "（暂无描述）"}
                     </div>
@@ -2401,52 +2401,37 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="mb-4 grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">描述类型（一级）</label>
-                      <Select
-                        value={descriptionCategory}
-                        onValueChange={v => {
-                          setDescriptionCategory(v);
-                          setDescriptionSubType("");
-                          setDescription("");
-                        }}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="请选择一级分类" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {descriptionOptions.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">描述类型（二级）</label>
-                      <Select
-                        value={descriptionSubType}
-                        onValueChange={v => {
-                          setDescriptionSubType(v);
-                          // 自动填充详细描述
-                          const cat = descriptionOptions.find(c => c.value === descriptionCategory);
-                          const sub = cat?.children.find(s => s.value === v);
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">描述类型</label>
+                    <Select
+                      value={descriptionSubType}
+                      onValueChange={v => {
+                        // 从所有options的children中找到对应项
+                        for (const cat of descriptionOptions) {
+                          const sub = cat.children.find(s => s.value === v);
                           if (sub) {
+                            setDescriptionCategory(cat.value);
+                            setDescriptionSubType(v);
                             setDescription(sub.description);
+                            return;
                           }
-                        }}
-                        disabled={!descriptionCategory}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder={descriptionCategory ? "请选择二级选项" : "请先选择一级分类"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(descriptionOptions.find(c => c.value === descriptionCategory)?.children || []).map(sub => (
-                            <SelectItem key={sub.value} value={sub.value}>{sub.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="请选择描述类型" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-96">
+                        {descriptionOptions.map(opt => (
+                          <SelectGroup key={opt.value}>
+                            <SelectLabel className="text-blue-600 font-medium">{opt.label}</SelectLabel>
+                            {opt.children.map(sub => (
+                              <SelectItem key={sub.value} value={sub.value}>{sub.label}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">详细描述</label>
