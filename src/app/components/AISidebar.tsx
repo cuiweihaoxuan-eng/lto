@@ -3,6 +3,8 @@ import { X, Send, Paperclip, Image, Sparkles, User, ChevronDown, ChevronUp, Tras
 import { sendDifyMessage, generateMessageId, type DifyMessage, type FileItem, getConversations, getConversationMessages, type ToolCall } from "../services/difyApi";
 import { DIFY_CONFIG, DIFY_CONFIG_LTO, DIFY_CONFIG_XINGCHEN } from "../config/dify";
 import { loadAIConfigs, getConfigByName, updateSessionCount } from "../config/aiAssistant";
+import { formSlotRegistry, type FormSlotAction } from "../utils/formSlotRegistry";
+import { listAllFormIds } from "../config/formSlots";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, LineChart as RechartsLineChart, Line } from 'recharts';
 
 type AgentType = 'ontology' | 'lto' | 'xingchen';
@@ -36,6 +38,8 @@ interface ToolCallBlock {
   response?: Record<string, unknown>;
   isCollapsed: boolean;
   isRealToolCall?: boolean;
+  // 工具调用发生时的 m.content 长度（位置锚点）
+  contentLength?: number;
 }
 
 // 消息段落类型
@@ -64,6 +68,55 @@ function formatDate(value: string | number | undefined): string {
   const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
   if (isNaN(date.getTime())) return '未知时间';
   return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+// ========== 解析 AI 回复中的 json 代码块并 apply 到当前表单 ==========
+/**
+ * 从 AI 回复文本里提取 ```json``` 代码块，解析出 actions 后调用 registry.apply()
+ * 静默处理解析失败（不影响主流程）
+ * 同时把 actions 暂存到 sessionStorage，等待表单打开时再 apply
+ */
+function extractAndApplyFormActions(aiReply: string): void {
+  if (!aiReply) return;
+  // 匹配 ```json ... ``` 代码块
+  const jsonBlockRegex = /```json\s*([\s\S]*?)\s*```/g;
+  let match: RegExpExecArray | null;
+  let lastResult: ReturnType<typeof formSlotRegistry.apply> | null = null;
+  const allActions: FormSlotAction[] = [];
+
+  while ((match = jsonBlockRegex.exec(aiReply)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      // 兼容多种 JSON 形态：顶层是数组 / 顶层有 actions 字段 / 顶层有 intent+actions
+      let actions: FormSlotAction[] = [];
+      if (Array.isArray(parsed)) {
+        actions = parsed;
+      } else if (Array.isArray(parsed?.actions)) {
+        actions = parsed.actions;
+      }
+      if (actions.length > 0) {
+        allActions.push(...actions);
+        lastResult = formSlotRegistry.apply(actions);
+      }
+    } catch (e) {
+      console.warn('[AISidebar] 解析 AI 返回的 json 代码块失败:', e);
+    }
+  }
+
+  // 暂存到 sessionStorage，AIAssistantConfig 打开弹窗时如果 active_form 没值，
+  // 会从这里取一次（解决"一次性说打开+填值"场景）
+  if (allActions.length > 0) {
+    try {
+      sessionStorage.setItem('__pendingFormActions', JSON.stringify({
+        actions: allActions,
+        timestamp: Date.now(),
+      }));
+      console.log('[AISidebar] 已暂存待应用 actions:', allActions);
+    } catch (e) {
+      console.warn('[AISidebar] 暂存 actions 失败:', e);
+    }
+    console.log('[AISidebar] 表单写入结果:', lastResult);
+  }
 }
 
 // 下载CSV函数
@@ -176,8 +229,23 @@ function processInlineFormatting(text: string): React.ReactNode[] {
       const linkMatch = match[2].match(/\[([^\]]+)\]\(([^)]+)\)/);
       if (linkMatch) {
         const url = linkMatch[2];
-        const params = new URLSearchParams(url.split('?')[1] || '');
-        const page = params.get('page');
+        // 兼容 Dify 流式输出时丢失 & 的情况：
+        // 直接在 url 里搜索关键参数，不用 URLSearchParams 严格按 & 分隔
+        const queryPart = url.split('?')[1] || '';
+        const getParam = (key: string): string | null => {
+          // 优先用 URLSearchParams 解析（标准情况）
+          const params = new URLSearchParams(queryPart);
+          const v = params.get(key);
+          if (v) return v;
+          // 兜底：直接在 url 里匹配 key=value
+          const m = queryPart.match(new RegExp(`${key}=([^&\\s]+)`));
+          return m ? m[1] : null;
+        };
+        const page = getParam('page');
+        // 调试：打印解析结果
+        if (queryPart) {
+          console.log('[AISidebar] 解析链接 query:', { queryPart, page, openModal: getParam('openModal'), action: getParam('action') });
+        }
 
         // 如果是页面跳转链接
         if (page) {
@@ -199,6 +267,8 @@ function processInlineFormatting(text: string): React.ReactNode[] {
             'large-business-opportunity-award': 'LargeBusinessOpportunityAward',
             'project-commission-award': 'ProjectCommissionAward', 'reward-sign-report': 'RewardSignReport',
             'bonus-pool': 'BonusPool', 'task-wallet-list': 'TaskWalletList',
+            // 本次扩展（自然语言填表）新增
+            'ai-assistant-config': 'AIAssistantConfig',
           };
           const componentName = componentMap[page];
           if (componentName) {
@@ -208,7 +278,27 @@ function processInlineFormatting(text: string): React.ReactNode[] {
                 href={url}
                 onClick={(e) => {
                   e.preventDefault();
+                  // 兼容 Dify 流式输出丢失 & 的情况，重新解析
+                  const queryPart = url.split('?')[1] || '';
+                  const getParam = (key: string): string | null => {
+                    const params = new URLSearchParams(queryPart);
+                    const v = params.get(key);
+                    if (v) return v;
+                    const m = queryPart.match(new RegExp(`${key}=([^&\\s]+)`));
+                    return m ? m[1] : null;
+                  };
+                  const openModal = getParam('openModal');
+                  const action = getParam('action');
+                  console.log('[AISidebar] 链接点击:', { url, componentName, page, openModal, action });
                   window.dispatchEvent(new CustomEvent('switch-page', { detail: { component: componentName } }));
+                  if (openModal) {
+                    setTimeout(() => {
+                      console.log('[AISidebar] 派发 open-modal 事件:', { modal: openModal, action });
+                      window.dispatchEvent(new CustomEvent('open-modal', {
+                        detail: { modal: openModal, action: action || 'new' },
+                      }));
+                    }, 300);
+                  }
                 }}
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
@@ -555,24 +645,154 @@ function renderMarkdownTable(text: string): React.ReactNode {
   return parts.length > 0 ? <>{parts}</> : <>{renderMarkdownLinks(text)}</>;
 }
 
-// 渲染完整的消息内容（支持表格）
-function renderMessageContent(content: string): React.ReactNode {
-  // 安全检查：确保 content 是字符串
+// 渲染完整的消息内容（支持表格 + 思考块按顺序混排 + 工具调用按位置穿插 + 思考完成自动折叠）
+type InlineBlock =
+  | { type: 'text' | 'think'; content: string; thinkClosed: boolean; thinkIndex: number; contentStart: number; contentEnd: number }
+  | { type: 'toolcall'; toolCall: ToolCallBlock; contentStart: number };
+
+// 把 m.content（带 <think> 标签）和工具调用段（带 contentLength 锚点）合并成
+// 一个按"在 m.content 中的出现位置"排序的统一 blocks 列表
+function buildInlineBlocks(
+  content: string,
+  toolcalls: Array<ToolCallBlock & { contentLength?: number }>
+): InlineBlock[] {
+  // 1) 扫描 <think> 标签边界，生成 text/think 块（含 content 字符串索引、是否已闭合）
+  const tagRegex = /<think>|<\/think>/gi;
+  type ContentBlock = { type: 'text' | 'think'; content: string; thinkClosed: boolean; thinkIndex: number; contentStart: number; contentEnd: number };
+  const contentBlocks: ContentBlock[] = [];
+  let lastIndex = 0;
+  let inThink = false;
+  let thinkIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = tagRegex.exec(content)) !== null) {
+    const tag = match[0];
+    const idx = match.index;
+    if (idx > lastIndex) {
+      const segment = content.slice(lastIndex, idx);
+      if (segment) {
+        contentBlocks.push({
+          type: inThink ? 'think' : 'text',
+          content: segment,
+          thinkClosed: false, // 临时值，下面统一赋值
+          thinkIndex: inThink ? thinkIndex - 1 : -1,
+          contentStart: lastIndex,
+          contentEnd: idx,
+        });
+      }
+    }
+    if (tag.toLowerCase().startsWith('<think>')) {
+      inThink = true;
+      thinkIndex++;
+    } else {
+      // 闭合：标记当前 think 块已闭合（如果它存在且是 text/think 列表中的最后一个 think）
+      inThink = false;
+      for (let i = contentBlocks.length - 1; i >= 0; i--) {
+        if (contentBlocks[i].type === 'think') {
+          contentBlocks[i].thinkClosed = true;
+          break;
+        }
+        if (contentBlocks[i].type === 'text') break;
+      }
+    }
+    lastIndex = idx + tag.length;
+  }
+  const tail = content.slice(lastIndex);
+  if (tail) {
+    contentBlocks.push({
+      type: inThink ? 'think' : 'text',
+      content: tail,
+      thinkClosed: false,
+      thinkIndex: inThink ? thinkIndex - 1 : -1,
+      contentStart: lastIndex,
+      contentEnd: content.length,
+    });
+  }
+
+  // 2) 工具调用段也按 contentLength 锚点插入
+  //    对于 contentLength <= content.length 的 toolcall，插到对应的 contentBlock 之后；
+  //    contentLength > content.length 说明 m.content 还没累积到对应位置（流式中间），先放最后
+  const result: InlineBlock[] = [];
+  let ci = 0; // 指向下一个待插入的 contentBlock
+  for (const tc of toolcalls) {
+    const cl = tc.contentLength ?? content.length + 1;
+    // 把 cl 之前的所有 contentBlock 推进 result
+    while (ci < contentBlocks.length && contentBlocks[ci].contentEnd <= cl) {
+      result.push(contentBlocks[ci]);
+      ci++;
+    }
+    // 工具调用段
+    result.push({ type: 'toolcall', toolCall: tc, contentStart: cl });
+  }
+  // 剩余 contentBlock 追加
+  while (ci < contentBlocks.length) {
+    result.push(contentBlocks[ci]);
+    ci++;
+  }
+  return result;
+}
+
+function renderInlineBlocks(
+  blocks: InlineBlock[],
+  onToggleToolcall?: (id: string) => void
+): React.ReactNode {
+  return (
+    <div>
+      {blocks.map((block, i) => {
+        if (block.type === 'think') {
+          // 淡紫色样式：思考完成的块默认折叠（details 不带 open）
+          return (
+            <details
+              key={i}
+              open={!block.thinkClosed}
+              className="mb-2 text-xs rounded-lg border border-purple-200 overflow-hidden"
+            >
+              <summary className="flex items-center gap-2 cursor-pointer select-none font-medium px-3 py-2 bg-purple-50 text-purple-700">
+                <Brain className="w-3.5 h-3.5 text-purple-600" />
+                <span className="px-2 py-0.5 text-xs font-medium rounded border bg-purple-100 text-purple-700 border-purple-200">
+                  思考中
+                </span>
+              </summary>
+              <div className="p-3 bg-purple-50/50 text-sm">
+                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {renderMarkdownTable(block.content.trim())}
+                </div>
+              </div>
+            </details>
+          );
+        }
+        if (block.type === 'toolcall') {
+          const tc = block.toolCall;
+          return (
+            <ToolCallBlock
+              key={i}
+              toolName={tc.toolName}
+              request={tc.request}
+              response={tc.response}
+              isCollapsed={tc.isCollapsed}
+              isRealToolCall={true}
+              onToggle={() => onToggleToolcall?.(tc.id)}
+            />
+          );
+        }
+        // text
+        return <div key={i}>{renderMarkdownTable(block.content)}</div>;
+      })}
+    </div>
+  );
+}
+
+// 渲染完整的消息内容（支持表格 + 思考块按顺序混排 + 工具调用按位置穿插 + 思考完成自动折叠）
+function renderMessageContent(
+  content: string,
+  toolcalls: Array<ToolCallBlock & { contentLength?: number }> = [],
+  onToggleToolcall?: (id: string) => void
+): React.ReactNode {
   if (typeof content !== 'string') {
     return null;
   }
-
-  let filteredContent = content;
-
-  // 清理残留的空行
-  filteredContent = filteredContent.replace(/\n{3,}/g, '\n\n').trim();
-
-  if (!filteredContent) {
-    return null;
-  }
-
-  // 处理表格和链接
-  return <>{renderMarkdownTable(filteredContent)}</>;
+  const blocks = buildInlineBlocks(content, toolcalls);
+  if (blocks.length === 0) return null;
+  return renderInlineBlocks(blocks, onToggleToolcall);
 }
 
 // 思考块组件 - 单独显示思考内容
@@ -786,6 +1006,10 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
     prevMessagesLengthRef.current = messages.length;
   }, [messages]);
 
+  // ========== 自动派发已移到 onComplete 里（避免 useEffect 反复跑） ==========
+  // 原来这里有 useEffect 监听 messages 反复跑，会引起重复渲染问题。
+  // 现在改为：流式输出完成后，onComplete 里一次性处理链接派发 + actions apply。
+
   // 展开历史时加载对话列表
   useEffect(() => {
     if (!historyCollapsed && conversationList.length === 0) {
@@ -866,31 +1090,37 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
       apiKey: agentConfig.config.apiKey,
       baseUrl: agentConfig.config.baseUrl,
       platform: agentConfig.platform || '星辰平台',  // 传递平台类型
+      // 注入当前激活表单快照 + 当前页面（用于自然语言填表）
+      inputs: {
+        // user_permissions Dify 端是必填变量，本期暂不做权限，传 "*" 表示全部允许
+        user_permissions: '*',
+        // Dify 端期望的是对象/字符串 null，不要 stringify 后变成字符串 "null"
+        active_form: formSlotRegistry.getActive() || '',
+        all_form_ids: JSON.stringify(listAllFormIds()),
+        current_page: (window as any).__PRD_ROUTE__ || '',
+        // 兜底：Dify 端"输入表单"残留了一批必填字段，
+        // 这里全部传空字符串绕过。根本解决：去 Dify 端清理输入表单。
+        slotKey: '',
+        label: '',
+        value: '',
+        type: '',
+        options: '',
+        required: '',
+        currentValue: '',
+        formId: '',
+        formTitle: '',
+        slots: '',
+        description: '',
+        group: '',
+      },
       files: userMessage.files,
-      onMessage: (chunk, event) => {
-        // 流式输出文字内容：直接设置，不做复杂处理
+      onMessage: (chunk) => {
+        // difyApi.ts 内部已经做了累积，传入的 chunk 是当前完整正文（已过滤掉 <think> 标签）
+        // 直接覆盖 m.content，不要再用 += 追加，否则会指数级重复
         setMessages((prev) => {
           return prev.map((m) => {
             if (m.id !== aiMessageId) return m;
-
-            // 创建新的 segments 数组
-            const newSegments = [...m.segments];
-
-            // 找到或创建文字段落
-            const textIndex = newSegments.findIndex(s => s.type === 'text');
-            if (textIndex >= 0) {
-              // 更新现有文字段落
-              newSegments[textIndex] = { ...newSegments[textIndex], content: chunk };
-            } else {
-              // 添加新的文字段落
-              newSegments.push({
-                id: `text_${Date.now()}`,
-                type: 'text',
-                content: chunk,
-              });
-            }
-
-            return { ...m, content: chunk, segments: newSegments };
+            return { ...m, content: chunk || '' };
           });
         });
       },
@@ -926,6 +1156,8 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                 response: toolCall.response,
                 isCollapsed: true,
                 isRealToolCall: toolCall.isRealToolCall,
+                // 位置锚点：difyApi 记录的工具调用发生时 m.content 长度
+                contentLength: toolCall.contentLength,
               },
             };
 
@@ -992,6 +1224,115 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
         setIsTyping(false);
         setCurrentStreamId(null);
         setStreamController(null);
+        // 清理流式解析状态
+        const stateRef = (window as any).__streamParseState;
+        if (stateRef && stateRef[aiMessageId]) {
+          delete stateRef[aiMessageId];
+        }
+
+        // 从最新消息的 content 里**智能提取** actions 和链接（不依赖 state 累积）
+        setMessages((prev) => {
+          const aiMsg = prev.find(m => m.id === aiMessageId);
+          const content = aiMsg?.content || '';
+
+          // 1) 提取 actions：从 content 里找 ```json``` 块，**只取最后一个完整块**
+          // 用 [\s\S]*? 非贪婪，但要从最后往前找避免中间有未闭合的
+          const jsonBlocks: string[] = [];
+          const re = /```json\s*([\s\S]*?)\s*```/g;
+          let m: RegExpExecArray | null;
+          while ((m = re.exec(content)) !== null) {
+            jsonBlocks.push(m[1]);
+          }
+          if (jsonBlocks.length > 0) {
+            // 拼接所有 json 块内容（可能有多个，但只 apply 一次有效）
+            const lastJson = jsonBlocks[jsonBlocks.length - 1];
+            try {
+              const parsed = JSON.parse(lastJson);
+              let actions: FormSlotAction[] = [];
+              if (Array.isArray(parsed)) {
+                actions = parsed;
+              } else if (Array.isArray(parsed?.actions)) {
+                actions = parsed.actions;
+              }
+              if (actions.length > 0) {
+                console.log('[AISidebar] onComplete 时 apply actions:', actions);
+                const result = formSlotRegistry.apply(actions);
+                console.log('[AISidebar] apply 结果:', result);
+                // 暂存到 sessionStorage（弹窗打开时兜底 apply）
+                try {
+                  sessionStorage.setItem('__pendingFormActions', JSON.stringify({
+                    actions,
+                    timestamp: Date.now(),
+                  }));
+                } catch (e) { /* ignore */ }
+              }
+            } catch (e) {
+              console.warn('[AISidebar] onComplete 解析 actions 失败:', e, 'source:', lastJson.slice(0, 200));
+            }
+          }
+
+          // 2) 提取链接：扫描所有 [text](url)，命中 ?page=xxx 就派发
+          const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+          let linkMatch: RegExpExecArray | null;
+          const seenLinks = new Set<string>();
+          while ((linkMatch = linkRegex.exec(content)) !== null) {
+            const url = linkMatch[2];
+            if (seenLinks.has(url)) continue;
+            seenLinks.add(url);
+
+            const queryPart = url.split('?')[1] || '';
+            const getParam = (key: string): string | null => {
+              const params = new URLSearchParams(queryPart);
+              const v = params.get(key);
+              if (v) return v;
+              const m = queryPart.match(new RegExp(`${key}=([^&\\s]+)`));
+              return m ? m[1] : null;
+            };
+            const page = getParam('page');
+            if (!page) continue;
+
+            const componentMap: Record<string, string> = {
+              'dashboard': 'Dashboard', 'opportunity': 'OpportunityQuery',
+              'business-info': 'BusinessInfoManagement', 'lead-acquisition': 'LeadAcquisition',
+              'lead-pool': 'LeadPoolManagement', 'lead-merge': 'LeadMerge',
+              'lead-distribution': 'LeadDistribution', 'process-config': 'ProcessNodeConfig',
+              'risk-dispatch': 'RiskManagement', 'six-positioning': 'SixPositioning',
+              'revenue-management': 'RevenueManagement', 'self-delivery-settlement': 'SelfDeliverySettlement',
+              'progress-management': 'ProgressManagement', 'contract-payment-confirmation': 'ContractPaymentConfirmation',
+              'expert-report': 'ExpertReportPage', 'full-flow-table': 'FullFlowTable',
+              'low-margin-report': 'LowMarginReport', 'revenue-plan-actual-diff': 'RevenuePlanActualDiff',
+              'revenue-cost-diff': 'RevenueCostDiff', 'first-payment-diff': 'FirstPaymentDiff',
+              'ict-share-abnormal': 'IctShareAbnormalReport', 'ict-gross-profit-report': 'IctGrossProfitReport',
+              'ict-budget-detail': 'IctBudgetDetail', 'construct-not-fixed-no-expense': 'ConstructNotFixedNoExpense',
+              'cost-estimate-report': 'CostEstimateReport', 'my-wallet': 'MyWallet',
+              'project-list': 'ProjectList', 'effective-business-opportunity-award': 'EffectiveBusinessOpportunityAward',
+              'large-business-opportunity-award': 'LargeBusinessOpportunityAward',
+              'project-commission-award': 'ProjectCommissionAward', 'reward-sign-report': 'RewardSignReport',
+              'bonus-pool': 'BonusPool', 'task-wallet-list': 'TaskWalletList',
+              'ai-assistant-config': 'AIAssistantConfig',
+            };
+            const componentName = componentMap[page];
+            if (!componentName) {
+              console.warn('[AISidebar] onComplete 未找到 componentName:', page, 'url:', url);
+              continue;
+            }
+            console.log('[AISidebar] onComplete 自动派发链接:', { url, page, componentName, openModal: getParam('openModal') });
+            // 派发 switch-page
+            window.dispatchEvent(new CustomEvent('switch-page', { detail: { component: componentName } }));
+            // 派发 open-modal（如果有）
+            const openModal = getParam('openModal');
+            const action = getParam('action');
+            if (openModal) {
+              setTimeout(() => {
+                console.log('[AISidebar] onComplete 自动派发 open-modal:', { modal: openModal, action });
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                  detail: { modal: openModal, action: action || 'new' },
+                }));
+              }, 300);
+            }
+          }
+          return prev;
+        });
         // 更新会话次数
         if (agentConfig.configId) {
           updateSessionCount(agentConfig.configId);
@@ -1174,57 +1515,18 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                     // 转换为 Message 格式并显示
                     if (messages.length > 0) {
                       const historyMessages: Message[] = messages.map((m, idx) => {
-                        // 从 answer 中提取 think 标签内容
-                        const thinkMatches = (m.answer || '').matchAll(/<think>([\s\S]*?)<\/think>/gi);
-                        const thinkBlocks: string[] = [];
-                        for (const match of thinkMatches) {
-                          const content = match[1].trim();
-                          if (content) {
-                            thinkBlocks.push(content);
-                          }
-                        }
-
-                        // 清理正文中的 think 标签
-                        const cleanContent = (m.answer || m.content || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-
-                        // 构建 segments
+                        // 历史消息：保留完整 answer（含 think 标签），由 renderMessageContent
+                        // 统一按字符串顺序提取 think 折叠块 + 剩余正文
+                        // segments 留空（历史消息没有工具调用）
                         const segments: MessageSegment[] = [];
-
-                        // 助手消息：从 answer 中提取 think 标签内容
-                        if (m.role === 'assistant') {
-                          thinkBlocks.forEach((thought, tIdx) => {
-                            segments.push({
-                              id: `history-seg-${idx}-think-${tIdx}`,
-                              type: 'thinking',
-                              toolCall: {
-                                id: `think-history-${idx}-${tIdx}`,
-                                toolName: '思考中',
-                                thought: thought,
-                                isCollapsed: true,
-                                isRealToolCall: false,
-                              },
-                            });
-                          });
-                          if (cleanContent) {
-                            segments.push({
-                              id: `history-seg-${idx}-text`,
-                              type: 'text',
-                              content: cleanContent,
-                            });
-                          }
-                        } else {
-                          // 用户消息：直接显示 query 内容
-                          segments.push({
-                            id: `history-seg-${idx}-text`,
-                            type: 'text',
-                            content: m.query || m.content,
-                          });
-                        }
+                        const fullContent = m.role === 'assistant'
+                          ? (m.answer || m.content || '')
+                          : (m.query || m.content || '');
 
                         return {
                           id: `history-${idx}`,
                           role: m.role as 'user' | 'assistant',
-                          content: m.role === 'assistant' ? cleanContent : (m.query || m.content),
+                          content: fullContent,
                           timestamp: new Date(m.created_at),
                           segments: segments,
                           files: [],
@@ -1315,70 +1617,35 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
               {/* 消息段落 - 按顺序显示 */}
               {message.role === "assistant" && message.segments?.length > 0 ? (
                 <div className="space-y-2">
-                  {message.segments.map((segment) => {
-                    if (segment.type === 'text') {
-                      // 文字段落
-                      return (
-                        <div key={segment.id} className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {renderMessageContent(segment.content || '')}
-                        </div>
-                      );
-                    } else if (segment.type === 'toolcall' && segment.toolCall) {
-                      // 工具调用段落
-                      return (
-                        <ToolCallBlock
-                          key={segment.id}
-                          toolName={segment.toolCall.toolName}
-                          request={segment.toolCall.request}
-                          response={segment.toolCall.response}
-                          isCollapsed={segment.toolCall.isCollapsed}
-                          isRealToolCall={true}
-                          onToggle={() => {
-                            setMessages((prev) =>
-                              prev.map((m) =>
-                                m.id === message.id
-                                  ? {
-                                      ...m,
-                                      segments: m.segments.map((s) =>
-                                        s.id === segment.id && s.toolCall
-                                          ? { ...s, toolCall: { ...s.toolCall, isCollapsed: !s.toolCall.isCollapsed } }
-                                          : s
-                                      ),
-                                    }
-                                  : m
-                              )
-                            );
-                          }}
-                        />
-                      );
-                    } else if (segment.type === 'thinking' && segment.toolCall) {
-                      // 思考段落
-                      return (
-                        <ThinkingBlock
-                          key={segment.id}
-                          thought={segment.toolCall.thought || segment.toolCall.observation || ''}
-                          isCollapsed={segment.toolCall.isCollapsed}
-                          onToggle={() => {
-                            setMessages((prev) =>
-                              prev.map((m) =>
-                                m.id === message.id
-                                  ? {
-                                      ...m,
-                                      segments: m.segments.map((s) =>
-                                        s.id === segment.id && s.toolCall
-                                          ? { ...s, toolCall: { ...s.toolCall, isCollapsed: !s.toolCall.isCollapsed } }
-                                          : s
-                                      ),
-                                    }
-                                  : m
-                              )
-                            );
-                          }}
-                        />
-                      );
-                    }
-                    return null;
-                  })}
+                  {/* 正文 + 思考块 + 工具调用：统一由 renderMessageContent 按实际出现顺序渲染 */}
+                  {message.content && (
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {renderMessageContent(
+                        message.content,
+                        message.segments
+                          .filter(s => s.type === 'toolcall' && s.toolCall)
+                          .map(s => s.toolCall!),
+                        (id) => {
+                          // 工具调用段折叠/展开 toggle
+                          setMessages((prev) =>
+                            prev.map((m) =>
+                              m.id === message.id
+                                ? {
+                                    ...m,
+                                    segments: m.segments.map((s) =>
+                                      s.toolCall?.id === id && s.toolCall
+                                        ? { ...s, toolCall: { ...s.toolCall, isCollapsed: !s.toolCall.isCollapsed } }
+                                        : s
+                                    ),
+                                  }
+                                : m
+                            )
+                          );
+                        }
+                      )}
+                    </div>
+                  )}
+                  {/* segments 里的 text/toolcall 都已并入上方 renderMessageContent 渲染，此处不再遍历 */}
                 </div>
               ) : (
                 /* 非助手消息或没有段落的消息，显示纯文本内容 */
@@ -1438,6 +1705,26 @@ export function AISidebar({ isOpen, onClose, width = 400 }: AISidebarProps) {
                           conversationId: agentConfig.conversationId || undefined,
                           apiKey: agentConfig.config.apiKey,
                           baseUrl: agentConfig.config.baseUrl,
+                          // 同样注入当前激活表单快照（重新生成场景）
+                          inputs: {
+                            user_permissions: '*',
+                            active_form: formSlotRegistry.getActive() || '',
+                            all_form_ids: JSON.stringify(listAllFormIds()),
+                            current_page: (window as any).__PRD_ROUTE__ || '',
+                            // 兜底（重新生成场景）
+                            slotKey: '',
+                            label: '',
+                            value: '',
+                            type: '',
+                            options: '',
+                            required: '',
+                            currentValue: '',
+                            formId: '',
+                            formTitle: '',
+                            slots: '',
+                            description: '',
+                            group: '',
+                          },
                           onMessage: (chunk) => {
                             fullAnswer = chunk;
                             setMessages((prev) =>

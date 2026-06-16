@@ -573,18 +573,18 @@ export function SelfDeliverySettlement() {
       </div>
       {row.innerList.length > 0 ? (
         <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-12">序号</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-40">结算单名称</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-32">结算单号</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 min-w-48">结算类型 / 申请金额 / 人员</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 w-24">申请日期</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-20">申请人</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 w-20">状态</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-32">发放凭证</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 min-w-28">操作</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-40">结算单名称</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">结算单号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 min-w-48">结算类型 / 申请金额 / 人员</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">申请日期</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">发放凭证</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 min-w-28">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -616,11 +616,11 @@ export function SelfDeliverySettlement() {
                           <td className="px-3 py-2 w-20" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
                           <td className="px-3 py-2 text-center w-20" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
                           <td className="px-3 py-2 w-32 max-w-32 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
-                          <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>
+                          <td className="px-3 py-2 min-w-28" rowSpan={item.settlementMethods.length}>
                             <div className="flex flex-col gap-1">
                               <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
                               {(item.status === "已申请" || item.status === "审核中") && (
-                                <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
                               )}
                               {item.status === "已申请" && (
                                 <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
@@ -1013,7 +1013,7 @@ export function SelfDeliverySettlement() {
       {/* 表格 */}
       <div className="flex-1 overflow-hidden px-6 pb-6">
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               {/* 项目型表头 */}
               {typeTab === "项目型" && (
@@ -1115,37 +1115,37 @@ export function SelfDeliverySettlement() {
                   {typeTab === "项目型" && (
                     <>
                       <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleRowExpand(row.id)}>
-                        <td className="px-3 py-3 bg-white sticky left-0 z-10">
+                        <td className="px-3 py-3 w-10 bg-white sticky left-0 z-10">
                           <button onClick={(e) => { e.stopPropagation(); toggleRowExpand(row.id); }} className="p-1 hover:bg-gray-100 rounded">
                             {expandedRows.has(row.id) ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
                           </button>
                         </td>
-                        <td className="px-3 py-3">{row.index}</td>
-                        <td className="px-3 py-3">{row.businessUnit}</td>
-                        <td className="px-3 py-3">{row.branch}</td>
-                        <td className="px-3 py-3"><Badge className="bg-blue-100 text-blue-700">{row.type}</Badge></td>
+                        <td className="px-3 py-3 w-12">{row.index}</td>
+                        <td className="px-3 py-3 w-24">{row.businessUnit}</td>
+                        <td className="px-3 py-3 w-20">{row.branch}</td>
+                        <td className="px-3 py-3 w-20"><Badge className="bg-blue-100 text-blue-700">{row.type}</Badge></td>
                         <td className="px-3 py-3 max-w-36 truncate" title={row.oppName}>{row.oppName}</td>
-                        <td className="px-3 py-3">{row.oppCode}</td>
+                        <td className="px-3 py-3 w-28">{row.oppCode}</td>
                         <td className="px-3 py-3 max-w-32 truncate" title={row.contractName}>{row.contractName}</td>
-                        <td className="px-3 py-3">{row.contractCode}</td>
+                        <td className="px-3 py-3 w-28">{row.contractCode}</td>
                         <td className="px-3 py-3 max-w-32 truncate" title={row.projectName}>{row.projectName}</td>
-                        <td className="px-3 py-3">{row.projectCode}</td>
-                        <td className="px-3 py-3 max-w-24 truncate" title={row.customerName}>{row.customerName}</td>
-                        <td className="px-3 py-3">{row.customerCode}</td>
-                        <td className="px-3 py-3 text-right">{row.forwardAmount}</td>
-                        <td className="px-3 py-3 text-center">{row.isWarrantyProject ? "是" : "否"}</td>
-                        <td className="px-3 py-3 text-center">{row.cycle}</td>
-                        <td className="px-3 py-3 text-center">{row.startDate}</td>
-                        <td className="px-3 py-3 text-center">{row.endDate}</td>
-                        <td className="px-3 py-3 text-right">{row.selfDeliveryForwardAmount}</td>
-                        <td className="px-3 py-3 text-right">{row.selfDeliveryCostAmount}</td>
-                        <td className="px-3 py-3 text-right">{row.forwardContractSelfDeliveryAmount}</td>
-                        <td className="px-3 py-3 text-right font-medium">{row.canApplyAmount}</td>
-                        <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
-                        <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
-                        <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
-                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
-                        <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
+                        <td className="px-3 py-3 w-28">{row.projectCode}</td>
+                        <td className="px-3 py-3 w-28">{row.customerName}</td>
+                        <td className="px-3 py-3 w-24">{row.customerCode}</td>
+                        <td className="px-3 py-3 w-28 text-right">{row.forwardAmount}</td>
+                        <td className="px-3 py-3 w-20 text-center">{row.isWarrantyProject ? "是" : "否"}</td>
+                        <td className="px-3 py-3 w-20 text-center">{row.cycle}</td>
+                        <td className="px-3 py-3 w-24 text-center">{row.startDate}</td>
+                        <td className="px-3 py-3 w-24 text-center">{row.endDate}</td>
+                        <td className="px-3 py-3 w-28 text-right">{row.selfDeliveryForwardAmount}</td>
+                        <td className="px-3 py-3 w-28 text-right">{row.selfDeliveryCostAmount}</td>
+                        <td className="px-3 py-3 w-28 text-right">{row.forwardContractSelfDeliveryAmount}</td>
+                        <td className="px-3 py-3 w-24 text-right font-medium">{row.canApplyAmount}</td>
+                        <td className="px-3 py-3 w-24 text-right text-blue-600">{row.appliedAmount}</td>
+                        <td className="px-3 py-3 w-28 text-right text-green-600">{row.approvedAmount}</td>
+                        <td className="px-3 py-3 w-24 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
+                        <td className="px-3 py-3 w-20"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3 w-32 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
                           </Button>
@@ -1165,21 +1165,20 @@ export function SelfDeliverySettlement() {
                                 </div>
                                 {row.innerList.length > 0 ? (
                                   <div className="overflow-x-auto" style={{ maxHeight: "280px" }}>
-                                    <table className="w-full text-sm">
+                                    <table className="w-full text-sm table-fixed">
                                       <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                                         <tr>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
-                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">结算类型</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算类型 / 人数（姓名）</th>
-                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 bg-gray-50">申请金额</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
-                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-40">结算单名称</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">结算单号</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-28">结算类型</th>
+                                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 w-24">申请金额</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 min-w-56">人员（金额/人天）</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">申请日期</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
+                                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">发放凭证</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 min-w-28">操作</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
@@ -1187,12 +1186,18 @@ export function SelfDeliverySettlement() {
                                           <React.Fragment key={item.id}>
                                             {item.settlementMethods.map((sm, smIdx) => (
                                               <tr key={`${item.id}-${smIdx}`} className="hover:bg-gray-50">
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 w-12 align-top">
                                                   {smIdx === 0 && <span className="text-xs text-gray-400 mr-1">{item.id.replace("i", "")}.</span>}
                                                   {smIdx > 0 && <span className="text-xs text-gray-300 mr-1">└</span>}
+                                                </td>
+                                                <td className="px-3 py-2 w-40 max-w-40 align-top truncate" title={item.name}>{smIdx === 0 ? item.name : ""}</td>
+                                                <td className="px-3 py-2 w-32 align-top">{smIdx === 0 ? item.code : ""}</td>
+                                                <td className="px-3 py-2 w-28 align-top">
                                                   <Badge className={sm.method === "451定额" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}>{sm.method}</Badge>
-                                                  <span className="ml-2 text-green-600 font-medium">¥{sm.applyAmount}</span>
-                                                  <div className="mt-1 flex flex-wrap gap-1">
+                                                </td>
+                                                <td className="px-3 py-2 w-24 align-top text-right text-green-600 font-medium">¥{sm.applyAmount}</td>
+                                                <td className="px-3 py-2 min-w-56 align-top">
+                                                  <div className="flex flex-wrap gap-1">
                                                     {sm.personList.map((p, idx) => (
                                                       <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
                                                         {p.name}{p.amount ? ` ¥${p.amount}` : ""}{p.personDays ? ` ${p.personDays}人天` : ""}
@@ -1200,18 +1205,17 @@ export function SelfDeliverySettlement() {
                                                     ))}
                                                   </div>
                                                 </td>
-                                                <td className="px-3 py-2 text-right text-green-600 font-medium">¥{sm.applyAmount}</td>
                                                 {smIdx === 0 && (
                                                   <>
-                                                    <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
-                                                    <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
-                                                    <td className="px-3 py-2 text-center" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
-                                                    <td className="px-3 py-2 max-w-28 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
-                                                    <td className="px-3 py-2" rowSpan={item.settlementMethods.length}>
+                                                    <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
+                                                    <td className="px-3 py-2 w-20 align-top" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
+                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                                    <td className="px-3 py-2 w-32 max-w-32 align-top truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
+                                                    <td className="px-3 py-2 min-w-28 align-top" rowSpan={item.settlementMethods.length}>
                                                       <div className="flex flex-col gap-1">
                                                         <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
                                                         {(item.status === "已申请" || item.status === "审核中") && (
-                                                          <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setAuditRecord(item); setAuditDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
+                                                          <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
                                                         )}
                                                         {item.status === "已申请" && (
                                                           <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
@@ -1361,6 +1365,7 @@ export function SelfDeliverySettlement() {
         open={applyDialogOpen}
         onClose={() => { setApplyDialogOpen(false); setSelectedRowData(null); }}
         rowData={selectedRowData}
+        onAudit={(rec) => { setApplyDialogOpen(false); setAuditRecord(rec as InnerRecord); setAuditResult(null); setAuditOpinion(""); setAuditDialogOpen(true); }}
       />
 
       {/* 审核弹窗 */}

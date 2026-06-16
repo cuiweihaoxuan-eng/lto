@@ -183,7 +183,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle, activeItem: externalActiveItem, onItemChange }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["report", "risk", "task-wallet", "fixed-assets"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [activeItem, setActiveItem] = useState("dashboard");
   const [cascadeParent, setCascadeParent] = useState<string | null>(null);
   const [cascadePos, setCascadePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Power, TestTube, Eye, EyeOff, X, Check } from "lucide-react";
+import { useFormSlots } from "../hooks/useFormSlots";
 
 // AI 助手配置接口
 export interface AIAssistantConfig {
@@ -75,6 +76,56 @@ export function AIAssistantConfig() {
   useEffect(() => {
     saveConfigs(configs);
   }, [configs]);
+
+  // ========== AI 助手配置 表单槽位注册（自然语言填表） ==========
+  // 弹窗打开时把表单槽位注册到 formSlotRegistry，AI 助手可以读取并填写
+  useFormSlots({
+    formId: editingConfig?.id ? 'AIAssistantConfig/edit' : 'AIAssistantConfig/new',
+    formTitle: editingConfig?.id ? '编辑AI助手配置' : '新增AI助手配置',
+    enabled: isModalOpen && !!editingConfig,
+    slots: editingConfig
+      ? [
+          {
+            slotKey: 'name',
+            get: () => editingConfig.name,
+            // 用函数式 setState，每次基于最新 state，**避免闭包覆盖**
+            set: v => setEditingConfig(prev => ({ ...(prev || editingConfig), name: String(v ?? '') })),
+          },
+          {
+            slotKey: 'platform',
+            get: () => editingConfig.platform,
+            set: v => setEditingConfig(prev => ({ ...(prev || editingConfig), platform: String(v ?? 'Dify') })),
+          },
+          {
+            slotKey: 'url',
+            get: () => editingConfig.url,
+            set: v => setEditingConfig(prev => ({ ...(prev || editingConfig), url: String(v ?? '') })),
+          },
+          {
+            slotKey: 'apiKey',
+            get: () => editingConfig.apiKey,
+            set: v => setEditingConfig(prev => ({ ...(prev || editingConfig), apiKey: String(v ?? '') })),
+          },
+        ]
+      : [],
+  });
+
+  // ========== 监听 open-modal 事件（从 URL 参数触发打开弹窗） ==========
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ modal: string; action: string }>).detail;
+      if (!detail) return;
+      if (detail.modal === 'ai-assistant') {
+        if (detail.action === 'new') {
+          handleAdd();
+        }
+        // 编辑场景暂不实现（需要先选具体哪条）
+      }
+    };
+    window.addEventListener('open-modal', handler);
+    return () => window.removeEventListener('open-modal', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 新增配置
   const handleAdd = () => {
@@ -351,8 +402,8 @@ export function AIAssistantConfig() {
                   onChange={(e) => setEditingConfig({ ...editingConfig, platform: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
+                  <option value="Dify">Dify</option>
                   <option value="星辰平台">星辰平台</option>
-                  <option value="dify">dify</option>
                   <option value="星智平台">星智平台</option>
                 </select>
               </div>

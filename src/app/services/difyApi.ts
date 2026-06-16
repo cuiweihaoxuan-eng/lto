@@ -33,6 +33,10 @@ export interface ToolCall {
   request?: Record<string, unknown>;
   response?: Record<string, unknown>;
   isRealToolCall?: boolean;
+  // 工具调用发生时的 m.content 长度，作为渲染时插入位置的锚点
+  // （AI 实际输出可能是 think → tool → text → think → tool 交叉，
+  //  工具调用段必须按 m.content 累积到该长度时插入，而不是堆底）
+  contentLength?: number;
 }
 
 export interface SendMessageOptions {
@@ -257,11 +261,6 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
     let lastConversationId = conversationId || '';
     // 累积答案，用于处理分段发送
     let accumulatedAnswer = '';
-    // 累积当前的 think 内容（跨多个事件）
-    let pendingThinkContent = '';
-    let isInThinkTag = false;
-    // 标记：agent_thought 事件已经处理过 think 标签，不需要在 agent_message 中重复处理
-    let thoughtProcessedThinkTag = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -327,26 +326,10 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                 // 清理 thought：只保留最后一个 think 标签之后的内容（不包含 think 标签内的内容）
                 const cleanThought = thoughtContent.slice(lastEndIndex).trim();
 
-                // 发送思考内容（作为思考块）
-                if (hasThinkTag && onToolCall) {
-                  console.log(`[Dify] agent_thought 发现 ${thinkBlocks.length} 个思考块，立即发送`);
-                  console.log(`[Dify] 思考块内容预览:`, thinkBlocks);
-                  // 标记：已处理过 think 标签，避免 agent_message 中重复处理
-                  thoughtProcessedThinkTag = true;
-                  for (let i = 0; i < thinkBlocks.length; i++) {
-                    const thinkContent = thinkBlocks[i];
-                    console.log(`[Dify] 发送思考块 ${i + 1}/${thinkBlocks.length}:`, thinkContent.slice(0, 100));
-                    onToolCall({
-                      id: `think_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-                      toolName: '思考中',
-                      thought: thinkContent,
-                      observation: i === 0 ? 'thinking_start' : 'thinking_end',
-                      request: undefined,
-                      response: undefined,
-                      isRealToolCall: false,
-                    });
-                  }
-                }
+                // 注：think 内容不在 parsed.thought 字段里（该字段为空），
+                // 而是在 agent_message.answer 里分片发送。
+                // 由下方 agent_message 分支保留 <think> 标签后写入 accumulatedAnswer，
+                // 前端 renderMessageContent 统一提取显示。
 
                 // 如果有工具调用，创建工具调用块
                 if (hasToolInput) {
@@ -387,6 +370,8 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
                       request: request,
                       response: response,
                       isRealToolCall: true,
+                      // 记录当时 m.content 长度作为位置锚点
+                      contentLength: accumulatedAnswer.length,
                     });
                   }
                   break;
@@ -422,31 +407,13 @@ export async function sendDifyMessage(options: SendMessageOptions): Promise<Abor
 
               case 'agent_message':
               case 'message':
-                // 处理 answer 内容 - 使用追加模式累积所有片段
+                // Dify 把 think 内容塞在 agent_message.answer 里分片发送（agent_thought 事件的
+                // thought 字段是空的，不要再被它误导）。
+                // 直接把 answer 原样 append 到 accumulatedAnswer，保留 <think> 标签，
+                // 渲染时由前端 renderMessageContent 按字符串顺序提取 think 块（在上）+ 正文（在下）。
                 if (parsed.answer) {
-                  const answerContent = parsed.answer;
-
-                  // 如果 agent_thought 已经处理过 think 标签，过滤掉 answer 中的 think 标签
-                  if (thoughtProcessedThinkTag) {
-                    console.log('[Dify] agent_message 检测到 thoughtProcessedThinkTag=true，准备过滤');
-                    // 从 answer 中移除 think 标签，只保留正文
-                    const cleanAnswer = answerContent
-                      .replace(/<\/think>/gi, '')  // 先移除结束标签
-                      .replace(/<think>[\s\S]*?<\/think>/gi, '')  // 移除完整的 think 块
-                      .replace(/<think>[\s\S]*$/gi, '');  // 移除可能未闭合的开始标签
-
-                    console.log('[Dify] 过滤前:', answerContent.slice(0, 50));
-                    console.log('[Dify] 过滤后:', cleanAnswer.slice(0, 50));
-
-                    if (cleanAnswer.trim()) {
-                      accumulatedAnswer += cleanAnswer;
-                      onMessage(accumulatedAnswer, parsed.event);
-                    }
-                  } else {
-                    // 正常追加答案内容
-                    accumulatedAnswer += answerContent;
-                    onMessage(accumulatedAnswer, parsed.event);
-                  }
+                  accumulatedAnswer += parsed.answer;
+                  onMessage(accumulatedAnswer, parsed.event);
                 }
                 break;
 

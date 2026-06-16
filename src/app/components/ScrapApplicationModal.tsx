@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { X, Trash2, Upload, Search, ChevronDown, ChevronRight, Check } from "lucide-react";
+import { X, Trash2, Upload, Search, ChevronDown, ChevronRight, Check, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { AssetPickerModal } from "./AssetPickerModal";
 
 interface FixedAsset {
   id: string;
@@ -226,6 +227,7 @@ export function ScrapApplicationModal({ open, onClose, selectedAssets }: ScrapAp
   const [assetList, setAssetList] = useState<FixedAsset[]>(selectedAssets);
   const [approver, setApprover] = useState("");
   const [approverSelectOpen, setApproverSelectOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   // 当selectedAssets变化时更新assetList
   useEffect(() => {
@@ -243,6 +245,14 @@ export function ScrapApplicationModal({ open, onClose, selectedAssets }: ScrapAp
 
   const removeAsset = (id: string) => {
     setAssetList(prev => prev.filter(a => a.id !== id));
+  };
+
+  // 添加资产
+  const handleAddAssets = (newAssets: FixedAsset[]) => {
+    const existingIds = new Set(assetList.map(a => a.id));
+    const filteredNew = newAssets.filter(a => !existingIds.has(a.id));
+    setAssetList(prev => [...prev, ...filteredNew]);
+    setPickerOpen(false);
   };
 
   if (!open) return null;
@@ -313,11 +323,16 @@ export function ScrapApplicationModal({ open, onClose, selectedAssets }: ScrapAp
 
           {/* 报废资产清单 */}
           <div className="bg-white rounded-lg border border-gray-200">
-            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
               <div className="text-sm font-medium text-gray-700 flex items-center">
                 <span className="w-1 h-4 bg-red-500 rounded mr-2"></span>
                 报废资产清单
+                <span className="ml-2 text-xs text-gray-500">（共 {assetList.length} 项）</span>
               </div>
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => setPickerOpen(true)}>
+                <Plus className="w-3 h-3" />
+                添加资产
+              </Button>
             </div>
             <div className="overflow-x-auto max-h-64">
               <table className="w-full text-sm">
@@ -389,6 +404,14 @@ export function ScrapApplicationModal({ open, onClose, selectedAssets }: ScrapAp
         onClose={() => setApproverSelectOpen(false)}
         onSelect={(name) => setApprover(name)}
         selectedApprover={approver}
+      />
+
+      {/* 资产选择弹窗 */}
+      <AssetPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onConfirm={handleAddAssets}
+        existingAssetIds={assetList.map(a => a.id)}
       />
     </div>
   );

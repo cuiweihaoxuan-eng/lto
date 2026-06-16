@@ -193,6 +193,7 @@ interface SelfDeliveryApplyDialogProps {
   open: boolean;
   onClose: () => void;
   rowData?: SettlementRecord | null;
+  onAudit?: (record: any) => void;
 }
 
 // ============ 模拟数据 ============
@@ -888,7 +889,7 @@ function PersonSelectDialog({ open, onClose, onSelect, selectedPersons }: Person
 }
 
 // ============ 主弹窗组件（单页面滚动形式） ============
-export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfDeliveryApplyDialogProps) {
+export function SelfDeliveryApplyDialog({ open, onClose, rowData = null, onAudit }: SelfDeliveryApplyDialogProps) {
   // 根据 rowData 判断弹窗模式
   // isViewMode: rowData有innerList且有数据 = 查看模式
   // isEditMode: rowData有innerList = 修改模式（和新增一样但有数据）
@@ -3045,12 +3046,39 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
           {/* 底部按钮 */}
           <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2 flex-shrink-0">
-            <Button variant="outline" onClick={handleClose}>
-              取消
-            </Button>
-            <Button className="bg-green-600 hover:bg-green-700">
-              提交申请
-            </Button>
+            {isViewMode ? (
+              <>
+                <Button variant="outline" onClick={handleClose}>
+                  关闭
+                </Button>
+                {/* 状态为"已申请"或"审核中"时才显示审核按钮 */}
+                {(() => {
+                  const firstInner = rowData?.innerList?.[0];
+                  const auditable = firstInner && (firstInner.status === "已申请" || firstInner.status === "审核中");
+                  if (!auditable) return null;
+                  return (
+                    <Button
+                      className="bg-orange-500 hover:bg-orange-600"
+                      onClick={() => {
+                        onAudit?.(firstInner);
+                      }}
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      审核
+                    </Button>
+                  );
+                })()}
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={handleClose}>
+                  取消
+                </Button>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  提交申请
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

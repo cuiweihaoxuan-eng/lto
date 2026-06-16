@@ -163,7 +163,7 @@ export function SelfDeliverySettlementList() {
       {/* 列表 */}
       <div className="flex-1 overflow-hidden px-6 pb-6">
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
@@ -185,30 +185,30 @@ export function SelfDeliverySettlementList() {
             <tbody className="divide-y divide-gray-100">
               {filteredData.map(row => (
                 <tr key={row.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-3">{row.index}</td>
-                  <td className="px-3 py-3">{row.settlementName}</td>
-                  <td className="px-3 py-3">{row.settlementCode}</td>
-                  <td className="px-3 py-3">{row.businessUnit}</td>
-                  <td className="px-3 py-3">{row.branch}</td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3 w-12">{row.index}</td>
+                  <td className="px-3 py-3 min-w-32">{row.settlementName}</td>
+                  <td className="px-3 py-3 w-32">{row.settlementCode}</td>
+                  <td className="px-3 py-3 w-24">{row.businessUnit}</td>
+                  <td className="px-3 py-3 w-20">{row.branch}</td>
+                  <td className="px-3 py-3 w-20">
                     <Badge className={row.businessType === "项目型" ? "bg-blue-100 text-blue-700" : row.businessType === "小微标品" ? "bg-green-100 text-green-700" : "bg-purple-100 text-purple-700"}>
                       {row.businessType}
                     </Badge>
                   </td>
-                  <td className="px-3 py-3">{row.businessCode}</td>
-                  <td className="px-3 py-3 text-right">{row.forwardAmount}</td>
-                  <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
-                  <td className="px-3 py-3 text-right font-medium text-green-600">{row.currentApplyAmount}</td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3 w-32">{row.businessCode}</td>
+                  <td className="px-3 py-3 w-28 text-right">{row.forwardAmount}</td>
+                  <td className="px-3 py-3 w-28 text-right text-blue-600">{row.appliedAmount}</td>
+                  <td className="px-3 py-3 w-28 text-right font-medium text-green-600">{row.currentApplyAmount}</td>
+                  <td className="px-3 py-3 w-32">
                     <div className="flex flex-wrap gap-1">
                       {row.payPersonnel.map((p, i) => (
                         <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">{p}</span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-center">{row.applyDate}</td>
-                  <td className="px-3 py-3">{row.applicant}</td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3 w-24 text-center">{row.applyDate}</td>
+                  <td className="px-3 py-3 w-20">{row.applicant}</td>
+                  <td className="px-3 py-3 w-20">
                     <Badge className={getStatusBadge(row.status)}>{row.status}</Badge>
                   </td>
                 </tr>

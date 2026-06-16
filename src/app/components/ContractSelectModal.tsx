@@ -238,11 +238,11 @@ export function ContractSelectModal({ open, onClose, onSelect }: ContractSelectM
         </div>
 
         {/* 表格 */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto px-6 py-3">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10 bg-gray-50 sticky left-0 z-30">选择</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-10">选择</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">ICT项目名称</th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">ICT项目编码</th>
@@ -255,7 +255,7 @@ export function ContractSelectModal({ open, onClose, onSelect }: ContractSelectM
             <tbody className="divide-y divide-gray-100">
               {currentContracts.map((contract, idx) => (
                 <tr key={contract.id} className={`hover:bg-gray-50 cursor-pointer ${selectedContract?.id === contract.id ? 'bg-blue-50' : ''}`} onClick={() => setSelectedContract(contract)}>
-                  <td className="px-3 py-3 bg-white sticky left-0 z-10">
+                  <td className="px-3 py-3">
                     <input type="radio" name="contract" checked={selectedContract?.id === contract.id} onChange={() => setSelectedContract(contract)} />
                   </td>
                   <td className="px-3 py-3">{startIndex + idx + 1}</td>

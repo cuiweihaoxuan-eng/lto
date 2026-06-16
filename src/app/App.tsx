@@ -113,7 +113,6 @@ const ROUTE_TO_COMPONENT: Record<string, string> = {
   'commission-distribution-report': 'CommissionDistributionReport',
   'fixed-assets': 'FixedAssets',
   'business-pre-demolition': 'BusinessPreDemolitionList',
-  'settings': 'settings',
   'ai-assistant-config': 'AIAssistantConfig',
 };
 
@@ -125,14 +124,45 @@ export default function App() {
   const [aiSidebarWidth, setAiSidebarWidth] = useState(400);
   const [prdSidebarOpen, setPrdSidebarOpen] = useState(false);
 
-  // 解析 URL 参数并自动跳转页面
+  // 解析 URL 参数并自动跳转页面 + 触发打开弹窗
+  // 支持格式: ?page=settings&openModal=ai-assistant&action=new
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const page = params.get('page');
+    const openModal = params.get('openModal');
+    const action = params.get('action');
+
+    // 0. 立刻把 URL 里的 page 写到 __PRD_ROUTE__，避免 prd-inject.js 读到旧的
+    //    sidebarItem（useState 初始值 "dashboard"）而加载错文档
+    //    用 setTimeout 延后到下一个 tick，绕过下方 activeSidebarItem useEffect
+    //    第一次跑（仍为初始值 "dashboard"）的覆盖
+    if (page) {
+      setTimeout(() => {
+        window.__PRD_ROUTE__ = page;
+        const meta = document.querySelector('meta[name="prd-route"]');
+        if (meta) meta.setAttribute('content', page);
+        else document.head.insertAdjacentHTML('beforeend', `<meta name="prd-route" content="${page}">`);
+      }, 0);
+    }
+
+    // 1. 跳页面
     if (page && ROUTE_TO_COMPONENT[page]) {
       const componentName = ROUTE_TO_COMPONENT[page];
       window.dispatchEvent(new CustomEvent('switch-page', { detail: { component: componentName } }));
-      // 清除 URL 参数
+    }
+
+    // 2. 延迟 200ms 等页面渲染完，再触发"打开弹窗"事件
+    //    由各表单组件（AIAssistantConfig 等）自行监听 open-modal 决定是否打开
+    if (openModal) {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('open-modal', {
+          detail: { modal: openModal, action: action || 'new' },
+        }));
+      }, 200);
+    }
+
+    // 3. 清理 URL 参数（避免刷新重复触发）
+    if (page || openModal) {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
@@ -201,6 +231,7 @@ useEffect(() => {
         'AIAssistantConfig': 'ai-assistant-config',
         'FixedAssets': 'fixed-assets',
         'BusinessPreDemolitionList': 'business-pre-demolition',
+        'settings': 'settings',  // 本次扩展（自然语言填表）新增
       };
 
       const sidebarItem = componentMap[componentName];
