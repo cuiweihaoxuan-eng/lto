@@ -32,7 +32,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: pnpm install --allow-build=esbuild
+        run: pnpm install
 
       - name: Build
         run: pnpm build
