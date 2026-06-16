@@ -576,15 +576,15 @@ export function SelfDeliverySettlement() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">序号</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单名称</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算单号</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">结算类型 / 申请金额 / 人员</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">申请日期</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">申请人</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">状态</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50">发放凭证</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50">操作</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-12">序号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-40">结算单名称</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-32">结算单号</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 min-w-48">结算类型 / 申请金额 / 人员</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 w-24">申请日期</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-20">申请人</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 w-20">状态</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 bg-gray-50 w-32">发放凭证</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 bg-gray-50 min-w-28">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

@@ -1009,6 +1009,12 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
       setSelectedTriple(null);
       setProjectType("项目型");
     }
+    // 申请单名称默认 = 项目名称 + "自交付结算申请单"
+    if (rowData) {
+      setSettlementName(`${rowData.projectName || ""}自交付结算申请单`);
+    } else {
+      setSettlementName("");
+    }
   }, [rowData]);
 
   // 结算信息状态 - 支持平铺添加多个section
@@ -1116,6 +1122,8 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
 
   // 基本情况描述
   const [description, setDescription] = useState("根据用户的需求提供宿舍大楼内的机房整治与固话线路的优化服务，大楼共计5层楼，7个人工累计服务15天，服务时间共计为105个工时。");
+  // 结算单申请单名称（默认"项目名称+自交付结算申请单"）
+  const [settlementName, setSettlementName] = useState("");
 
   // 超额提示
   const [overAmountReason, setOverAmountReason] = useState("");
@@ -2383,6 +2391,20 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                 自交付基本情况描述
               </h4>
 
+              {/* 申请单名称（默认项目名称+自交付结算申请单） */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">申请单名称</label>
+                {isViewMode ? (
+                  <div className="text-sm text-gray-700 px-3 py-2 bg-gray-50 rounded border border-gray-200">{settlementName || "（暂无名称）"}</div>
+                ) : (
+                  <Input
+                    value={settlementName}
+                    onChange={e => setSettlementName(e.target.value)}
+                    placeholder="请输入申请单名称"
+                  />
+                )}
+              </div>
+
               {isViewMode ? (
                 <div className="space-y-3">
                   <div>
@@ -2418,7 +2440,7 @@ export function SelfDeliveryApplyDialog({ open, onClose, rowData = null }: SelfD
                         }
                       }}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-72">
                         <SelectValue placeholder="请选择描述类型" />
                       </SelectTrigger>
                       <SelectContent className="max-h-96">
