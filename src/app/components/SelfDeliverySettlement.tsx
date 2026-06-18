@@ -26,6 +26,10 @@ interface InnerRecord {
   name: string;
   code: string;
   settlementMethods: SettlementMethodItem[]; // 支持多个结算类型
+  isWarrantyProject: boolean;  // 是否维保
+  cycle: string;               // 周期
+  startDate: string;           // 开始时间
+  endDate: string;             // 结束时间
   applyDate: string;
   applicant: string;
   status: InnerStatus;
@@ -106,6 +110,10 @@ const mockSettlementData: SettlementRecord[] = [
             { name: "王五", amount: "2,700" }
           ]}
         ],
+        isWarrantyProject: false,
+        cycle: "12个月",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
         applyDate: "2026-04-15",
         applicant: "张明",
         status: "审核中",
@@ -125,6 +133,10 @@ const mockSettlementData: SettlementRecord[] = [
             { name: "王五", personDays: 7 }
           ]}
         ],
+        isWarrantyProject: false,
+        cycle: "12个月",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
         applyDate: "2026-03-15",
         applicant: "张明",
         status: "审核通过",
@@ -172,6 +184,10 @@ const mockSettlementData: SettlementRecord[] = [
             { name: "钱七", amount: "3,000" }
           ]}
         ],
+        isWarrantyProject: true,
+        cycle: "6个月",
+        startDate: "2026-02-01",
+        endDate: "2026-07-31",
         applyDate: "2026-04-10",
         applicant: "李华",
         status: "已发放",
@@ -278,6 +294,10 @@ const mockSettlementData: SettlementRecord[] = [
             { name: "孙八", personDays: 13 }
           ]}
         ],
+        isWarrantyProject: true,
+        cycle: "3个月",
+        startDate: "2026-04-01",
+        endDate: "2026-06-30",
         applyDate: "2026-05-10",
         applicant: "王九",
         status: "已申请",
@@ -325,6 +345,10 @@ const mockSettlementData: SettlementRecord[] = [
             { name: "郑二", amount: "4,000" }
           ]}
         ],
+        isWarrantyProject: false,
+        cycle: "8个月",
+        startDate: "2026-01-15",
+        endDate: "2026-09-15",
         applyDate: "2026-04-20",
         applicant: "刘十一",
         status: "审核通过",
@@ -428,14 +452,14 @@ export function SelfDeliverySettlement() {
 
     // Sheet1: 外层列表（按当前Tab类型生成对应表头）
     const outerHeaders: Record<string, string[]> = {
-      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "是否维保", "周期", "开始时间", "结束时间", "前向合同自交付金额", "可申请", "已申请", "可发放", "实际发放", "状态"],
+      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "模式会前向金额（自交付部分）", "模式会自交付金额", "前向合同金额（自交付部分）", "最多可申请金额", "已申请", "可发放", "实际发放", "状态"],
       "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "状态"],
       "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "状态"]
     };
 
     const buildOuterRow = (row: typeof mockSettlementData[number]): (string | number)[] => {
       if (typeTab === "项目型") {
-        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.isWarrantyProject ? "是" : "否", row.cycle, row.startDate, row.endDate, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.selfDeliveryForwardAmount, row.selfDeliveryCostAmount, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
       } else if (typeTab === "小微标品") {
         return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
       } else {
@@ -459,7 +483,7 @@ export function SelfDeliverySettlement() {
     });
 
     // Sheet2: 内层列表（按业务类型分组，每组独立表头）
-    const innerHeaders = ["业务类型", "合同/小微工单/三联单编码", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "申请日期", "申请人", "状态", "发放凭证"];
+    const innerHeaders = ["业务类型", "合同/小微工单/三联单编码", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "是否维保", "周期", "开始时间", "结束时间", "申请日期", "申请人", "状态", "发放凭证"];
     const innerRows: (string | number)[][] = [];
     mockSettlementData.forEach(row => {
       // 根据业务类型取对应编码
@@ -479,6 +503,10 @@ export function SelfDeliverySettlement() {
             sm.method,
             sm.applyAmount,
             sm.personList.map(p => `${p.name}${p.amount ? " ¥" + p.amount : ""}${p.personDays ? " " + p.personDays + "人天" : ""}`).join("、"),
+            item.isWarrantyProject ? "是" : "否",
+            item.cycle,
+            item.startDate,
+            item.endDate,
             item.applyDate,
             item.applicant,
             item.status,
@@ -1013,7 +1041,7 @@ export function SelfDeliverySettlement() {
       {/* 表格 */}
       <div className="flex-1 overflow-hidden px-6 pb-6">
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
-          <table className="w-full text-sm table-fixed">
+          <table className={`w-full text-sm table-fixed ${typeTab === "项目型" ? "min-w-[2400px]" : typeTab === "三联单" ? "min-w-[2800px]" : ""}`}>
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               {/* 项目型表头 */}
               {typeTab === "项目型" && (
@@ -1032,14 +1060,10 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">客户名称</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">客户编码</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">是否维保</th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">周期</th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">开始时间</th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">结束时间</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">前向金额</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">成本金额</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">自交付金额</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">可申请</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-36 whitespace-normal leading-tight">模式会前向金额（自交付部分）</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-32 whitespace-normal leading-tight">模式会自交付金额</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-36 whitespace-normal leading-tight">前向合同金额（自交付部分）</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-32 whitespace-normal leading-tight">最多可申请金额</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
@@ -1133,14 +1157,10 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 w-28">{row.customerName}</td>
                         <td className="px-3 py-3 w-24">{row.customerCode}</td>
                         <td className="px-3 py-3 w-28 text-right">{row.forwardAmount}</td>
-                        <td className="px-3 py-3 w-20 text-center">{row.isWarrantyProject ? "是" : "否"}</td>
-                        <td className="px-3 py-3 w-20 text-center">{row.cycle}</td>
-                        <td className="px-3 py-3 w-24 text-center">{row.startDate}</td>
-                        <td className="px-3 py-3 w-24 text-center">{row.endDate}</td>
-                        <td className="px-3 py-3 w-28 text-right">{row.selfDeliveryForwardAmount}</td>
-                        <td className="px-3 py-3 w-28 text-right">{row.selfDeliveryCostAmount}</td>
-                        <td className="px-3 py-3 w-28 text-right">{row.forwardContractSelfDeliveryAmount}</td>
-                        <td className="px-3 py-3 w-24 text-right font-medium">{row.canApplyAmount}</td>
+                        <td className="px-3 py-3 w-36 text-right">{row.selfDeliveryForwardAmount}</td>
+                        <td className="px-3 py-3 w-32 text-right">{row.selfDeliveryCostAmount}</td>
+                        <td className="px-3 py-3 w-36 text-right">{row.forwardContractSelfDeliveryAmount}</td>
+                        <td className="px-3 py-3 w-32 text-right font-medium">{row.canApplyAmount}</td>
                         <td className="px-3 py-3 w-24 text-right text-blue-600">{row.appliedAmount}</td>
                         <td className="px-3 py-3 w-28 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 w-24 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
@@ -1154,7 +1174,7 @@ export function SelfDeliverySettlement() {
                       {/* 项目型内层结算单列表 */}
                       {expandedRows.has(row.id) && (
                         <tr className="bg-gray-50">
-                          <td colSpan={26} className="p-0 align-top">
+                          <td colSpan={22} className="p-0 align-top">
                             <div className="py-3 px-4">
                               <div className="bg-white border border-gray-200 rounded-lg">
                                 <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
@@ -1174,6 +1194,10 @@ export function SelfDeliverySettlement() {
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-28">结算类型</th>
                                           <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 w-24">申请金额</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 min-w-56">人员（金额/人天）</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">是否维保</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">周期</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">开始时间</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">结束时间</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">申请日期</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
@@ -1207,6 +1231,10 @@ export function SelfDeliverySettlement() {
                                                 </td>
                                                 {smIdx === 0 && (
                                                   <>
+                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}>{item.isWarrantyProject ? "是" : "否"}</td>
+                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}>{item.cycle}</td>
+                                                    <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.startDate}</td>
+                                                    <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.endDate}</td>
                                                     <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
                                                     <td className="px-3 py-2 w-20 align-top" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
                                                     <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
