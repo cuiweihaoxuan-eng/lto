@@ -16,66 +16,63 @@ import { ApprovalSelectModal } from "./ApprovalSelectModal";
 import { AssetSelectModal } from "./AssetSelectModal";
 
 // ============ 类型定义 ============
-type FreezeStatus = "否" | "是";
 type AssetNature = "生产用" | "利旧回收" | "报废";
 type PlanStatus = "待回收" | "回收中" | "已完成";
 type ScrapStatus = "待审批" | "审批中" | "已通过" | "已驳回";
 
 interface FixedAsset {
   id: string;
+  // 资产基本信息
   cityCode: string;
   cityName: string;
   assetName: string;
-  assetCardNo: string;
-  assetNature: AssetNature;
-  equipmentAmount: string;
-  freezeStatus: FreezeStatus;
-  projectCode: string;
+  assetCardNo: string;          // 资产编码（12位）
+  assetNature: AssetNature;     // 资产性质（衍生：生产用/利旧回收/报废）
+  assetState: string;           // 资产状态（在用/报废等）
+  equipmentAmount: string;      // 设备金额（衍生显示用）
+  projectCode: string;          // 工程编码（WBS编码）
   department: string;
-  ictProjectCode: string;
-  ictProjectName: string;
-  contractName: string;
+  // 资产详细信息
+  assetCategory: string;        // 资产分类（如 "09 接入设备"）
+  assetCatalog: string;         // 资产目录（如 "0901040202"）
+  specModel: string;            // 型号
+  capitalizationDate: string;
+  useYears: string;             // 使用年限
+  isOverdue: string;            // 是否逾龄
+  purchaseAmount: string;       // 原值
+  depreciationAmount: string;   // 净值
+  assetCount: string;           // 数量
+  assetCustodianCode: string;   // 资产保管员工号
+  assetCustodianName: string;   // 资产保管员名称
+  assetLocation: string;        // 地点
+  isClientAsset: string;        // 是否客户端资产
+  accountingPeriod: string;     // 账期
+  // 工程信息
+  investmentProjectCode: string;   // 投资主项编码
+  investmentProjectName: string;   // 投资主项名称
+  investmentMajorSpecialty: string;// 投资一级专业
+  investmentMinorSpecialty: string;// 投资二级专业
+  useDepartment: string;
+  companyCode: string;
+  profitCenterGroupCode: string;   // 利润中心组编码
+  profitCenterGroup: string;       // 利润中心组
+  profitCenterCode: string;        // 利润中心
+  profitCenterName: string;        // 利润中心名称
+  // ICT/协议项目信息
+  protocolProjectCode: string;     // 协议级项目编码
+  protocolProjectName: string;     // 协议级项目名称
   contractCode: string;
+  contractName: string;
+  contractSignDate: string;        // 合同签约日期
   contractStartDate: string;
   contractEndDate: string;
+  contractYears: string;           // 合同期限（年）
+  customerCode: string;            // 客户P码
   customerName: string;
-  customerCode: string;
   customerManager: string;
-  customerManagerPhone: string;
   projectManager: string;
-  projectManagerPhone: string;
-  contactPhone: string;
-  employeeId: string;
-  responsiblePerson: string;
-  responsiblePersonPhone: string;
-  responsiblePersonEmpId: string;
   assetUsageAddress: string;
-  sapAssetClass: string;
-  specModel: string;
-  capitalizationDate: string;
-  overdueDate: string;
-  purchaseAmount: string;
-  depreciationAmount: string;
-  assetCustodian: string;
-  investmentProjectCode: string;
-  sapOrderNo: string;
-  purchaseOrderNo: string;
-  supplierName: string;
-  supplierCode: string;
-  useDepartment: string;
-  departmentNo: string;
-  companyCode: string;
-  companyName: string;
-  profitCenterGroup: string;
-  profitCenterGroupName: string;
-  profitCenterId: string;
-  profitCenter: string;
-  costCenterNo: string;
-  costCenter: string;
-  "实物Class": string;
-  "实物Table": string;
-  createTime: string;
-  updateTime: string;
+  expectedRenewal: string;
 }
 
 interface AssetRecoveryPlan {
@@ -112,287 +109,313 @@ interface ScrapApproval {
   assets: FixedAsset[];
 }
 
-// ============ 模拟数据 ============
-const mockAssets: FixedAsset[] = [
+// ============ 模拟数据（参考资产卡片.csv字段） ============
+export const mockAssets: FixedAsset[] = [
+  // 数据1：衢州·江山中医院 - 板卡
   {
     id: "1",
-    cityCode: "0200",
-    cityName: "省本部",
-    assetName: "监控设备",
-    assetCardNo: "000000000001",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "板卡",
+    assetCardNo: "000013377945",
     assetNature: "生产用",
-    equipmentAmount: "15,000.00",
-    freezeStatus: "否",
-    projectCode: "XM202401001",
-    department: "办公室(安全保卫部)",
-    ictProjectCode: "ICT202401001",
-    ictProjectName: "某医院信息化建设项目",
-    contractName: "医院ICT服务合同",
-    contractCode: "HT202401001",
-    contractStartDate: "2024-01-01",
-    contractEndDate: "2026-12-31",
-    customerName: "杭州某医院",
-    customerCode: "KH202401001",
-    customerManager: "张明-13800138001(GZ2024001)",
-    customerManagerPhone: "13800138001",
-    projectManager: "李华-13900139001(GZ2024002)",
-    projectManagerPhone: "13900139001",
-    contactPhone: "0571-88888888",
-    employeeId: "EMP2024001",
-    responsiblePerson: "赵六",
-    responsiblePersonPhone: "13700137001",
-    responsiblePersonEmpId: "EMP2024002",
-    assetUsageAddress: "杭州市西湖区某医院机房",
-    sapAssetClass: "固定资产-有线传输设",
-    specModel: "nvr7",
-    capitalizationDate: "20141231",
-    overdueDate: "20241231",
-    purchaseAmount: "15,000.00",
-    depreciationAmount: "12,000.00",
-    assetCustodian: "王五",
-    investmentProjectCode: "TZ202401001",
-    sapOrderNo: "SO202401001",
-    purchaseOrderNo: "PO202401001",
-    supplierName: "杭州科技有限公司",
-    supplierCode: "SUP2024001",
-    useDepartment: "股份.省本部.办公室(安全保卫部)",
-    departmentNo: "A330000001",
+    assetState: "在用",
+    equipmentAmount: "758.95",
+    projectCode: "22ZJ000819",
+    department: "网络运营建设部",
+    assetCategory: "09 接入设备",
+    assetCatalog: "0901040202",
+    specModel: "ZXCTN 6180H",
+    capitalizationDate: "20221219",
+    useYears: "010",
+    isOverdue: "否",
+    purchaseAmount: "758.95",
+    depreciationAmount: "507.42",
+    assetCount: "1",
+    assetCustodianCode: "33021651@ZJ",
+    assetCustodianName: "吴勇鉴",
+    assetLocation: "衢州市江山市虎山街道东岳路江山何家山综合机房",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "22ZJ000819",
+    investmentProjectName: "2022年衢州江山中医院5G定制网承载网项目",
+    investmentMajorSpecialty: "数据网",
+    investmentMinorSpecialty: "STN网络",
+    useDepartment: "股份.衢州市.江山市.网络运营建设部",
     companyCode: "A011",
-    companyName: "中国电信股份有限公司",
-    profitCenterGroup: "A3300",
-    profitCenterGroupName: "中国电信股份有限公司浙江分",
-    profitCenterId: "A330000",
-    profitCenter: "股份省本部",
-    costCenterNo: "A330000004",
-    costCenter: "办公室(安全保卫部)",
-    "实物Class": "NY",
-    "实物Table": "NY",
-    createTime: "2016-05-05 11:42:54",
-    updateTime: "2026-05-16 22:40:1"
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330802",
+    profitCenterName: "股份衢州市江山市",
+    protocolProjectCode: "XYJAZJQZA211000005",
+    protocolProjectName: "江山市中医院移动护士站采购项目合同",
+    contractCode: "ZJQZA2103573CGN00",
+    contractName: "江山市中医院移动护士站采购项目合同",
+    contractSignDate: "2021-10-08",
+    contractStartDate: "2021-09-28",
+    contractEndDate: "2026-09-27",
+    contractYears: "5",
+    customerCode: "ZJ2019080700073423",
+    customerName: "江山市中医院",
+    customerManager: "张明-13800138001(GZ2024001)",
+    projectManager: "李华-13900139001(GZ2024002)",
+    assetUsageAddress: "衢州市江山市虎山街道东岳路江山何家山综合机房",
+    expectedRenewal: "是"
   },
+  // 数据2：衢州·江山中医院 - 接入设备（A类设备）
   {
     id: "2",
-    cityCode: "0201",
-    cityName: "杭州",
-    assetName: "服务器",
-    assetCardNo: "000000000002",
-    assetNature: "利旧回收",
-    equipmentAmount: "50,000.00",
-    freezeStatus: "是",
-    projectCode: "XM202402001",
-    department: "技术部",
-    ictProjectCode: "ICT202402001",
-    ictProjectName: "企业云服务项目",
-    contractName: "云服务采购合同",
-    contractCode: "HT202402001",
-    contractStartDate: "2024-02-01",
-    contractEndDate: "2025-01-31",
-    customerName: "宁波某企业",
-    customerCode: "KH202402001",
-    customerManager: "钱七-13800138002(GZ2024003)",
-    customerManagerPhone: "13800138002",
-    projectManager: "孙八-13900139002(GZ2024004)",
-    projectManagerPhone: "13900139002",
-    contactPhone: "0574-88888888",
-    employeeId: "EMP2024003",
-    responsiblePerson: "周十",
-    responsiblePersonPhone: "13700137002",
-    responsiblePersonEmpId: "EMP2024004",
-    assetUsageAddress: "宁波市鄞州区某企业机房",
-    sapAssetClass: "固定资产-计算机设备",
-    specModel: "Dell PowerEdge R740",
-    capitalizationDate: "20200115",
-    overdueDate: "20251231",
-    purchaseAmount: "50,000.00",
-    depreciationAmount: "30,000.00",
-    assetCustodian: "李九",
-    investmentProjectCode: "TZ202402001",
-    sapOrderNo: "SO202402001",
-    purchaseOrderNo: "PO202402001",
-    supplierName: "深圳科技有限公司",
-    supplierCode: "SUP2024002",
-    useDepartment: "股份.杭州.技术部",
-    departmentNo: "A330000002",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "接入设备（A类设备）",
+    assetCardNo: "000013377942",
+    assetNature: "生产用",
+    assetState: "在用",
+    equipmentAmount: "700.00",
+    projectCode: "22ZJ000819",
+    department: "网络运营建设部",
+    assetCategory: "09 接入设备",
+    assetCatalog: "09010402",
+    specModel: "ZXCTN 6180H",
+    capitalizationDate: "20221219",
+    useYears: "010",
+    isOverdue: "否",
+    purchaseAmount: "700.00",
+    depreciationAmount: "468.01",
+    assetCount: "1",
+    assetCustodianCode: "33021651@ZJ",
+    assetCustodianName: "吴勇鉴",
+    assetLocation: "衢州市江山市虎山街道东岳路江山何家山综合机房",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "22ZJ000819",
+    investmentProjectName: "2022年衢州江山中医院5G定制网承载网项目",
+    investmentMajorSpecialty: "数据网",
+    investmentMinorSpecialty: "STN网络",
+    useDepartment: "股份.衢州市.江山市.网络运营建设部",
     companyCode: "A011",
-    companyName: "中国电信股份有限公司浙江分公司",
-    profitCenterGroup: "A3301",
-    profitCenterGroupName: "中国电信股份有限公司浙江分杭州",
-    profitCenterId: "A330001",
-    profitCenter: "杭州",
-    costCenterNo: "A330000005",
-    costCenter: "技术部",
-    "实物Class": "NY",
-    "实物Table": "NY",
-    createTime: "2020-01-15 10:00:00",
-    updateTime: "2026-05-15 18:00:00"
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330802",
+    profitCenterName: "股份衢州市江山市",
+    protocolProjectCode: "XYJAZJQZA211000005",
+    protocolProjectName: "江山市中医院移动护士站采购项目合同",
+    contractCode: "ZJQZA2103573CGN00",
+    contractName: "江山市中医院移动护士站采购项目合同",
+    contractSignDate: "2021-10-08",
+    contractStartDate: "2021-09-28",
+    contractEndDate: "2026-09-27",
+    contractYears: "5",
+    customerCode: "ZJ2019080700073423",
+    customerName: "江山市中医院",
+    customerManager: "钱七-13800138002(GZ2024003)",
+    projectManager: "孙八-13900139002(GZ2024004)",
+    assetUsageAddress: "衢州市江山市虎山街道东岳路江山何家山综合机房",
+    expectedRenewal: "是"
   },
+  // 数据3：衢州·江山 - 基带处理板
   {
     id: "3",
-    cityCode: "0202",
-    cityName: "宁波",
-    assetName: "网络设备",
-    assetCardNo: "000000000003",
-    assetNature: "生产用",
-    equipmentAmount: "30,000.00",
-    freezeStatus: "否",
-    projectCode: "XM202403001",
-    department: "网络部",
-    ictProjectCode: "ICT202403001",
-    ictProjectName: "智慧城市建设项目",
-    contractName: "智慧城市建设合同",
-    contractCode: "HT202403001",
-    contractStartDate: "2024-03-01",
-    contractEndDate: "2027-02-28",
-    customerName: "宁波市政府",
-    customerCode: "KH202403001",
-    customerManager: "吴一-13800138003(GZ2024005)",
-    customerManagerPhone: "13800138003",
-    projectManager: "郑二-13900139003(GZ2024006)",
-    projectManagerPhone: "13900139003",
-    contactPhone: "0574-88888889",
-    employeeId: "EMP2024005",
-    responsiblePerson: "陈十二",
-    responsiblePersonPhone: "13700137003",
-    responsiblePersonEmpId: "EMP2024006",
-    assetUsageAddress: "宁波市政府大楼",
-    sapAssetClass: "固定资产-通信设备",
-    specModel: "Huawei S5720",
-    capitalizationDate: "20210301",
-    overdueDate: "20260301",
-    purchaseAmount: "30,000.00",
-    depreciationAmount: "18,000.00",
-    assetCustodian: "冯十一",
-    investmentProjectCode: "TZ202403001",
-    sapOrderNo: "SO202403001",
-    purchaseOrderNo: "PO202403001",
-    supplierName: "华为技术有限公司",
-    supplierCode: "SUP2024003",
-    useDepartment: "股份.宁波.网络部",
-    departmentNo: "A330000003",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "基带处理板",
+    assetCardNo: "000013165755",
+    assetNature: "利旧回收",
+    assetState: "在用",
+    equipmentAmount: "6,367.33",
+    projectCode: "22ZJ000873",
+    department: "网络运营建设部",
+    assetCategory: "07 移动通信设备",
+    assetCatalog: "0703110103",
+    specModel: "VSW",
+    capitalizationDate: "20220816",
+    useYears: "010",
+    isOverdue: "否",
+    purchaseAmount: "6,367.33",
+    depreciationAmount: "4,051.21",
+    assetCount: "1",
+    assetCustodianCode: "33034348@ZJ",
+    assetCustodianName: "李懿",
+    assetLocation: "衢州市江山市虎山街道城中路城中局",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "22ZJ000873",
+    investmentProjectName: "衢州江山中医院5G定制网建设项目",
+    investmentMajorSpecialty: "无线网",
+    investmentMinorSpecialty: "室内分布系统",
+    useDepartment: "股份.衢州市.江山市.网络运营建设部",
     companyCode: "A011",
-    companyName: "中国电信股份有限公司浙江分公司",
-    profitCenterGroup: "A3302",
-    profitCenterGroupName: "中国电信股份有限公司浙江分宁波",
-    profitCenterId: "A330002",
-    profitCenter: "宁波",
-    costCenterNo: "A330000006",
-    costCenter: "网络部",
-    "实物Class": "NY",
-    "实物Table": "NY",
-    createTime: "2021-03-01 09:00:00",
-    updateTime: "2026-05-14 16:00:00"
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330800",
+    profitCenterName: "股份衢州市本部",
+    protocolProjectCode: "XYJAZJQZA211000005",
+    protocolProjectName: "江山市中医院移动护士站采购项目合同",
+    contractCode: "ZJQZA2103573CGN00",
+    contractName: "江山市中医院移动护士站采购项目合同",
+    contractSignDate: "2021-10-08",
+    contractStartDate: "2021-09-28",
+    contractEndDate: "2026-09-27",
+    contractYears: "5",
+    customerCode: "ZJ2019080700073423",
+    customerName: "江山市中医院",
+    customerManager: "吴一-13800138003(GZ2024005)",
+    projectManager: "郑二-13900139003(GZ2024006)",
+    assetUsageAddress: "衢州市江山市虎山街道城中路城中局",
+    expectedRenewal: "否"
   },
+  // 数据4：衢州·柯城 - 基础架构及基础平台应用（无形资产）
   {
     id: "4",
-    cityCode: "0203",
-    cityName: "温州",
-    assetName: "存储设备",
-    assetCardNo: "000000000004",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "基础架构及基础平台应用",
+    assetCardNo: "200000025384",
     assetNature: "报废",
-    equipmentAmount: "80,000.00",
-    freezeStatus: "否",
-    projectCode: "XM202404001",
-    department: "数据中心",
-    ictProjectCode: "ICT202404001",
-    ictProjectName: "学校信息化项目",
-    contractName: "智慧校园建设合同",
-    contractCode: "HT202404001",
-    contractStartDate: "2024-04-01",
-    contractEndDate: "2026-03-31",
-    customerName: "温州某学校",
-    customerCode: "KH202404001",
-    customerManager: "刘十三-13800138004(GZ2024007)",
-    customerManagerPhone: "13800138004",
-    projectManager: "宋十四-13900139004(GZ2024008)",
-    projectManagerPhone: "13900139004",
-    contactPhone: "0577-88888888",
-    employeeId: "EMP2024007",
-    responsiblePerson: "许十六",
-    responsiblePersonPhone: "13700137004",
-    responsiblePersonEmpId: "EMP2024008",
-    assetUsageAddress: "温州市鹿城区某学校",
-    sapAssetClass: "固定资产-存储设备",
-    specModel: "Lenovo DS4000",
-    capitalizationDate: "20190401",
-    overdueDate: "20240401",
-    purchaseAmount: "80,000.00",
-    depreciationAmount: "72,000.00",
-    assetCustodian: "韩十五",
-    investmentProjectCode: "TZ202404001",
-    sapOrderNo: "SO202404001",
-    purchaseOrderNo: "PO202404001",
-    supplierName: "联想科技有限公司",
-    supplierCode: "SUP2024004",
-    useDepartment: "股份.温州.数据中心",
-    departmentNo: "A330000004",
+    assetState: "报废",
+    equipmentAmount: "2,066,037.74",
+    projectCode: "23ZJ000245",
+    department: "柯城分局",
+    assetCategory: "20 无形资产",
+    assetCatalog: "-",
+    specModel: "-",
+    capitalizationDate: "20230620",
+    useYears: "003",
+    isOverdue: "否",
+    purchaseAmount: "2,066,037.74",
+    depreciationAmount: "0.00",
+    assetCount: "1",
+    assetCustodianCode: "33021077@ZJ",
+    assetCustodianName: "方文俊",
+    assetLocation: "基础架构及基础平台应用",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "23ZJ000245",
+    investmentProjectName: "衢州市柯城区建设投资发展有限公司柯城区电动车充停智能监管采购项目（徐佳彬7170000）",
+    investmentMajorSpecialty: "综合信息服务",
+    investmentMinorSpecialty: "系统集成及其他",
+    useDepartment: "柯城分局",
     companyCode: "A011",
-    companyName: "中国电信股份有限公司浙江分公司",
-    profitCenterGroup: "A3303",
-    profitCenterGroupName: "中国电信股份有限公司浙江分温州",
-    profitCenterId: "A330003",
-    profitCenter: "温州",
-    costCenterNo: "A330000007",
-    costCenter: "数据中心",
-    "实物Class": "NY",
-    "实物Table": "NY",
-    createTime: "2019-04-01 08:00:00",
-    updateTime: "2026-05-13 14:00:00"
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330805",
+    profitCenterName: "股份衢州市柯城分局",
+    protocolProjectCode: "XYJAZJQZA230100059",
+    protocolProjectName: "衢州市柯城区建设投资发展有限公司柯城区电动车充停智能监管采购项目（徐佳彬7170000）",
+    contractCode: "ZJQZA2205350CGN00",
+    contractName: "衢州市柯城区建设投资发展有限公司柯城区电动车充停智能监管采购项目（徐佳彬7170000）",
+    contractSignDate: "2023-01-12",
+    contractStartDate: "2023-01-09",
+    contractEndDate: "2026-01-08",
+    contractYears: "3",
+    customerCode: "JP190618024534675",
+    customerName: "衢州市柯城区建设投资发展有限公司",
+    customerManager: "刘十三-13800138004(GZ2024007)",
+    projectManager: "宋十四-13900139004(GZ2024008)",
+    assetUsageAddress: "衢州市柯城区",
+    expectedRenewal: "-"
   },
+  // 数据5：衢州·江山城市运行中心 - 其他智能设备
   {
     id: "5",
-    cityCode: "0204",
-    cityName: "嘉兴",
-    assetName: "交换机",
-    assetCardNo: "000000000005",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "其他智能设备",
+    assetCardNo: "000014621196",
     assetNature: "生产用",
-    equipmentAmount: "25,000.00",
-    freezeStatus: "是",
-    projectCode: "XM202405001",
-    department: "网络部",
-    ictProjectCode: "ICT202405001",
-    ictProjectName: "工厂数字化转型项目",
-    contractName: "数字化转型服务合同",
-    contractCode: "HT202405001",
-    contractStartDate: "2024-05-01",
-    contractEndDate: "2026-04-30",
-    customerName: "嘉兴某工厂",
-    customerCode: "KH202405001",
-    customerManager: "何十七-13800138005(GZ2024009)",
-    customerManagerPhone: "13800138005",
-    projectManager: "孙十八-13900139005(GZ2024010)",
-    projectManagerPhone: "13900139005",
-    contactPhone: "0573-88888888",
-    employeeId: "EMP2024009",
-    responsiblePerson: "王二十",
-    responsiblePersonPhone: "13700137005",
-    responsiblePersonEmpId: "EMP2024010",
-    assetUsageAddress: "嘉兴市南湖区某工厂",
-    sapAssetClass: "固定资产-通信设备",
-    specModel: "Cisco Catalyst 2960",
-    capitalizationDate: "20210501",
-    overdueDate: "20260501",
-    purchaseAmount: "25,000.00",
-    depreciationAmount: "15,000.00",
-    assetCustodian: "郑十九",
-    investmentProjectCode: "TZ202405001",
-    sapOrderNo: "SO202405001",
-    purchaseOrderNo: "PO202405001",
-    supplierName: "思科科技有限公司",
-    supplierCode: "SUP2024005",
-    useDepartment: "股份.嘉兴.网络部",
-    departmentNo: "A330000005",
+    assetState: "在用",
+    equipmentAmount: "867.26",
+    projectCode: "23ZJ003284",
+    department: "网络运营建设部",
+    assetCategory: "11 通用设备",
+    assetCatalog: "11090399",
+    specModel: "大华/K6C",
+    capitalizationDate: "20240423",
+    useYears: "003",
+    isOverdue: "否",
+    purchaseAmount: "867.26",
+    depreciationAmount: "318.68",
+    assetCount: "1",
+    assetCustodianCode: "33021624@ZJ",
+    assetCustodianName: "徐建忠",
+    assetLocation: "江山市江滨四区117号3楼",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "23ZJ003284",
+    investmentProjectName: "江山市城市运行中心场地租赁服务采购项目",
+    investmentMajorSpecialty: "综合信息服务",
+    investmentMinorSpecialty: "系统集成及其他",
+    useDepartment: "股份.衢州市.江山市.网络运营建设部",
     companyCode: "A011",
-    companyName: "中国电信股份有限公司浙江分公司",
-    profitCenterGroup: "A3304",
-    profitCenterGroupName: "中国电信股份有限公司浙江分嘉兴",
-    profitCenterId: "A330004",
-    profitCenter: "嘉兴",
-    costCenterNo: "A330000008",
-    costCenter: "网络部",
-    "实物Class": "NY",
-    "实物Table": "NY",
-    createTime: "2021-05-01 10:00:00",
-    updateTime: "2026-05-12 12:00:00"
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330802",
+    profitCenterName: "股份衢州市江山市",
+    protocolProjectCode: "XYJAZJQZA230200075",
+    protocolProjectName: "江山市城市运行中心场地租赁服务采购项目政府采购合同",
+    contractCode: "ZJQZA2300739CGN00",
+    contractName: "江山市城市运行中心场地租赁服务采购项目政府采购合同",
+    contractSignDate: "2023-02-28",
+    contractStartDate: "2023-02-28",
+    contractEndDate: "2026-02-27",
+    contractYears: "3",
+    customerCode: "JT2020111000422090",
+    customerName: "江山市大数据中心",
+    customerManager: "何十七-13800138005(GZ2024009)",
+    projectManager: "孙十八-13900139005(GZ2024010)",
+    assetUsageAddress: "江山市江滨四区117号3楼",
+    expectedRenewal: "是"
+  },
+  // 数据6：江山城市运行中心 - 综合布线线路
+  {
+    id: "6",
+    cityCode: "0208",
+    cityName: "衢州",
+    assetName: "综合布线线路",
+    assetCardNo: "000014621102",
+    assetNature: "生产用",
+    assetState: "在用",
+    equipmentAmount: "35.40",
+    projectCode: "23ZJ003284",
+    department: "网络运营建设部",
+    assetCategory: "01 有线传输",
+    assetCatalog: "01130501",
+    specModel: "Manhates/定制",
+    capitalizationDate: "20240423",
+    useYears: "010",
+    isOverdue: "否",
+    purchaseAmount: "35.40",
+    depreciationAmount: "28.25",
+    assetCount: "1",
+    assetCustodianCode: "33021624@ZJ",
+    assetCustodianName: "徐建忠",
+    assetLocation: "江山市江滨四区117号3楼",
+    isClientAsset: "否",
+    accountingPeriod: "202605",
+    investmentProjectCode: "23ZJ003284",
+    investmentProjectName: "江山市城市运行中心场地租赁服务采购项目",
+    investmentMajorSpecialty: "综合信息服务",
+    investmentMinorSpecialty: "系统集成及其他",
+    useDepartment: "股份.衢州市.江山市.网络运营建设部",
+    companyCode: "A011",
+    profitCenterGroupCode: "A3308",
+    profitCenterGroup: "衢州",
+    profitCenterCode: "A330802",
+    profitCenterName: "股份衢州市江山市",
+    protocolProjectCode: "XYJAZJQZA230200075",
+    protocolProjectName: "江山市城市运行中心场地租赁服务采购项目政府采购合同",
+    contractCode: "ZJQZA2300739CGN00",
+    contractName: "江山市城市运行中心场地租赁服务采购项目政府采购合同",
+    contractSignDate: "2023-02-28",
+    contractStartDate: "2023-02-28",
+    contractEndDate: "2026-02-27",
+    contractYears: "3",
+    customerCode: "JT2020111000422090",
+    customerName: "江山市大数据中心",
+    customerManager: "周十一-13800138006(GZ2024011)",
+    projectManager: "吴十二-13900139006(GZ2024012)",
+    assetUsageAddress: "江山市江滨四区117号3楼",
+    expectedRenewal: "否"
   }
 ];
 
@@ -526,7 +549,7 @@ export function FixedAssets() {
   const [searchAssetNature, setSearchAssetNature] = useState<string>("全部");
   const [searchEquipmentAmountStart, setSearchEquipmentAmountStart] = useState("");
   const [searchEquipmentAmountEnd, setSearchEquipmentAmountEnd] = useState("");
-  const [searchFreezeStatus, setSearchFreezeStatus] = useState<string>("全部");
+  const [, setSearchFreezeStatus] = useState<string>("全部"); // 已废弃保留以防兼容
   const [searchProjectCode, setSearchProjectCode] = useState("");
   const [searchIctProjectCode, setSearchIctProjectCode] = useState("");
   const [searchIctProjectName, setSearchIctProjectName] = useState("");
@@ -598,10 +621,6 @@ export function FixedAssets() {
   };
 
   // 获取状态徽章样式
-  const getFreezeBadge = (status: FreezeStatus) => {
-    return status === "是" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700";
-  };
-
   const getNatureBadge = (nature: AssetNature) => {
     const styles: Record<AssetNature, string> = {
       "生产用": "bg-blue-100 text-blue-700",
@@ -636,13 +655,12 @@ export function FixedAssets() {
     if (searchAssetName && !asset.assetName.includes(searchAssetName)) return false;
     if (searchAssetCardNo && !asset.assetCardNo.includes(searchAssetCardNo)) return false;
     if (searchAssetNature !== "全部" && asset.assetNature !== searchAssetNature) return false;
-    if (searchFreezeStatus !== "全部" && asset.freezeStatus !== searchFreezeStatus) return false;
     if (searchProjectCode && !asset.projectCode.includes(searchProjectCode)) return false;
-    if (searchIctProjectCode && !asset.ictProjectCode.includes(searchIctProjectCode)) return false;
-    if (searchIctProjectName && !asset.ictProjectName.includes(searchIctProjectName)) return false;
+    if (searchIctProjectCode && !asset.protocolProjectCode.includes(searchIctProjectCode)) return false;
+    if (searchIctProjectName && !asset.protocolProjectName.includes(searchIctProjectName)) return false;
     if (searchContractName && !asset.contractName.includes(searchContractName)) return false;
     if (searchContractCode && !asset.contractCode.includes(searchContractCode)) return false;
-    if (searchResponsiblePerson && !asset.responsiblePerson.includes(searchResponsiblePerson)) return false;
+    if (searchResponsiblePerson && !asset.assetCustodianName.includes(searchResponsiblePerson)) return false;
     if (searchEquipmentAmountStart && parseFloat(asset.equipmentAmount.replace(/,/g, '')) < parseFloat(searchEquipmentAmountStart)) return false;
     if (searchEquipmentAmountEnd && parseFloat(asset.equipmentAmount.replace(/,/g, '')) > parseFloat(searchEquipmentAmountEnd)) return false;
     if (searchContractDateStart && asset.contractEndDate < searchContractDateStart) return false;
@@ -672,7 +690,7 @@ export function FixedAssets() {
 
   // 获取同ICT项目的所有资产
   const getAssetsByIctProject = (asset: FixedAsset): FixedAsset[] => {
-    return mockAssets.filter(a => a.ictProjectCode === asset.ictProjectCode);
+    return mockAssets.filter(a => a.ictProjectCode === asset.protocolProjectCode);
   };
 
   // 打开资产详情
@@ -838,22 +856,11 @@ export function FixedAssets() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">冻结状态</label>
-                  <Select value={searchFreezeStatus} onValueChange={setSearchFreezeStatus}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="全部">全部</SelectItem>
-                      <SelectItem value="是">是</SelectItem>
-                      <SelectItem value="否">否</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">工程编码</label>
                   <Input placeholder="请输入" value={searchProjectCode} onChange={e => setSearchProjectCode(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ICT项目编码</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">协议级项目编码</label>
                   <Input placeholder="请输入" value={searchIctProjectCode} onChange={e => setSearchIctProjectCode(e.target.value)} />
                 </div>
               </div>
@@ -862,7 +869,7 @@ export function FixedAssets() {
               {showMoreConditions && (
                 <div className="grid grid-cols-4 gap-x-6 gap-y-3 mt-4 pt-4 border-t border-gray-100">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ICT项目名称</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">协议级项目名称</label>
                     <Input placeholder="请输入" value={searchIctProjectName} onChange={e => setSearchIctProjectName(e.target.value)} />
                   </div>
                   <div>
@@ -882,7 +889,7 @@ export function FixedAssets() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">责任人</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">资产保管员</label>
                     <Input placeholder="请输入" value={searchResponsiblePerson} onChange={e => setSearchResponsiblePerson(e.target.value)} />
                   </div>
                 </div>
@@ -944,15 +951,14 @@ export function FixedAssets() {
                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">卡片号</th>
                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">资产性质</th>
                     <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">设备金额</th>
-                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-16">冻结状态</th>
                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">工程编码</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">ICT项目编码</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">ICT项目名称</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32">协议级项目编码</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">协议级项目名称</th>
                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-600">合同名称</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">合同编码</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32">合同编码</th>
                     <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">合同到期时间</th>
                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">客户名称</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">责任人</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">资产保管员</th>
                     <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-16 bg-gray-50 sticky right-0 z-20">操作</th>
                   </tr>
                 </thead>
@@ -969,17 +975,14 @@ export function FixedAssets() {
                         <Badge className={getNatureBadge(asset.assetNature)}>{asset.assetNature}</Badge>
                       </td>
                       <td className="px-3 py-3 text-right">{asset.equipmentAmount}</td>
-                      <td className="px-3 py-3 text-center">
-                        <Badge className={getFreezeBadge(asset.freezeStatus)}>{asset.freezeStatus}</Badge>
-                      </td>
                       <td className="px-3 py-3">{asset.projectCode}</td>
-                      <td className="px-3 py-3">{asset.ictProjectCode}</td>
-                      <td className="px-3 py-3 max-w-36 truncate" title={asset.ictProjectName}>{asset.ictProjectName}</td>
+                      <td className="px-3 py-3">{asset.protocolProjectCode}</td>
+                      <td className="px-3 py-3 max-w-36 truncate" title={asset.protocolProjectName}>{asset.protocolProjectName}</td>
                       <td className="px-3 py-3 max-w-32 truncate" title={asset.contractName}>{asset.contractName}</td>
                       <td className="px-3 py-3">{asset.contractCode}</td>
                       <td className="px-3 py-3 text-center">{asset.contractEndDate}</td>
                       <td className="px-3 py-3 max-w-24 truncate" title={asset.customerName}>{asset.customerName}</td>
-                      <td className="px-3 py-3">{asset.responsiblePerson}</td>
+                      <td className="px-3 py-3">{asset.assetCustodianName}</td>
                       <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
                         <div className="flex gap-2 justify-center">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => openAssetDetail(asset)}>
@@ -1376,7 +1379,7 @@ export function FixedAssets() {
         onSelectSelected={() => handleAssetSelectConfirm("selected")}
         onSelectSameIct={() => handleAssetSelectConfirm("same-ict")}
         selectedCount={selectedAssets.size}
-        ictProjectName={mockAssets.find(a => selectedAssets.has(a.id))?.ictProjectName || ""}
+        ictProjectName={mockAssets.find(a => selectedAssets.has(a.id))?.protocolProjectName || ""}
       />
     </div>
   );

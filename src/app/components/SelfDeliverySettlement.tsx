@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, RefreshCw, ChevronDown, ChevronRight, ChevronUp, Upload, Download, Plus, Eye, Edit, Trash2, CheckCircle, X } from "lucide-react";
+import { Search, RefreshCw, ChevronDown, ChevronRight, ChevronUp, Upload, Download, Plus, Eye, Edit, Trash2, CheckCircle, X, ListChecks } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -10,8 +10,12 @@ import { exportToXlsx, SheetData } from "../utils/excelExport";
 
 // ============ 类型定义 ============
 type SettlementType = "项目型" | "小微标品" | "三联单";
-type SettlementStatus = "未发" | "已申请" | "审核中" | "审核通过" | "发放完成";
-type InnerStatus = "已申请" | "审核中" | "审核驳回" | "审核通过" | "已发放";
+// 项目状态（外层项目维度）
+type ProjectStatus = "待申请" | "已申请";
+// 结算单状态（内层结算单维度）
+type SettlementBillStatus = "审核中" | "审核通过" | "审核驳回";
+// 发放状态（结算单维度，挂在审核通过后）
+type PayStatus = "待发放" | "可发放" | "已发放";
 type SettlementMethod = "451定额" | "350元人天";
 type RecordType = "自动生成" | "手动生成";
 
@@ -32,7 +36,8 @@ interface InnerRecord {
   endDate: string;             // 结束时间
   applyDate: string;
   applicant: string;
-  status: InnerStatus;
+  billStatus: SettlementBillStatus; // 结算单状态：审核中/审核通过/审核驳回
+  payStatus: PayStatus;             // 发放状态：待发放/可发放/已发放
   voucher: string;
   recordType: RecordType;
 }
@@ -63,8 +68,7 @@ interface SettlementRecord {
   appliedAmount: string;
   approvedAmount: string;
   actualPaidAmount: string;
-  status: SettlementStatus;
-  appliedProfitPercent: string;
+  projectStatus: ProjectStatus; // 项目状态：待申请/已申请
   innerList: InnerRecord[];
 }
 
@@ -96,8 +100,9 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "2,000.00",
     approvedAmount: "800.00",
     actualPaidAmount: "0.00",
-    status: "审核中",
+    projectStatus: "已申请",
     appliedProfitPercent: "5%",
+    projectStatus: "已申请",
     innerList: [
       {
         id: "i1",
@@ -116,7 +121,8 @@ const mockSettlementData: SettlementRecord[] = [
         endDate: "2026-12-31",
         applyDate: "2026-04-15",
         applicant: "张明",
-        status: "审核中",
+        billStatus: "审核中",
+        payStatus: "待发放",
         voucher: "",
         recordType: "手动生成"
       },
@@ -139,7 +145,8 @@ const mockSettlementData: SettlementRecord[] = [
         endDate: "2026-12-31",
         applyDate: "2026-03-15",
         applicant: "张明",
-        status: "审核通过",
+        billStatus: "审核通过",
+        payStatus: "已发放",
         voucher: "凭证001.pdf",
         recordType: "自动生成"
       }
@@ -171,7 +178,7 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "6,000.00",
     approvedAmount: "6,000.00",
     actualPaidAmount: "6,000.00",
-    status: "发放完成",
+    projectStatus: "已申请",
     appliedProfitPercent: "10%",
     innerList: [
       {
@@ -190,7 +197,8 @@ const mockSettlementData: SettlementRecord[] = [
         endDate: "2026-07-31",
         applyDate: "2026-04-10",
         applicant: "李华",
-        status: "已发放",
+        billStatus: "审核通过",
+        payStatus: "已发放",
         voucher: "凭证002.pdf",
         recordType: "自动生成"
       }
@@ -222,7 +230,7 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "0.00",
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
-    status: "未发",
+    projectStatus: "待申请",
     appliedProfitPercent: "0%",
     innerList: []
   },
@@ -252,7 +260,7 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "0.00",
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
-    status: "未发",
+    projectStatus: "待申请",
     appliedProfitPercent: "0%",
     innerList: []
   },
@@ -282,7 +290,7 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "4,500.00",
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
-    status: "已申请",
+    projectStatus: "已申请",
     appliedProfitPercent: "8%",
     innerList: [
       {
@@ -300,7 +308,8 @@ const mockSettlementData: SettlementRecord[] = [
         endDate: "2026-06-30",
         applyDate: "2026-05-10",
         applicant: "王九",
-        status: "已申请",
+        billStatus: "审核中",
+        payStatus: "待发放",
         voucher: "",
         recordType: "手动生成"
       }
@@ -332,7 +341,7 @@ const mockSettlementData: SettlementRecord[] = [
     appliedAmount: "0.00",
     approvedAmount: "0.00",
     actualPaidAmount: "0.00",
-    status: "审核通过",
+    projectStatus: "已申请",
     innerList: [
       {
         id: "i5",
@@ -351,7 +360,8 @@ const mockSettlementData: SettlementRecord[] = [
         endDate: "2026-09-15",
         applyDate: "2026-04-20",
         applicant: "刘十一",
-        status: "审核通过",
+        billStatus: "审核通过",
+        payStatus: "可发放",
         voucher: "凭证003.pdf",
         recordType: "自动生成"
       }
@@ -432,6 +442,9 @@ export function SelfDeliverySettlement() {
   const [auditRecord, setAuditRecord] = useState<InnerRecord | null>(null);
   const [auditResult, setAuditResult] = useState<"通过" | "驳回" | null>(null);
   const [auditOpinion, setAuditOpinion] = useState("");
+  // 查看发放清单弹窗
+  const [payListDialogOpen, setPayListDialogOpen] = useState(false);
+  const [payListDialogItem, setPayListDialogItem] = useState<InnerRecord | null>(null);
   const [typeTab, setTypeTab] = useState<SettlementType>("项目型");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importType, setImportType] = useState<"三联单" | "小微标品" | "凭证">("三联单");
@@ -452,18 +465,18 @@ export function SelfDeliverySettlement() {
 
     // Sheet1: 外层列表（按当前Tab类型生成对应表头）
     const outerHeaders: Record<string, string[]> = {
-      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "模式会前向金额（自交付部分）", "模式会自交付金额", "前向合同金额（自交付部分）", "最多可申请金额", "已申请", "可发放", "实际发放", "状态"],
-      "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "状态"],
-      "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "状态"]
+      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "模式会前向金额（自交付部分）", "模式会自交付金额", "前向合同金额（自交付部分）", "最多可申请金额", "已申请", "可发放", "实际发放", "项目状态"],
+      "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "项目状态"],
+      "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "项目状态"]
     };
 
     const buildOuterRow = (row: typeof mockSettlementData[number]): (string | number)[] => {
       if (typeTab === "项目型") {
-        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.selfDeliveryForwardAmount, row.selfDeliveryCostAmount, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.selfDeliveryForwardAmount, row.selfDeliveryCostAmount, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
       } else if (typeTab === "小微标品") {
-        return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+        return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
       } else {
-        return [row.index, row.businessUnit, row.type, row.customerName, row.customerCode, row.forwardAmount, row.endDate, row.businessUnit, row.branch, "-", "-", row.selfDeliveryForwardAmount, row.startDate, row.projectCode, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.status];
+        return [row.index, row.businessUnit, row.type, row.customerName, row.customerCode, row.forwardAmount, row.endDate, row.businessUnit, row.branch, "-", "-", row.selfDeliveryForwardAmount, row.startDate, row.projectCode, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
       }
     };
 
@@ -483,7 +496,7 @@ export function SelfDeliverySettlement() {
     });
 
     // Sheet2: 内层列表（按业务类型分组，每组独立表头）
-    const innerHeaders = ["业务类型", "合同/小微工单/三联单编码", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "是否维保", "周期", "开始时间", "结束时间", "申请日期", "申请人", "状态", "发放凭证"];
+    const innerHeaders = ["业务类型", "合同/小微工单/三联单编码", "序号", "结算单名称", "结算单号", "结算类型", "申请金额", "人员列表", "是否维保", "周期", "开始时间", "结束时间", "申请日期", "申请人", "结算单状态", "发放状态", "发放凭证"];
     const innerRows: (string | number)[][] = [];
     mockSettlementData.forEach(row => {
       // 根据业务类型取对应编码
@@ -509,7 +522,8 @@ export function SelfDeliverySettlement() {
             item.endDate,
             item.applyDate,
             item.applicant,
-            item.status,
+            item.billStatus,
+            item.payStatus,
             item.voucher || "-"
           ]);
         });
@@ -548,7 +562,7 @@ export function SelfDeliverySettlement() {
               p.name,
               p.amount || (p.personDays ? (p.personDays * 350).toFixed(2) : "0.00"),
               p.personDays || "-",
-              item.status,
+              item.billStatus,
               item.applicant,
               item.applyDate
             ]);
@@ -567,24 +581,30 @@ export function SelfDeliverySettlement() {
     exportToXlsx(sheets, `自交付结算数据_${today}.xlsx`);
   };
 
-  // 获取状态徽章样式
-  const getStatusBadge = (status: SettlementStatus) => {
-    const styles: Record<SettlementStatus, string> = {
-      "未发": "bg-gray-100 text-gray-700",
-      "已申请": "bg-yellow-100 text-yellow-700",
-      "审核中": "bg-blue-100 text-blue-700",
-      "审核通过": "bg-green-100 text-green-700",
-      "发放完成": "bg-emerald-100 text-emerald-700"
+  // 项目状态徽章样式
+  const getProjectStatusBadge = (status: ProjectStatus) => {
+    const styles: Record<ProjectStatus, string> = {
+      "待申请": "bg-gray-100 text-gray-700",
+      "已申请": "bg-blue-100 text-blue-700"
     };
     return styles[status];
   };
 
-  const getInnerStatusBadge = (status: InnerStatus) => {
-    const styles: Record<InnerStatus, string> = {
-      "已申请": "bg-yellow-100 text-yellow-700",
+  // 结算单状态徽章样式
+  const getBillStatusBadge = (status: SettlementBillStatus) => {
+    const styles: Record<SettlementBillStatus, string> = {
       "审核中": "bg-blue-100 text-blue-700",
-      "审核驳回": "bg-red-100 text-red-700",
       "审核通过": "bg-green-100 text-green-700",
+      "审核驳回": "bg-red-100 text-red-700"
+    };
+    return styles[status];
+  };
+
+  // 发放状态徽章样式
+  const getPayStatusBadge = (status: PayStatus) => {
+    const styles: Record<PayStatus, string> = {
+      "待发放": "bg-gray-100 text-gray-700",
+      "可发放": "bg-amber-100 text-amber-700",
       "已发放": "bg-emerald-100 text-emerald-700"
     };
     return styles[status];
@@ -642,20 +662,16 @@ export function SelfDeliverySettlement() {
                         <>
                           <td className="px-3 py-2 text-center w-24" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
                           <td className="px-3 py-2 w-20" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
-                          <td className="px-3 py-2 text-center w-20" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                          <td className="px-3 py-2 text-center w-20" rowSpan={item.settlementMethods.length}><Badge className={getBillStatusBadge(item.billStatus)}>{item.billStatus}</Badge></td>
+                          <td className="px-3 py-2 text-center w-20" rowSpan={item.settlementMethods.length}><Badge className={getPayStatusBadge(item.payStatus)}>{item.payStatus}</Badge></td>
                           <td className="px-3 py-2 w-32 max-w-32 truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
-                          <td className="px-3 py-2 min-w-28" rowSpan={item.settlementMethods.length}>
+                          <td className="px-3 py-2 min-w-32" rowSpan={item.settlementMethods.length}>
                             <div className="flex flex-col gap-1">
                               <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
-                              {(item.status === "已申请" || item.status === "审核中") && (
+                              {(item.billStatus === "审核中") && (
                                 <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
                               )}
-                              {item.status === "已申请" && (
-                                <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
-                              )}
-                              {item.status === "已申请" && (
-                                <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
-                              )}
+                              <Button variant="link" size="sm" className="text-purple-600 h-auto p-0" onClick={() => { setPayListDialogItem(item); setPayListDialogOpen(true); }}><ListChecks className="w-3 h-3 mr-1" />查看发放清单</Button>
                             </div>
                           </td>
                         </>
@@ -680,7 +696,7 @@ export function SelfDeliverySettlement() {
     // 基本信息筛选
     if (searchArea && !item.branch.includes(searchArea)) return false;
     if (searchBusinessUnit && !item.businessUnit.includes(searchBusinessUnit)) return false;
-    if (searchStatus !== "全部" && item.status !== searchStatus) return false;
+    if (searchStatus !== "全部" && item.projectStatus !== searchStatus) return false;
 
     // 项目型筛选
     if (item.type === "项目型") {
@@ -717,12 +733,12 @@ export function SelfDeliverySettlement() {
     const all = data;
     // 可申请：canApplyAmount > 0 的记录
     const canApply = data.filter(d => parseFloat(d.canApplyAmount.replace(/,/g, '')) > 0);
-    // 审核通过：status === "审核通过" 的记录
-    const approved = data.filter(d => d.status === "审核通过");
-    // 审核通过可发放：status === "审核通过" 的记录（金额用 canApplyAmount）
-    const approvedPayable = data.filter(d => d.status === "审核通过");
-    // 审核通过实际发放：status === "发放完成" 的记录（金额用 actualPaidAmount）
-    const approvedPaid = data.filter(d => d.status === "发放完成");
+    // 审核通过：approvedAmount > 0 的记录（项目下有任意结算单审核通过）
+    const approved = data.filter(d => parseFloat(d.approvedAmount.replace(/,/g, '')) > 0);
+    // 审核通过可发放：approvedAmount > 0 的记录（金额用 canApplyAmount）
+    const approvedPayable = data.filter(d => parseFloat(d.approvedAmount.replace(/,/g, '')) > 0);
+    // 审核通过实际发放：actualPaidAmount > 0 的记录（金额用 actualPaidAmount）
+    const approvedPaid = data.filter(d => parseFloat(d.actualPaidAmount.replace(/,/g, '')) > 0);
 
     const sumAmount = (records: SettlementRecord[], field: keyof SettlementRecord = "canApplyAmount") =>
       records.reduce((sum, r) => {
@@ -819,16 +835,13 @@ export function SelfDeliverySettlement() {
                 <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
                 <Select value={searchStatus} onValueChange={setSearchStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="全部">全部</SelectItem>
-                    <SelectItem value="未发">未发</SelectItem>
+                    <SelectItem value="待申请">待申请</SelectItem>
                     <SelectItem value="已申请">已申请</SelectItem>
-                    <SelectItem value="审核中">审核中</SelectItem>
-                    <SelectItem value="审核通过">审核通过</SelectItem>
-                    <SelectItem value="发放完成">发放完成</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -875,16 +888,13 @@ export function SelfDeliverySettlement() {
                 <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
                 <Select value={searchStatus} onValueChange={setSearchStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="全部">全部</SelectItem>
-                    <SelectItem value="未发">未发</SelectItem>
+                    <SelectItem value="待申请">待申请</SelectItem>
                     <SelectItem value="已申请">已申请</SelectItem>
-                    <SelectItem value="审核中">审核中</SelectItem>
-                    <SelectItem value="审核通过">审核通过</SelectItem>
-                    <SelectItem value="发放完成">发放完成</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -935,16 +945,13 @@ export function SelfDeliverySettlement() {
                   <Input placeholder="请输入" value={searchBusinessUnit} onChange={e => setSearchBusinessUnit(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">结算状态</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
                   <Select value={searchStatus} onValueChange={setSearchStatus}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="全部">全部</SelectItem>
-                      <SelectItem value="未发">未发</SelectItem>
+                      <SelectItem value="待申请">待申请</SelectItem>
                       <SelectItem value="已申请">已申请</SelectItem>
-                      <SelectItem value="审核中">审核中</SelectItem>
-                      <SelectItem value="审核通过">审核通过</SelectItem>
-                      <SelectItem value="发放完成">发放完成</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1067,7 +1074,7 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1091,7 +1098,7 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1127,7 +1134,7 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">已申请</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1164,7 +1171,7 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 w-24 text-right text-blue-600">{row.appliedAmount}</td>
                         <td className="px-3 py-3 w-28 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 w-24 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
-                        <td className="px-3 py-3 w-20"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3 w-20"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
                         <td className="px-3 py-3 w-32 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
@@ -1200,9 +1207,10 @@ export function SelfDeliverySettlement() {
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">结束时间</th>
                                           <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-24">申请日期</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">状态</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">结算单状态</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 w-20">发放状态</th>
                                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 w-32">发放凭证</th>
-                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 min-w-28">操作</th>
+                                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 min-w-32">操作</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
@@ -1237,20 +1245,16 @@ export function SelfDeliverySettlement() {
                                                     <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.endDate}</td>
                                                     <td className="px-3 py-2 w-24 text-center align-top" rowSpan={item.settlementMethods.length}>{item.applyDate}</td>
                                                     <td className="px-3 py-2 w-20 align-top" rowSpan={item.settlementMethods.length}>{item.applicant}</td>
-                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}><Badge className={getInnerStatusBadge(item.status)}>{item.status}</Badge></td>
+                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}><Badge className={getBillStatusBadge(item.billStatus)}>{item.billStatus}</Badge></td>
+                                                    <td className="px-3 py-2 w-20 text-center align-top" rowSpan={item.settlementMethods.length}><Badge className={getPayStatusBadge(item.payStatus)}>{item.payStatus}</Badge></td>
                                                     <td className="px-3 py-2 w-32 max-w-32 align-top truncate" rowSpan={item.settlementMethods.length} title={item.voucher}>{item.voucher || "-"}</td>
-                                                    <td className="px-3 py-2 min-w-28 align-top" rowSpan={item.settlementMethods.length}>
+                                                    <td className="px-3 py-2 min-w-32 align-top" rowSpan={item.settlementMethods.length}>
                                                       <div className="flex flex-col gap-1">
                                                         <Button variant="link" size="sm" className="text-blue-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><Eye className="w-3 h-3 mr-1" />查看</Button>
-                                                        {(item.status === "已申请" || item.status === "审核中") && (
+                                                        {(item.billStatus === "审核中") && (
                                                           <Button variant="link" size="sm" className="text-orange-600 h-auto p-0" onClick={() => { setSelectedRowData(row); setApplyDialogOpen(true); }}><CheckCircle className="w-3 h-3 mr-1" />审核</Button>
                                                         )}
-                                                        {item.status === "已申请" && (
-                                                          <Button variant="link" size="sm" className="text-green-600 h-auto p-0" onClick={() => { setSelectedRowData({ ...row, isEditMode: true }); setApplyDialogOpen(true); }}><Edit className="w-3 h-3 mr-1" />修改</Button>
-                                                        )}
-                                                        {item.status === "已申请" && (
-                                                          <Button variant="link" size="sm" className="text-red-600 h-auto p-0" onClick={() => { if(confirm('确定删除该结算单？')) { alert('删除功能开发中'); } }}><Trash2 className="w-3 h-3 mr-1" />删除</Button>
-                                                        )}
+                                                        <Button variant="link" size="sm" className="text-purple-600 h-auto p-0" onClick={() => { setPayListDialogItem(item); setPayListDialogOpen(true); }}><ListChecks className="w-3 h-3 mr-1" />查看发放清单</Button>
                                                       </div>
                                                     </td>
                                                   </>
@@ -1297,7 +1301,7 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
                         <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
-                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
                         <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
@@ -1355,7 +1359,7 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 text-right text-blue-600">{row.appliedAmount}</td>
                         <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
-                        <td className="px-3 py-3"><Badge className={getStatusBadge(row.status)}>{row.status}</Badge></td>
+                        <td className="px-3 py-3"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
                         <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
@@ -1418,11 +1422,11 @@ export function SelfDeliverySettlement() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">申请金额</span>
-                  <span className="text-sm font-medium text-green-600">¥{auditRecord.applyAmount}</span>
+                  <span className="text-sm font-medium text-green-600">¥{auditRecord.settlementMethods[0]?.applyAmount || "0.00"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">结算方式</span>
-                  <span className="text-sm font-medium">{auditRecord.settlementMethod}</span>
+                  <span className="text-sm font-medium">{auditRecord.settlementMethods[0]?.method || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">申请人</span>
@@ -1460,6 +1464,93 @@ export function SelfDeliverySettlement() {
               <Button className="bg-blue-500 hover:bg-blue-600" disabled={!auditResult} onClick={() => { alert(`提交审核结果：${auditResult}，意见：${auditOpinion}`); setAuditDialogOpen(false); setAuditRecord(null); setAuditResult(null); setAuditOpinion(""); }}>
                 提交审核
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 查看发放清单弹窗（结构同人员自交付结算清单） */}
+      {payListDialogOpen && payListDialogItem && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl mx-4 max-h-[85vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <div>
+                <div className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-purple-600" />
+                  人员发放清单
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  结算单：{payListDialogItem.name}（{payListDialogItem.code}） · 发放状态：<Badge className={getPayStatusBadge(payListDialogItem.payStatus)}>{payListDialogItem.payStatus}</Badge>
+                </div>
+              </div>
+              <button onClick={() => { setPayListDialogOpen(false); setPayListDialogItem(null); }} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto px-6 py-4">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-12">序号</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">经营单元</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">支局</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">姓名</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-24">电话</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">工号</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-28">部门</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 min-w-32">结算单名称</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32">结算单号</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">是否周期项目</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-24">发放账期</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">结算单状态</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-20">发放状态</th>
+                    <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">结算金额</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">业务类型</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32">合同/小微工单/三联单编码</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">申请人</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 w-32">申请时间</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {(() => {
+                    // 拍平该结算单下所有 method 下的 personList，每人生成一行
+                    let idx = 0;
+                    return payListDialogItem.settlementMethods.flatMap(sm =>
+                      sm.personList.map(p => {
+                        idx++;
+                        const billCode = payListDialogItem.code;
+                        // 经营单元/支局/工号从外层 row 取（SettlementRecord 上下文）
+                        const outerRow = mockSettlementData.find(r => r.innerList.some(it => it.id === payListDialogItem.id));
+                        return (
+                          <tr key={`${sm.method}-${p.name}`} className="hover:bg-gray-50">
+                            <td className="px-3 py-3">{idx}</td>
+                            <td className="px-3 py-3">{outerRow?.businessUnit || "-"}</td>
+                            <td className="px-3 py-3">{outerRow?.branch || "-"}</td>
+                            <td className="px-3 py-3 font-medium">{p.name}</td>
+                            <td className="px-3 py-3 text-gray-500">138****{1000 + idx}</td>
+                            <td className="px-3 py-3">EMP{String(idx).padStart(3, "0")}</td>
+                            <td className="px-3 py-3 text-xs text-gray-600">{outerRow ? `${outerRow.branch}-销售部` : "-"}</td>
+                            <td className="px-3 py-3">{payListDialogItem.name}</td>
+                            <td className="px-3 py-3">{billCode}</td>
+                            <td className="px-3 py-3 text-center">{payListDialogItem.isWarrantyProject ? "是" : "否"}</td>
+                            <td className="px-3 py-3 text-center text-gray-600">{payListDialogItem.applyDate.slice(0, 7)}</td>
+                            <td className="px-3 py-3 text-center"><Badge className={getBillStatusBadge(payListDialogItem.billStatus)}>{payListDialogItem.billStatus}</Badge></td>
+                            <td className="px-3 py-3 text-center"><Badge className={getPayStatusBadge(payListDialogItem.payStatus)}>{payListDialogItem.payStatus}</Badge></td>
+                            <td className="px-3 py-3 text-right text-green-600 font-medium">¥{p.amount || (p.personDays ? (p.personDays * 350).toFixed(2) : "0.00")}</td>
+                            <td className="px-3 py-3"><Badge className="bg-blue-100 text-blue-700">{sm.method}</Badge></td>
+                            <td className="px-3 py-3">{outerRow?.contractCode || outerRow?.projectCode || "-"}</td>
+                            <td className="px-3 py-3">{payListDialogItem.applicant}</td>
+                            <td className="px-3 py-3 text-center text-xs text-gray-600">{payListDialogItem.applyDate}</td>
+                          </tr>
+                        );
+                      })
+                    );
+                  })()}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-6 py-3 border-t border-gray-200 flex justify-end flex-shrink-0">
+              <Button variant="outline" onClick={() => { setPayListDialogOpen(false); setPayListDialogItem(null); }}>关闭</Button>
             </div>
           </div>
         </div>
