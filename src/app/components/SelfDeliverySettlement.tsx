@@ -396,6 +396,9 @@ export function SelfDeliverySettlement() {
   const [searchArea, setSearchArea] = useState("");
   const [searchBusinessUnit, setSearchBusinessUnit] = useState("");
   const [searchStatus, setSearchStatus] = useState<string>("全部");
+  const [searchProjectStatus, setSearchProjectStatus] = useState<string>("全部");
+  const [searchBillStatus, setSearchBillStatus] = useState<string>("全部");
+  const [searchPayStatus, setSearchPayStatus] = useState<string>("全部");
   const [searchApplyTimeStart, setSearchApplyTimeStart] = useState("");
   const [searchApplyTimeEnd, setSearchApplyTimeEnd] = useState("");
   const [searchCustomerName, setSearchCustomerName] = useState("");
@@ -449,6 +452,16 @@ export function SelfDeliverySettlement() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importType, setImportType] = useState<"三联单" | "小微标品" | "凭证">("三联单");
 
+  // 汇总项目下"主"结算单状态（取 innerList 最后一条，便于展示）
+  const summarizeMainBillStatus = (row: SettlementRecord): SettlementBillStatus | null => {
+    if (row.innerList.length === 0) return null;
+    return row.innerList[row.innerList.length - 1].billStatus;
+  };
+  const summarizeMainPayStatus = (row: SettlementRecord): PayStatus | null => {
+    if (row.innerList.length === 0) return null;
+    return row.innerList[row.innerList.length - 1].payStatus;
+  };
+
   // 切换行展开
   const toggleRowExpand = (id: string) => {
     setExpandedRows(prev => {
@@ -465,18 +478,21 @@ export function SelfDeliverySettlement() {
 
     // Sheet1: 外层列表（按当前Tab类型生成对应表头）
     const outerHeaders: Record<string, string[]> = {
-      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "模式会前向金额（自交付部分）", "模式会自交付金额", "前向合同金额（自交付部分）", "最多可申请金额", "已申请", "可发放", "实际发放", "项目状态"],
-      "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "项目状态"],
-      "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "项目状态"]
+      "项目型": ["序号", "经营单元", "支局", "类型", "商机名称", "商机编码", "合同名称", "合同编码", "项目名称", "项目编码", "客户名称", "客户编码", "前向金额", "模式会前向金额（自交付部分）", "模式会自交付金额", "前向合同金额（自交付部分）", "最多可申请金额", "已申请", "可发放", "实际发放", "项目状态", "结算单状态", "发放状态"],
+      "小微标品": ["序号", "区域", "经营单元", "类型", "工单编号", "主订单编码", "订单编码", "业务类型", "客户名称", "工单状态", "收单人", "环节名称", "可申请", "已申请", "可发放", "实际发放", "项目状态", "结算单状态", "发放状态"],
+      "三联单": ["序号", "经营单元", "类型", "VIP客户名称", "VIP卡号", "统计合同额", "竣工时间", "受理归属分局", "受理归属支局", "受理人名称", "受理人工号", "受理金额", "受理时间", "订单编码", "订单状态", "资产唯一编码", "受理的业务号码", "优惠编码", "优惠名称", "翼装大师", "营销归属分局", "营销归属支局", "营销人姓名", "营销人工号", "可申请", "已申请", "可发放", "实际发放", "项目状态", "结算单状态", "发放状态"]
     };
 
     const buildOuterRow = (row: typeof mockSettlementData[number]): (string | number)[] => {
+      const lastInner = row.innerList[row.innerList.length - 1];
+      const billStatus = lastInner?.billStatus || "-";
+      const payStatus = lastInner?.payStatus || "-";
       if (typeTab === "项目型") {
-        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.selfDeliveryForwardAmount, row.selfDeliveryCostAmount, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
+        return [row.index, row.businessUnit, row.branch, row.type, row.oppName, row.oppCode, row.contractName, row.contractCode, row.projectName, row.projectCode, row.customerName, row.customerCode, row.forwardAmount, row.selfDeliveryForwardAmount, row.selfDeliveryCostAmount, row.forwardContractSelfDeliveryAmount, row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus, billStatus, payStatus];
       } else if (typeTab === "小微标品") {
-        return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
+        return [row.index, row.branch, row.businessUnit, row.type, row.projectCode, "-", "-", "-", row.customerName, "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus, billStatus, payStatus];
       } else {
-        return [row.index, row.businessUnit, row.type, row.customerName, row.customerCode, row.forwardAmount, row.endDate, row.businessUnit, row.branch, "-", "-", row.selfDeliveryForwardAmount, row.startDate, row.projectCode, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus];
+        return [row.index, row.businessUnit, row.type, row.customerName, row.customerCode, row.forwardAmount, row.endDate, row.businessUnit, row.branch, "-", "-", row.selfDeliveryForwardAmount, row.startDate, row.projectCode, "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", row.canApplyAmount, row.appliedAmount, row.approvedAmount, row.actualPaidAmount, row.projectStatus, billStatus, payStatus];
       }
     };
 
@@ -697,6 +713,10 @@ export function SelfDeliverySettlement() {
     if (searchArea && !item.branch.includes(searchArea)) return false;
     if (searchBusinessUnit && !item.businessUnit.includes(searchBusinessUnit)) return false;
     if (searchStatus !== "全部" && item.projectStatus !== searchStatus) return false;
+    if (searchProjectStatus !== "全部" && item.projectStatus !== searchProjectStatus) return false;
+    // 结算单状态/发放状态：遍历内层列表，任一 InnerRecord 命中即视为项目命中
+    if (searchBillStatus !== "全部" && !item.innerList.some(it => it.billStatus === searchBillStatus)) return false;
+    if (searchPayStatus !== "全部" && !item.innerList.some(it => it.payStatus === searchPayStatus)) return false;
 
     // 项目型筛选
     if (item.type === "项目型") {
@@ -836,12 +856,36 @@ export function SelfDeliverySettlement() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
-                <Select value={searchStatus} onValueChange={setSearchStatus}>
+                <Select value={searchProjectStatus} onValueChange={setSearchProjectStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="全部">全部</SelectItem>
                     <SelectItem value="待申请">待申请</SelectItem>
                     <SelectItem value="已申请">已申请</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">结算单状态</label>
+                <Select value={searchBillStatus} onValueChange={setSearchBillStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="审核中">审核中</SelectItem>
+                    <SelectItem value="审核通过">审核通过</SelectItem>
+                    <SelectItem value="审核驳回">审核驳回</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">发放状态</label>
+                <Select value={searchPayStatus} onValueChange={setSearchPayStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="待发放">待发放</SelectItem>
+                    <SelectItem value="可发放">可发放</SelectItem>
+                    <SelectItem value="已发放">已发放</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -889,12 +933,36 @@ export function SelfDeliverySettlement() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
-                <Select value={searchStatus} onValueChange={setSearchStatus}>
+                <Select value={searchProjectStatus} onValueChange={setSearchProjectStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="全部">全部</SelectItem>
                     <SelectItem value="待申请">待申请</SelectItem>
                     <SelectItem value="已申请">已申请</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">结算单状态</label>
+                <Select value={searchBillStatus} onValueChange={setSearchBillStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="审核中">审核中</SelectItem>
+                    <SelectItem value="审核通过">审核通过</SelectItem>
+                    <SelectItem value="审核驳回">审核驳回</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">发放状态</label>
+                <Select value={searchPayStatus} onValueChange={setSearchPayStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="全部">全部</SelectItem>
+                    <SelectItem value="待发放">待发放</SelectItem>
+                    <SelectItem value="可发放">可发放</SelectItem>
+                    <SelectItem value="已发放">已发放</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -946,12 +1014,36 @@ export function SelfDeliverySettlement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
-                  <Select value={searchStatus} onValueChange={setSearchStatus}>
+                  <Select value={searchProjectStatus} onValueChange={setSearchProjectStatus}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="全部">全部</SelectItem>
                       <SelectItem value="待申请">待申请</SelectItem>
                       <SelectItem value="已申请">已申请</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">结算单状态</label>
+                  <Select value={searchBillStatus} onValueChange={setSearchBillStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="全部">全部</SelectItem>
+                      <SelectItem value="审核中">审核中</SelectItem>
+                      <SelectItem value="审核通过">审核通过</SelectItem>
+                      <SelectItem value="审核驳回">审核驳回</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">发放状态</label>
+                  <Select value={searchPayStatus} onValueChange={setSearchPayStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="全部">全部</SelectItem>
+                      <SelectItem value="待发放">待发放</SelectItem>
+                      <SelectItem value="可发放">可发放</SelectItem>
+                      <SelectItem value="已发放">已发放</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1048,7 +1140,7 @@ export function SelfDeliverySettlement() {
       {/* 表格 */}
       <div className="flex-1 overflow-hidden px-6 pb-6">
         <div className="h-full bg-white rounded-lg border border-gray-200 overflow-auto">
-          <table className={`w-full text-sm table-fixed ${typeTab === "项目型" ? "min-w-[2400px]" : typeTab === "三联单" ? "min-w-[2800px]" : ""}`}>
+          <table className={`w-full text-sm table-fixed ${typeTab === "项目型" ? "min-w-[2500px]" : typeTab === "三联单" ? "min-w-[2900px]" : ""}`}>
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               {/* 项目型表头 */}
               {typeTab === "项目型" && (
@@ -1075,6 +1167,8 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">结算单状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">发放状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1099,6 +1193,8 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">结算单状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">发放状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1135,6 +1231,8 @@ export function SelfDeliverySettlement() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-28">可发放</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-600 w-24">实际发放</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">项目状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">结算单状态</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-20">发放状态</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-600 w-32 bg-gray-50 sticky right-0 z-20">操作</th>
                 </tr>
               )}
@@ -1172,6 +1270,8 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 w-28 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 w-24 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
                         <td className="px-3 py-3 w-20"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainBillStatus(row); return s ? <Badge className={getBillStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainPayStatus(row); return s ? <Badge className={getPayStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
                         <td className="px-3 py-3 w-32 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
@@ -1181,7 +1281,7 @@ export function SelfDeliverySettlement() {
                       {/* 项目型内层结算单列表 */}
                       {expandedRows.has(row.id) && (
                         <tr className="bg-gray-50">
-                          <td colSpan={22} className="p-0 align-top">
+                          <td colSpan={24} className="p-0 align-top">
                             <div className="py-3 px-4">
                               <div className="bg-white border border-gray-200 rounded-lg">
                                 <div className="px-4 py-2 border-b border-gray-200 bg-gray-100">
@@ -1302,6 +1402,8 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
                         <td className="px-3 py-3"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainBillStatus(row); return s ? <Badge className={getBillStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainPayStatus(row); return s ? <Badge className={getPayStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
                         <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
@@ -1360,6 +1462,8 @@ export function SelfDeliverySettlement() {
                         <td className="px-3 py-3 text-right text-green-600">{row.approvedAmount}</td>
                         <td className="px-3 py-3 text-right font-medium text-emerald-600">{row.actualPaidAmount}</td>
                         <td className="px-3 py-3"><Badge className={getProjectStatusBadge(row.projectStatus)}>{row.projectStatus}</Badge></td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainBillStatus(row); return s ? <Badge className={getBillStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
+                        <td className="px-3 py-3 w-20">{(() => { const s = summarizeMainPayStatus(row); return s ? <Badge className={getPayStatusBadge(s)}>{s}</Badge> : <span className="text-gray-300">-</span>; })()}</td>
                         <td className="px-3 py-3 bg-gray-50 sticky right-0 z-10">
                           <Button variant="link" size="sm" className="text-blue-600 h-auto p-0 flex items-center gap-1 whitespace-nowrap" onClick={() => { setSelectedRowData({ ...row, innerList: [], isEditMode: false }); setApplyDialogOpen(true); }}>
                             <Plus className="w-3 h-3" />申请自交付结算
